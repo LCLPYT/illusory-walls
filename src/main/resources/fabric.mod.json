@@ -1,40 +1,36 @@
 {
 	"schemaVersion": 1,
-	"id": "testmod",
+	"id": "illwalls",
 	"version": "${version}",
-	"name": "Test Mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Illusionary Walls",
+	"description": "A Fabric mod to add illusionary walls from the Dark Souls series to Minecraft",
 	"authors": [
-		"Me!"
+		"LCLP"
 	],
 	"contact": {
-		"homepage": "https://github.com/LCLPYT/fabric-mod-boilerplate",
-		"sources": "https://github.com/LCLPYT/fabric-mod-boilerplate"
+		"homepage": "https://github.com/LCLPYT/illusionary-walls",
+		"sources": "https://github.com/LCLPYT/illusionary-walls"
 	},
-	"license": "CC0-1.0",
-	"icon": "assets/testmod/icon.png",
+	"license": "MIT",
+	"icon": "assets/illwalls/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.example.ExampleMod"
+			"work.lclpnet.illwalls.IllusionaryWalls"
 		],
 		"client": [
-			"com.example.ExampleModClient"
-		],
-		"fabric-datagen": [
-			"com.example.ExampleModDataGenerator"
+			"work.lclpnet.illwalls.IllusionaryWallsClient"
 		]
 	},
 	"mixins": [
-		"testmod.mixins.json",
 		{
-			"config": "testmod.client.mixins.json",
+			"config": "illwalls.client.mixins.json",
 			"environment": "client"
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.14.14",
-		"minecraft": "~1.19.3",
+		"fabricloader": ">=0.14.17",
+		"minecraft": "~1.19.4",
 		"java": ">=17",
 		"fabric-api": "*"
 	},
