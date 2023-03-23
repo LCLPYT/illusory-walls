@@ -14,15 +14,15 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import work.lclpnet.illwalls.mixin.client.BlockRenderManagerAccessor;
 
-public class IllusionBlockRenderManager {
+public class BlockIllusionRenderManager {
 
     private final BlockRenderManager blockRenderManager;
 
-    public IllusionBlockRenderManager(BlockRenderManager blockRenderManager) {
+    public BlockIllusionRenderManager(BlockRenderManager blockRenderManager) {
         this.blockRenderManager = blockRenderManager;
     }
 
-    public void renderBlockAsEntity(BlockState state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void renderBlockAsEntity(BlockState state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float alpha) {
         BlockRenderType blockRenderType = state.getRenderType();
         if (blockRenderType == BlockRenderType.INVISIBLE) return;
 
@@ -35,7 +35,6 @@ public class IllusionBlockRenderManager {
                 float r = (float) (i >> 16 & 0xFF) / 255.0f;
                 float g = (float) (i >> 8 & 0xFF) / 255.0f;
                 float b = (float) (i & 0xFF) / 255.0f;
-                float alpha = 0.5f;
 
                 RenderLayer renderLayer;
                 if (alpha >= 1.0f) {

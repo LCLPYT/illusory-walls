@@ -75,8 +75,8 @@ publishing {
             from components.java
 
             pom {
-                name = 'Illusionary Walls'
-                description = 'A Fabric mod to add illusionary walls from the Dark Souls series to Minecraft'
+                name = 'Illusory Walls'
+                description = 'A Fabric mod to add illusory walls from the Dark Souls series to Minecraft'
             }
         }
     }

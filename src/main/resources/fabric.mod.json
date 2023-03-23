@@ -2,24 +2,24 @@
 	"schemaVersion": 1,
 	"id": "illwalls",
 	"version": "${version}",
-	"name": "Illusionary Walls",
-	"description": "A Fabric mod to add illusionary walls from the Dark Souls series to Minecraft",
+	"name": "Illusory Walls",
+	"description": "A Fabric mod to add illusory walls from the Dark Souls series to Minecraft",
 	"authors": [
 		"LCLP"
 	],
 	"contact": {
-		"homepage": "https://github.com/LCLPYT/illusionary-walls",
-		"sources": "https://github.com/LCLPYT/illusionary-walls"
+		"homepage": "https://github.com/LCLPYT/illusory-walls",
+		"sources": "https://github.com/LCLPYT/illusory-walls"
 	},
 	"license": "MIT",
 	"icon": "assets/illwalls/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"work.lclpnet.illwalls.IllusionaryWalls"
+			"work.lclpnet.illwalls.IllusoryWalls"
 		],
 		"client": [
-			"work.lclpnet.illwalls.IllusionaryWallsClient"
+			"work.lclpnet.illwalls.IllusoryWallsClient"
 		]
 	},
 	"mixins": [
