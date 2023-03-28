@@ -6,9 +6,9 @@ import net.minecraft.client.render.entity.DisplayEntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
-import work.lclpnet.illwalls.entity.BlockIllusionEntity;
+import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 
-public class BlockIllusionEntityRenderer extends DisplayEntityRenderer<BlockIllusionEntity> {
+public class BlockIllusionEntityRenderer extends DisplayEntityRenderer<IllusoryWallEntity> {
 
     private final BlockIllusionRenderManager blockIllusionRenderManager;
 
@@ -20,7 +20,7 @@ public class BlockIllusionEntityRenderer extends DisplayEntityRenderer<BlockIllu
     }
 
     @Override
-    protected void render(BlockIllusionEntity entity, MatrixStack matrices, VertexConsumerProvider vertices, int light, float delta) {
+    protected void render(IllusoryWallEntity entity, MatrixStack matrices, VertexConsumerProvider vertices, int light, float delta) {
         float alpha = 1F;
 
         if (entity.isFading()) {
@@ -33,7 +33,7 @@ public class BlockIllusionEntityRenderer extends DisplayEntityRenderer<BlockIllu
 
             long now = System.currentTimeMillis();
 
-            alpha = 1F - (now - start) / (float) BlockIllusionEntity.FADE_DURATION_MS;
+            alpha = 1F - (now - start) / (float) IllusoryWallEntity.FADE_DURATION_MS;
             alpha = MathHelper.clamp(alpha, 0F, 1F);
         }
 

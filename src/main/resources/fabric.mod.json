@@ -16,10 +16,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"work.lclpnet.illwalls.IllusoryWalls"
+			"work.lclpnet.illwalls.IllusoryWallsMod"
 		],
 		"client": [
-			"work.lclpnet.illwalls.IllusoryWallsClient"
+			"work.lclpnet.illwalls.IllusoryWallsModClient"
 		]
 	},
 	"mixins": [
