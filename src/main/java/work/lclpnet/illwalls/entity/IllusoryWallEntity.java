@@ -16,11 +16,13 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import work.lclpnet.illwalls.impl.FabricBlockStateAdapter;
+import work.lclpnet.illwalls.impl.FabricNbtConversion;
 import work.lclpnet.illwalls.impl.FabricStructureWrapper;
 import work.lclpnet.illwalls.impl.IllusoryWallStructure;
 import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
 import work.lclpnet.illwalls.network.IllusoryWallUpdatePacket;
 import work.lclpnet.illwalls.network.ServerNetworkHandler;
+import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.schematic.SchematicFormats;
 import work.lclpnet.kibu.schematic.api.SchematicFormat;
 import work.lclpnet.kibu.structure.BlockStructure;
@@ -31,7 +33,8 @@ public class IllusoryWallEntity extends Entity implements ExtraSpawnData {
 
     public static final String
             FADING_NBT_KEY = "fading",
-            VIEW_RANGE_NBT_KEY = "view_range";
+            VIEW_RANGE_NBT_KEY = "view_range",
+            STRUCTURE_NBT_KEY = "structure";
     private static final TrackedData<Boolean> FADING = DataTracker.registerData(IllusoryWallEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     public static final SchematicFormat SCHEMATIC_FORMAT = SchematicFormats.SPONGE_V2;
     public static final int FADE_DURATION_TICKS = 20;
@@ -84,12 +87,25 @@ public class IllusoryWallEntity extends Entity implements ExtraSpawnData {
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         this.setFading(nbt.getBoolean(FADING_NBT_KEY));
         this.setViewRange(nbt.getFloat(VIEW_RANGE_NBT_KEY));
+
+        NbtCompound structureNbt = nbt.getCompound(STRUCTURE_NBT_KEY);
+        CompoundTag structureTag = FabricNbtConversion.convert(structureNbt, CompoundTag.class);
+
+        var adapter = FabricBlockStateAdapter.getInstance();
+        BlockStructure structure = SCHEMATIC_FORMAT.deserializer().deserialize(structureTag, adapter);
+
+        this.structure = new IllusoryWallStructure(this, structure);
     }
 
     @Override
     protected void writeCustomDataToNbt(NbtCompound nbt) {
         nbt.putBoolean(FADING_NBT_KEY, isFading());
         nbt.putFloat(VIEW_RANGE_NBT_KEY, getViewRange());
+
+        BlockStructure structure = this.structure.getStructure();
+        CompoundTag structureTag = SCHEMATIC_FORMAT.serializer().serialize(structure);
+        NbtCompound structureNbt = FabricNbtConversion.convert(structureTag, NbtCompound.class);
+        nbt.put(STRUCTURE_NBT_KEY, structureNbt);
     }
 
     public IllusoryWallStructure getStructure() {

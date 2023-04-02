@@ -39,6 +39,7 @@ dependencies {
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     implementation "work.lclpnet.mods.kibu:kibu-schematic-api:${project.kibu_schematic_api_version}"
+    implementation "work.lclpnet.mods.kibu:kibu-nbt-api:${project.kibu_nbt_api_version}"
 
     /* other Java dependencies */
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
