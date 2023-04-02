@@ -18,14 +18,16 @@ public class CullStructureRenderer implements StructureRenderer {
     public void render(FabricStructureView structure, Vec3d origin, MatrixStack matrices, VertexConsumerProvider vertices, int light, float alpha) {
         if (alpha <= 0F) return;
 
-        for (var pos : structure.getBlockPositions()) {
+        var positions = structure.getBlockPositions();
+        for (var pos : positions) {
             var state = structure.getBlockState(pos);
             if (state.isAir()) continue;
 
             matrices.push();
             matrices.translate(pos.getX() - origin.x, pos.getY() - origin.y, pos.getZ() - origin.z);
 
-            renderManager.renderBlockAsEntity(state, matrices, vertices, light, OverlayTexture.DEFAULT_UV, alpha);
+            var cullInfo = new CullInfo(structure, pos);
+            renderManager.renderBlockAsEntity(state, cullInfo, matrices, vertices, light, OverlayTexture.DEFAULT_UV, alpha);
 
             matrices.pop();
         }

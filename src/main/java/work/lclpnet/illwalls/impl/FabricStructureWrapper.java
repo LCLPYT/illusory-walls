@@ -3,7 +3,11 @@ package work.lclpnet.illwalls.impl;
 import com.google.common.collect.Streams;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.Nullable;
 import work.lclpnet.kibu.structure.BlockStructure;
 import work.lclpnet.kibu.structure.SimpleBlockStructure;
 
@@ -44,5 +48,26 @@ public class FabricStructureWrapper implements FabricStructureView {
         return Streams.stream(structure.getBlockPositions())
                 .map(adapter::revert)
                 .toList();
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity getBlockEntity(BlockPos pos) {
+        return null;  // no block entities
+    }
+
+    @Override
+    public FluidState getFluidState(BlockPos pos) {
+        return Fluids.EMPTY.getDefaultState();  // no fluids atm
+    }
+
+    @Override
+    public int getHeight() {
+        return structure.getHeight();
+    }
+
+    @Override
+    public int getBottomY() {
+        return structure.getOrigin().getY();
     }
 }

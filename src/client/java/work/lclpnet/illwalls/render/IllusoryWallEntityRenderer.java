@@ -1,6 +1,5 @@
 package work.lclpnet.illwalls.render;
 
-import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
@@ -26,11 +25,6 @@ public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntit
     @Override
     public Identifier getTexture(IllusoryWallEntity entity) {
         return SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE;
-    }
-
-    @Override
-    public boolean shouldRender(IllusoryWallEntity entity, Frustum frustum, double x, double y, double z) {  // TODO remove
-        return super.shouldRender(entity, frustum, x, y, z);
     }
 
     @Override

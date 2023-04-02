@@ -1,21 +1,23 @@
 package work.lclpnet.illwalls.render;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.random.Random;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.List;
@@ -29,6 +31,25 @@ public class AlphaBlockModelRenderer {
         long seed = 42L;
 
         for (Direction direction : DIRECTIONS) {
+            random.setSeed(seed);
+            AlphaBlockModelRenderer.renderQuads(entry, vertexConsumer, red, green, blue, alpha, bakedModel.getQuads(state, direction, random), light, overlay);
+        }
+
+        random.setSeed(seed);
+        AlphaBlockModelRenderer.renderQuads(entry, vertexConsumer, red, green, blue, alpha, bakedModel.getQuads(state, null, random), light, overlay);
+    }
+
+    public static void renderWithCulling(MatrixStack.Entry entry, VertexConsumer vertexConsumer, BlockState state, CullInfo cullInfo, BakedModel bakedModel, float red, float green, float blue, float alpha, int light, int overlay) {
+        final Random random = Random.create();
+        final long seed = 42L;
+        final var pos = cullInfo.pos();
+        final var adjPos = new BlockPos.Mutable();
+        final var view = cullInfo.blockView();
+
+        for (Direction direction : DIRECTIONS) {
+            adjPos.set(pos, direction);
+            if (!Block.shouldDrawSide(state, view, pos, direction, adjPos)) continue;
+
             random.setSeed(seed);
             AlphaBlockModelRenderer.renderQuads(entry, vertexConsumer, red, green, blue, alpha, bakedModel.getQuads(state, direction, random), light, overlay);
         }

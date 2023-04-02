@@ -47,6 +47,7 @@ public class IllusoryWallEntity extends Entity implements ExtraSpawnData {
 
     public IllusoryWallEntity(EntityType<?> entityType, World world) {
         super(entityType, world);
+        this.ignoreCameraFrustum = true;
     }
 
     @Override

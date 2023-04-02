@@ -15,9 +15,15 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
+
+import java.util.Comparator;
 
 public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
 
@@ -46,6 +52,11 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
         test();
     }
 
+    private static void updateEntity(World world, BlockPos pos, IllusoryWallEntity entity) {
+        var structure = entity.getStructure();
+        structure.setBlockState(pos, world.getBlockState(pos));
+    }
+
     private void test() {
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
             if (world.isClient) return ActionResult.PASS;
@@ -55,12 +66,18 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
 
             var pos = hitResult.getBlockPos();
 
-            IllusoryWallsMod.ILLUSORY_WALL.spawn((ServerWorld) world, null, entity -> {
-                var structure = entity.getStructure();
-                structure.setBlockState(pos, world.getBlockState(pos));
-//                structure.setBlockState(pos.add(0, 1, 0), Blocks.GLASS.getDefaultState());
-//                structure.setBlockState(pos.add(1, 0, 0), Blocks.ACACIA_STAIRS.getDefaultState().with(StairsBlock.SHAPE, StairShape.OUTER_LEFT));
-            }, pos, SpawnReason.SPAWN_EGG, false, false);
+            Vec3d center = pos.toCenterPos();
+
+            ServerWorld sw = (ServerWorld) world;
+            Box box = Box.of(center, 3, 3, 3);
+            var entities = sw.getEntitiesByClass(IllusoryWallEntity.class, box, e -> true);
+            var closest = entities.stream().min(Comparator.comparing(entity -> entity.squaredDistanceTo(center)));
+
+            if (closest.isEmpty()) {
+                IllusoryWallsMod.ILLUSORY_WALL.spawn(sw, null, entity -> updateEntity(world, pos, entity), pos, SpawnReason.SPAWN_EGG, false, false);
+            } else {
+                updateEntity(world, pos, closest.get());
+            }
 
             return ActionResult.CONSUME;
         });

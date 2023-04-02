@@ -4,7 +4,6 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.TexturedRenderLayers;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.BlockRenderManager;
@@ -14,6 +13,8 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import work.lclpnet.illwalls.mixin.client.BlockRenderManagerAccessor;
 
+import javax.annotation.Nullable;
+
 public class BlockIllusionRenderManager {
 
     private final BlockRenderManager blockRenderManager;
@@ -22,7 +23,7 @@ public class BlockIllusionRenderManager {
         this.blockRenderManager = blockRenderManager;
     }
 
-    public void renderBlockAsEntity(BlockState state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float alpha) {
+    public void renderBlockAsEntity(BlockState state, @Nullable CullInfo cullInfo, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float alpha) {
         BlockRenderType blockRenderType = state.getRenderType();
         if (blockRenderType == BlockRenderType.INVISIBLE) return;
 
@@ -36,26 +37,22 @@ public class BlockIllusionRenderManager {
                 float g = (float) (i >> 8 & 0xFF) / 255.0f;
                 float b = (float) (i & 0xFF) / 255.0f;
 
-                RenderLayer renderLayer;
-                if (alpha >= 1.0f) {
-                    renderLayer = RenderLayers.getEntityBlockLayer(state, false);
+                RenderLayer renderLayer = MinecraftClient.isFabulousGraphicsOrBetter()
+                        ? TexturedRenderLayers.getItemEntityTranslucentCull()
+                        : TexturedRenderLayers.getEntityTranslucentCull();
 
-                    var buffer = vertexConsumers.getBuffer(renderLayer);
-                    this.blockRenderManager.getModelRenderer().render(matrices.peek(), buffer, state, bakedModel, r, g, b, light, overlay);
+                var buffer = vertexConsumers.getBuffer(renderLayer);
+                if (cullInfo != null) {
+                    AlphaBlockModelRenderer.renderWithCulling(matrices.peek(), buffer, state, cullInfo, bakedModel, r, g, b, alpha, light, overlay);
                 } else {
-                    renderLayer = MinecraftClient.isFabulousGraphicsOrBetter()
-                            ? TexturedRenderLayers.getItemEntityTranslucentCull()
-                            : TexturedRenderLayers.getEntityTranslucentCull();
-
-                    var buffer = vertexConsumers.getBuffer(renderLayer);
                     AlphaBlockModelRenderer.render(matrices.peek(), buffer, state, bakedModel, r, g, b, alpha, light, overlay);
                 }
-
             }
             case ENTITYBLOCK_ANIMATED -> {
                 var renderer = ((BlockRenderManagerAccessor) blockRenderManager).getBuiltinModelItemRenderer();
                 var itemStack = new ItemStack(state.getBlock());
 
+                // todo add culling and opacity support
                 renderer.render(itemStack, ModelTransformationMode.NONE, matrices, vertexConsumers, light, overlay);
             }
         }
