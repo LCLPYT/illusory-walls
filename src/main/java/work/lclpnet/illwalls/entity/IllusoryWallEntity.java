@@ -2,34 +2,45 @@ package work.lclpnet.illwalls.entity;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.BlockState;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import work.lclpnet.illwalls.structure.BlockStorage;
-import work.lclpnet.illwalls.structure.BlockStructure;
-import work.lclpnet.illwalls.structure.BlockStructureHandler;
-import work.lclpnet.illwalls.structure.MapStructure;
+import work.lclpnet.illwalls.impl.FabricBlockStateAdapter;
+import work.lclpnet.illwalls.impl.FabricStructureWrapper;
+import work.lclpnet.illwalls.impl.IllusoryWallStructure;
+import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
+import work.lclpnet.illwalls.network.IllusoryWallUpdatePacket;
+import work.lclpnet.illwalls.network.ServerNetworkHandler;
+import work.lclpnet.kibu.schematic.SchematicFormats;
+import work.lclpnet.kibu.schematic.api.SchematicFormat;
+import work.lclpnet.kibu.structure.BlockStructure;
 
-import javax.annotation.Nonnull;
-import java.util.Objects;
+import java.io.IOException;
 
-public class IllusoryWallEntity extends DisplayEntity.BlockDisplayEntity implements BlockStorage {
+public class IllusoryWallEntity extends Entity implements ExtraSpawnData {
 
-    public static final String FADING_NBT_KEY = "fading";
+    public static final String
+            FADING_NBT_KEY = "fading",
+            VIEW_RANGE_NBT_KEY = "view_range";
     private static final TrackedData<Boolean> FADING = DataTracker.registerData(IllusoryWallEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final TrackedData<BlockStructure> STRUCTURE = DataTracker.registerData(IllusoryWallEntity.class, BlockStructureHandler.BLOCK_STRUCTURE);
+    public static final SchematicFormat SCHEMATIC_FORMAT = SchematicFormats.SPONGE_V2;
     public static final int FADE_DURATION_TICKS = 20;
     public static final int FADE_DURATION_MS = FADE_DURATION_TICKS * 50;
+    private static final TrackedData<Float> VIEW_RANGE = DataTracker.registerData(IllusoryWallEntity.class, TrackedDataHandlerRegistry.FLOAT);
 
     @Environment(EnvType.CLIENT)
     private long fadeStartMs = 0L;
-    private final BlockStructure structure = new MapStructure();
+    private IllusoryWallStructure structure = new IllusoryWallStructure(this);
 
     public IllusoryWallEntity(EntityType<?> entityType, World world) {
         super(entityType, world);
@@ -37,9 +48,8 @@ public class IllusoryWallEntity extends DisplayEntity.BlockDisplayEntity impleme
 
     @Override
     protected void initDataTracker() {
-        super.initDataTracker();
         this.dataTracker.startTracking(FADING, false);
-        this.dataTracker.startTracking(STRUCTURE, BlockStructure.EMPTY);
+        this.dataTracker.startTracking(VIEW_RANGE, 1f);
     }
 
     public boolean isFading() {
@@ -72,33 +82,89 @@ public class IllusoryWallEntity extends DisplayEntity.BlockDisplayEntity impleme
 
     @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
         this.setFading(nbt.getBoolean(FADING_NBT_KEY));
+        this.setViewRange(nbt.getFloat(VIEW_RANGE_NBT_KEY));
     }
 
     @Override
     protected void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
         nbt.putBoolean(FADING_NBT_KEY, isFading());
+        nbt.putFloat(VIEW_RANGE_NBT_KEY, getViewRange());
+    }
+
+    public IllusoryWallStructure getStructure() {
+        return structure;
     }
 
     @Override
-    public void setBlockState(BlockPos pos, BlockState state) {
-        Objects.requireNonNull(pos, "Position is null");
-        Objects.requireNonNull(state, "State is null");
-
-        structure.setBlockState(pos, state);
-
-        this.dataTracker.set(STRUCTURE, structure);
+    public Packet<ClientPlayPacketListener> createSpawnPacket() {
+        var packet = new EntityExtraSpawnPacket(this);
+        return packet.toVanillaS2CPacket();
     }
 
     @Override
-    public @Nonnull BlockState getBlockState(BlockPos pos) {
-        return structure.getBlockState(pos);
+    public void writeExtraSpawnData(PacketByteBuf buf) {
+        final var structure = this.structure.getStructure();
+
+        final byte[] bytes;
+        try {
+            bytes = SCHEMATIC_FORMAT.writer().toArray(structure);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to serialize structure", e);
+        }
+
+        buf.writeVarInt(bytes.length);
+        buf.writeByteArray(bytes);
     }
 
     @Override
-    public Iterable<BlockPos> getBlockPositions() {
-        return structure.getBlockPositions();
+    public void readExtraSpawnData(PacketByteBuf buf) {
+        final int length = buf.readVarInt();
+        final byte[] bytes = buf.readByteArray(length);
+
+        final var adapter = FabricBlockStateAdapter.getInstance();
+
+        final BlockStructure structure;
+        try {
+            structure = SCHEMATIC_FORMAT.reader().fromArray(bytes, adapter);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to deserialize structure", e);
+        }
+
+        this.structure = new IllusoryWallStructure(this, structure);
+    }
+
+    private boolean existsInWorld() {
+        return this.world.getEntityById(this.getId()) != null;
+    }
+
+    public void updateStructure(BlockStructure delta) {
+        if (!world.isClient) {
+            if (!this.existsInWorld()) return;  // too early
+
+            // if we are in the server world, send an update packet
+            var updatePacket = new IllusoryWallUpdatePacket(getId(), delta);
+            ServerNetworkHandler.send(updatePacket, PlayerLookup.tracking(this));
+            return;
+        }
+
+        // sync the received delta structure
+        var deltaWrapper = new FabricStructureWrapper(delta);
+        var positions = deltaWrapper.getBlockPositions();
+
+        positions.forEach(pos -> structure.setBlockState(pos, deltaWrapper.getBlockState(pos)));
+    }
+
+    private float getViewRange() {
+        return this.dataTracker.get(VIEW_RANGE);
+    }
+
+    private void setViewRange(float viewRange) {
+        this.dataTracker.set(VIEW_RANGE, viewRange);
+    }
+
+    @Override
+    public boolean shouldRender(double distance) {
+        return distance < MathHelper.square((double) this.getViewRange() * 64.0 * DisplayEntity.getRenderDistanceMultiplier());
     }
 }

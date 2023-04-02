@@ -1,7 +1,5 @@
 package work.lclpnet.illwalls;
 
-import work.lclpnet.illwalls.wall.IllusoryWallManager;
-
 import javax.annotation.Nonnull;
 
 public interface IllusoryWallsApi {
@@ -12,6 +10,4 @@ public interface IllusoryWallsApi {
         if (api == null) throw new IllegalStateException("Called too early");
         return api;
     }
-
-    IllusoryWallManager getWallManager();
 }
