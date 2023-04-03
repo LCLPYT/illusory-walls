@@ -4,6 +4,7 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.TexturedRenderLayers;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.BlockRenderManager;
@@ -37,9 +38,14 @@ public class BlockIllusionRenderManager {
                 float g = (float) (i >> 8 & 0xFF) / 255.0f;
                 float b = (float) (i & 0xFF) / 255.0f;
 
-                RenderLayer renderLayer = MinecraftClient.isFabulousGraphicsOrBetter()
-                        ? TexturedRenderLayers.getItemEntityTranslucentCull()
-                        : TexturedRenderLayers.getEntityTranslucentCull();
+                RenderLayer renderLayer;
+                if (alpha >= 1.0f) {
+                    renderLayer = RenderLayers.getEntityBlockLayer(state, false);
+                } else {
+                    renderLayer = MinecraftClient.isFabulousGraphicsOrBetter()
+                            ? TexturedRenderLayers.getItemEntityTranslucentCull()
+                            : TexturedRenderLayers.getEntityTranslucentCull();
+                }
 
                 var buffer = vertexConsumers.getBuffer(renderLayer);
                 if (cullInfo != null) {
