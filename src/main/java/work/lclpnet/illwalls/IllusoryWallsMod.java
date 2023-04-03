@@ -16,14 +16,15 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
+import work.lclpnet.illwalls.wall.IllusoryWallLookup;
+import work.lclpnet.illwalls.wall.NaiveWallLookup;
 
-import java.util.Comparator;
+import javax.annotation.Nonnull;
 
 public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
 
@@ -38,23 +39,35 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
                     .trackedUpdateRate(1)
                     .build()
     );
-    static IllusoryWallsMod INSTANCE = null;
+    private static IllusoryWallsMod instance = null;
+    private final IllusoryWallLookup wallLookup = new NaiveWallLookup();
 
     public static Identifier identifier(String path) {
         return new Identifier(MOD_ID, path);
     }
 
+    @Nonnull
+    static IllusoryWallsMod getInstance() {
+        synchronized (IllusoryWallsMod.class) {
+            if (instance == null) throw new IllegalStateException("Called too early");
+            return instance;
+        }
+    }
+
     @Override
     public void onInitialize() {
-        INSTANCE = this;
+        synchronized (IllusoryWallsMod.class) {
+            instance = this;
+        }
+
         LOGGER.info("Initialized.");
 
         test();
     }
 
-    private static void updateEntity(World world, BlockPos pos, IllusoryWallEntity entity) {
-        var structure = entity.getStructure();
-        structure.setBlockState(pos, world.getBlockState(pos));
+    @Override
+    public IllusoryWallLookup lookup() {
+        return wallLookup;
     }
 
     private void test() {
@@ -64,22 +77,39 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
                 return ActionResult.PASS;
             if (hitResult.getType() != HitResult.Type.BLOCK) return ActionResult.PASS;
 
-            var pos = hitResult.getBlockPos();
+            final var pos = hitResult.getBlockPos();
+            final var serverWorld = (ServerWorld) world;
 
-            Vec3d center = pos.toCenterPos();
+            if (wallLookup.getWallAt(serverWorld, pos).isPresent())
+                return ActionResult.PASS;  // there is already a wall
 
-            ServerWorld sw = (ServerWorld) world;
-            Box box = Box.of(center, 3, 3, 3);
-            var entities = sw.getEntitiesByClass(IllusoryWallEntity.class, box, e -> true);
-            var closest = entities.stream().min(Comparator.comparing(entity -> entity.squaredDistanceTo(center)));
+            // check neighbours
+            IllusoryWallEntity entity = null;
+            var adjPos = new BlockPos.Mutable();
 
-            if (closest.isEmpty()) {
-                IllusoryWallsMod.ILLUSORY_WALL.spawn(sw, null, entity -> updateEntity(world, pos, entity), pos, SpawnReason.SPAWN_EGG, false, false);
+            for (Direction direction : Direction.values()) {
+                adjPos.set(pos, direction);
+
+                var opt = wallLookup.getWallAt(serverWorld, adjPos);
+                if (opt.isEmpty()) continue;
+
+                // found an adjacent wall
+                entity = opt.get();
+                break;
+            }
+
+            if (entity == null) {
+                IllusoryWallsMod.ILLUSORY_WALL.spawn(serverWorld, null, wall -> updateEntity(world, pos, wall), pos, SpawnReason.SPAWN_EGG, false, false);
             } else {
-                updateEntity(world, pos, closest.get());
+                updateEntity(world, pos, entity);
             }
 
             return ActionResult.CONSUME;
         });
+    }
+
+    private void updateEntity(World world, BlockPos pos, IllusoryWallEntity entity) {
+        var structure = entity.getStructure();
+        structure.setBlockState(pos, world.getBlockState(pos));
     }
 }

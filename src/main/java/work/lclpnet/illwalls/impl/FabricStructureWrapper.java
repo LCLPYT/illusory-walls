@@ -7,6 +7,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.kibu.structure.BlockStructure;
 import work.lclpnet.kibu.structure.SimpleBlockStructure;
@@ -69,5 +70,10 @@ public class FabricStructureWrapper implements FabricStructureView {
     @Override
     public int getBottomY() {
         return structure.getOrigin().getY();
+    }
+
+    public boolean isInBounds(Vec3i pos) {
+        var state = structure.getBlockState(adapter.adapt(pos));
+        return state != null && !state.isAir();
     }
 }

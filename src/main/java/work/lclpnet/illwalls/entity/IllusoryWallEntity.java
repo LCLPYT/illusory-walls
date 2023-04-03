@@ -23,6 +23,7 @@ import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
 import work.lclpnet.illwalls.network.IllusoryWallUpdatePacket;
 import work.lclpnet.illwalls.network.ServerNetworkHandler;
 import work.lclpnet.kibu.jnbt.CompoundTag;
+import work.lclpnet.kibu.mc.BlockPos;
 import work.lclpnet.kibu.schematic.SchematicFormats;
 import work.lclpnet.kibu.schematic.api.SchematicFormat;
 import work.lclpnet.kibu.structure.BlockStructure;
@@ -170,6 +171,25 @@ public class IllusoryWallEntity extends Entity implements ExtraSpawnData {
         var positions = deltaWrapper.getBlockPositions();
 
         positions.forEach(pos -> structure.setBlockState(pos, deltaWrapper.getBlockState(pos)));
+    }
+
+    /**
+     * Moves this entity to the nearest block of the center of the structure.
+     * This is done, so that the wall loads evenly from all directions.
+     */
+    public void center() {
+        BlockStructure structure = this.structure.getStructure();
+        BlockPos origin = structure.getOrigin();
+
+        int centerX = origin.getX() + structure.getWidth() / 2;
+        int centerY = origin.getY() + structure.getHeight() / 2;
+        int centerZ = origin.getZ() + structure.getLength() / 2;
+
+        // check whether the wall is in the center already
+        var currentPos = getBlockPos();
+        if (currentPos.getX() == centerX && currentPos.getY() == centerY && currentPos.getZ() == centerZ) return;
+
+        this.setPosition(centerX, centerY, centerZ);
     }
 
     private float getViewRange() {

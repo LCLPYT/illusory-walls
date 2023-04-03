@@ -3,6 +3,7 @@ package work.lclpnet.illwalls.impl;
 import net.minecraft.registry.Registries;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3i;
 import work.lclpnet.kibu.mc.BlockPos;
 import work.lclpnet.kibu.mc.BlockState;
 import work.lclpnet.kibu.mc.BlockStateAdapter;
@@ -86,7 +87,7 @@ public class FabricBlockStateAdapter implements BlockStateAdapter {
         return states.computeIfAbsent(state, FabricBlockState::new);
     }
 
-    public BlockPos adapt(net.minecraft.util.math.BlockPos pos) {
+    public BlockPos adapt(Vec3i pos) {
         return new BlockPos(pos.getX(), pos.getY(), pos.getZ());
     }
 

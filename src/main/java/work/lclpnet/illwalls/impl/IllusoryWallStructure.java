@@ -26,6 +26,9 @@ public class IllusoryWallStructure extends FabricStructureWrapper {
 
         if (entity.world.isClient) return;
 
+        // move the wall entity to the block in the center of the structure
+        entity.center();
+
         // on the server world, update send a delta update structure to the players
         var deltaStructure = createSimpleStructure();
         deltaStructure.setBlockState(adapter.adapt(pos), adapter.adapt(state));

@@ -33,7 +33,7 @@
       "minecraft": "~1.19.4",
       "java": ">=17",
       "fabric-api": "*",
-      "kibu-schematic-api": ">=0.6.0"
+      "kibu-schematic-api": ">=0.7.0"
     },
 	"suggests": {}
 }
