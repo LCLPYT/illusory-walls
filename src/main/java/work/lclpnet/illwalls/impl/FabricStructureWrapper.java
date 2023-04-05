@@ -76,4 +76,14 @@ public class FabricStructureWrapper implements FabricStructureView {
         var state = structure.getBlockState(adapter.adapt(pos));
         return state != null && !state.isAir();
     }
+
+    public BlockPos getCenter() {
+        var origin = structure.getOrigin();
+
+        return new BlockPos(
+                origin.getX() + structure.getWidth() / 2,
+                origin.getY() + structure.getHeight() / 2,
+                origin.getZ() + structure.getLength() / 2
+        );
+    }
 }

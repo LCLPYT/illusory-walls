@@ -1,12 +1,12 @@
 package work.lclpnet.illwalls.network;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.util.Identifier;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.entity.ExtraSpawnData;
-import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 
 import java.util.Objects;
 
@@ -22,7 +22,7 @@ public class EntityExtraSpawnPacket implements PacketSerializer {
         this.data = Objects.requireNonNull(data);
     }
 
-    public EntityExtraSpawnPacket(IllusoryWallEntity entity) {
+    public EntityExtraSpawnPacket(Entity entity) {
         this(new EntitySpawnS2CPacket(entity), createDataBuffer(entity));
     }
 

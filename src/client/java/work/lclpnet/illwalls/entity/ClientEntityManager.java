@@ -3,7 +3,7 @@ package work.lclpnet.illwalls.entity;
 import net.minecraft.client.world.ClientWorld;
 import org.slf4j.Logger;
 import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
-import work.lclpnet.illwalls.network.IllusoryWallUpdatePacket;
+import work.lclpnet.illwalls.network.StructureUpdatePacket;
 
 public class ClientEntityManager {
 
@@ -35,11 +35,11 @@ public class ClientEntityManager {
         world.addEntity(id, entity);
     }
 
-    public void updateIllusoryWall(IllusoryWallUpdatePacket packet, ClientWorld world) {
+    public void updateIllusoryWall(StructureUpdatePacket packet, ClientWorld world) {
         final int entityId = packet.getEntityId();
         final var entity = world.getEntityById(entityId);
 
-        if (!(entity instanceof IllusoryWallEntity wallEntity)) {
+        if (!(entity instanceof StructureEntity wallEntity)) {
             logger.warn("Skipping invalid illusory wall update for id {}", entityId);
             return;
         }

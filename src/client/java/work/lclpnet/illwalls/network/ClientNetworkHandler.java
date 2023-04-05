@@ -18,11 +18,11 @@ public class ClientNetworkHandler {
 
     public void init() {
         registerGlobalReceiver(EntityExtraSpawnPacket.ID, this::spawn);
-        registerGlobalReceiver(IllusoryWallUpdatePacket.ID, this::illusoryWallUpdate);
+        registerGlobalReceiver(StructureUpdatePacket.ID, this::illusoryWallUpdate);
     }
 
     private void illusoryWallUpdate(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        final var packet = new IllusoryWallUpdatePacket(buf);
+        final var packet = new StructureUpdatePacket(buf);
         final var world = handler.getWorld();
 
         client.execute(() -> entityManager.updateIllusoryWall(packet, world));

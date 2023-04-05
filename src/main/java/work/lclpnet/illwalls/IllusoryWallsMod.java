@@ -21,8 +21,11 @@ import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
+import work.lclpnet.illwalls.entity.StructureEntity;
 import work.lclpnet.illwalls.wall.IllusoryWallLookup;
 import work.lclpnet.illwalls.wall.NaiveWallLookup;
+import work.lclpnet.kibu.schematic.SchematicFormats;
+import work.lclpnet.kibu.schematic.api.SchematicFormat;
 
 import javax.annotation.Nonnull;
 
@@ -30,7 +33,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
 
     public static final String MOD_ID = "illwalls";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    public static final EntityType<IllusoryWallEntity> ILLUSORY_WALL = Registry.register(
+    public static final EntityType<IllusoryWallEntity> ILLUSORY_WALL_ENTITY = Registry.register(
             Registries.ENTITY_TYPE,
             identifier("illusory_wall"),
             FabricEntityTypeBuilder.create(SpawnGroup.MISC, IllusoryWallEntity::new)
@@ -39,6 +42,16 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
                     .trackedUpdateRate(1)
                     .build()
     );
+    public static final EntityType<StructureEntity> STRUCTURE_ENTITY = Registry.register(
+            Registries.ENTITY_TYPE,
+            identifier("structure"),
+            FabricEntityTypeBuilder.create(SpawnGroup.MISC, StructureEntity::new)
+                    .dimensions(EntityDimensions.changing(0f, 0f))
+                    .trackRangeChunks(10)
+                    .trackedUpdateRate(1)
+                    .build()
+    );
+    public static final SchematicFormat SCHEMATIC_FORMAT = SchematicFormats.SPONGE_V2;
     private static IllusoryWallsMod instance = null;
     private final IllusoryWallLookup wallLookup = new NaiveWallLookup();
 
@@ -84,7 +97,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
                 return ActionResult.PASS;  // there is already a wall
 
             // check neighbours
-            IllusoryWallEntity entity = null;
+            StructureEntity entity = null;
             var adjPos = new BlockPos.Mutable();
 
             for (Direction direction : Direction.values()) {
@@ -99,7 +112,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
             }
 
             if (entity == null) {
-                IllusoryWallsMod.ILLUSORY_WALL.spawn(serverWorld, null, wall -> updateEntity(world, pos, wall), pos, SpawnReason.SPAWN_EGG, false, false);
+                IllusoryWallsMod.STRUCTURE_ENTITY.spawn(serverWorld, null, wall -> updateEntity(world, pos, wall), pos, SpawnReason.SPAWN_EGG, false, false);
             } else {
                 updateEntity(world, pos, entity);
             }
@@ -108,7 +121,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
         });
     }
 
-    private void updateEntity(World world, BlockPos pos, IllusoryWallEntity entity) {
+    private void updateEntity(World world, BlockPos pos, StructureEntity entity) {
         var structure = entity.getStructure();
         structure.setBlockState(pos, world.getBlockState(pos));
     }

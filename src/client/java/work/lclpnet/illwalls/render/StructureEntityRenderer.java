@@ -7,13 +7,13 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import work.lclpnet.illwalls.entity.IllusoryWallEntity;
+import work.lclpnet.illwalls.entity.StructureEntity;
 
-public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntity> {
+public class StructureEntityRenderer extends EntityRenderer<StructureEntity> {
 
     private final StructureRenderer structureRenderer;
 
-    public IllusoryWallEntityRenderer(EntityRendererFactory.Context context) {
+    public StructureEntityRenderer(EntityRendererFactory.Context context) {
         super(context);
 
         var blockRenderManager = context.getBlockRenderManager();
@@ -23,12 +23,12 @@ public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntit
 
     @SuppressWarnings("deprecation")
     @Override
-    public Identifier getTexture(IllusoryWallEntity entity) {
+    public Identifier getTexture(StructureEntity entity) {
         return SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE;
     }
 
     @Override
-    public void render(IllusoryWallEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+    public void render(StructureEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
 
         float alpha = 1F;
@@ -43,7 +43,7 @@ public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntit
 
             long now = System.currentTimeMillis();
 
-            alpha = 1F - (now - start) / (float) IllusoryWallEntity.FADE_DURATION_MS;
+            alpha = 1F - (now - start) / (float) StructureEntity.FADE_DURATION_MS;
             alpha = MathHelper.clamp(alpha, 0F, 1F);
         }
 
