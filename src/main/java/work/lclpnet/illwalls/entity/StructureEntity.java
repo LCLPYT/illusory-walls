@@ -39,8 +39,6 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
             VIEW_RANGE_NBT_KEY = "view_range",
             STRUCTURE_NBT_KEY = "structure";
     private static final TrackedData<Boolean> FADING = DataTracker.registerData(StructureEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    public static final int FADE_DURATION_TICKS = 20;
-    public static final int FADE_DURATION_MS = FADE_DURATION_TICKS * 50;
     private static final TrackedData<Float> VIEW_RANGE = DataTracker.registerData(StructureEntity.class, TrackedDataHandlerRegistry.FLOAT);
 
     @Environment(EnvType.CLIENT)

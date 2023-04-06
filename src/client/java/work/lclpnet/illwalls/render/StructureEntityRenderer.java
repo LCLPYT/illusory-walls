@@ -7,6 +7,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.entity.StructureEntity;
 
 public class StructureEntityRenderer extends EntityRenderer<StructureEntity> {
@@ -43,7 +44,7 @@ public class StructureEntityRenderer extends EntityRenderer<StructureEntity> {
 
             long now = System.currentTimeMillis();
 
-            alpha = 1F - (now - start) / (float) StructureEntity.FADE_DURATION_MS;
+            alpha = 1F - (now - start) / (float) IllusoryWallEntity.FADE_DURATION_MS;
             alpha = MathHelper.clamp(alpha, 0F, 1F);
         }
 

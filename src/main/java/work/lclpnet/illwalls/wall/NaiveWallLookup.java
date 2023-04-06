@@ -3,7 +3,7 @@ package work.lclpnet.illwalls.wall;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.BlockPos;
-import work.lclpnet.illwalls.entity.StructureEntity;
+import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -11,12 +11,12 @@ import java.util.Optional;
 public class NaiveWallLookup implements IllusoryWallLookup {
 
     @Override
-    public Optional<StructureEntity> getWallAt(ServerWorld world, BlockPos pos) {
-        var entities = new ArrayList<StructureEntity>();
+    public Optional<IllusoryWallEntity> getWallAt(ServerWorld world, BlockPos pos) {
+        var entities = new ArrayList<IllusoryWallEntity>();
 
         // checks every loaded entity O(n)
         world.collectEntitiesByType(
-                TypeFilter.instanceOf(StructureEntity.class),
+                TypeFilter.instanceOf(IllusoryWallEntity.class),
                 entity -> entity.getStructure().isInBounds(pos),
                 entities,
                 1

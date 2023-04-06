@@ -1,6 +1,7 @@
 package work.lclpnet.illwalls;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
@@ -8,8 +9,10 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.Items;
+import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -17,7 +20,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.util.math.Vec3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
@@ -97,7 +100,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
                 return ActionResult.PASS;  // there is already a wall
 
             // check neighbours
-            StructureEntity entity = null;
+            IllusoryWallEntity entity = null;
             var adjPos = new BlockPos.Mutable();
 
             for (Direction direction : Direction.values()) {
@@ -111,18 +114,38 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
                 break;
             }
 
+            final ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+
             if (entity == null) {
-                IllusoryWallsMod.STRUCTURE_ENTITY.spawn(serverWorld, null, wall -> updateEntity(world, pos, wall), pos, SpawnReason.SPAWN_EGG, false, false);
+                IllusoryWallsMod.ILLUSORY_WALL_ENTITY.spawn(serverWorld, null, wall -> updateEntity(serverWorld, pos, wall, serverPlayer), pos, SpawnReason.SPAWN_EGG, false, false);
             } else {
-                updateEntity(world, pos, entity);
+                updateEntity(serverWorld, pos, entity, serverPlayer);
             }
+
+            return ActionResult.CONSUME;
+        });
+
+        AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
+            if (world.isClient || hand != Hand.MAIN_HAND) return ActionResult.PASS;
+
+            ServerWorld serverWorld = (ServerWorld) world;
+            var optWall = wallLookup.getWallAt(serverWorld, pos);
+            if (optWall.isEmpty()) return ActionResult.PASS;
+
+            var entity = optWall.get();
+            entity.fade();
 
             return ActionResult.CONSUME;
         });
     }
 
-    private void updateEntity(World world, BlockPos pos, StructureEntity entity) {
+    private void updateEntity(ServerWorld world, BlockPos pos, IllusoryWallEntity entity, ServerPlayerEntity invoker) {
         var structure = entity.getStructure();
         structure.setBlockState(pos, world.getBlockState(pos));
+
+        Vec3d center = pos.toCenterPos();
+
+        world.spawnParticles(invoker, new DustParticleEffect(Vec3d.unpackRgb(0x770077).toVector3f(), 0.6f),
+                false, center.x, center.y, center.z, 100, 0.5f, 0.5f, 0.5f, 0.1);
     }
 }

@@ -23,6 +23,7 @@
 		]
 	},
 	"mixins": [
+		"illwalls.mixins.json",
 		{
 			"config": "illwalls.client.mixins.json",
 			"environment": "client"

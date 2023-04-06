@@ -86,4 +86,10 @@ public class FabricStructureWrapper implements FabricStructureView {
                 origin.getZ() + structure.getLength() / 2
         );
     }
+
+    public void copyTo(FabricStructureWrapper other) {
+        for (BlockPos pos : getBlockPositions()) {
+            other.setBlockState(pos, getBlockState(pos));
+        }
+    }
 }
