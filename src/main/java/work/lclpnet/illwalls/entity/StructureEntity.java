@@ -41,8 +41,9 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
     private static final TrackedData<Boolean> FADING = DataTracker.registerData(StructureEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Float> VIEW_RANGE = DataTracker.registerData(StructureEntity.class, TrackedDataHandlerRegistry.FLOAT);
 
+    private transient int fadeEnd = 0;
     @Environment(EnvType.CLIENT)
-    private long fadeStartMs = 0L;
+    private transient long fadeStartMs = 0L;
     @Environment(EnvType.CLIENT)
     public BlockRenderOverrideView renderOverrideView = null;
     private FabricStructureWrapper structure = makeStructure(createSimpleStructure());
@@ -63,16 +64,25 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
     }
 
     public void setFading(boolean fading) {
+        boolean wasFading = isFading();
         this.dataTracker.set(FADING, fading);
 
-        if (world.isClient() && fading) {
+        if (!wasFading && fading) {
+            startFading();
+        }
+    }
+
+    private synchronized void startFading() {
+        fadeEnd = age + IllusoryWallEntity.FADE_DURATION_TICKS;
+
+        if (world.isClient()) {
             startFadingClient();
         }
     }
 
     @Environment(EnvType.CLIENT)
     private void startFadingClient() {
-        System.out.println("START FADING");
+        System.out.println("FADING CLIENT");
         fadeStartMs = System.currentTimeMillis();
 
         for (BlockPos blockPos : structure.getBlockPositions()) {
@@ -84,10 +94,8 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
     public void onTrackedDataSet(TrackedData<?> data) {
         super.onTrackedDataSet(data);
 
-        if (world.isClient()) {
-            if (data.equals(FADING) && isFading()) {
-                startFadingClient();
-            }
+        if (data.equals(FADING) && isFading()) {
+            startFading();
         }
     }
 
@@ -121,6 +129,16 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
         nbt.put(STRUCTURE_NBT_KEY, structureNbt);
     }
 
+    @Override
+    public void tick() {
+        super.tick();
+
+        if (world.isClient || !isFading() || age < fadeEnd) return;
+
+        this.discard();
+        System.out.println("DISCARD Structure");
+    }
+
     public FabricStructureWrapper getStructure() {
         return structure;
     }
@@ -144,6 +162,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
 
         buf.writeVarInt(bytes.length);
         buf.writeByteArray(bytes);
+        buf.writeBoolean(isFading());
     }
 
     @Override
@@ -161,6 +180,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
         }
 
         this.structure = makeStructure(structure);
+        setFading(buf.readBoolean());
     }
 
     private boolean existsInWorld() {

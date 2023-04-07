@@ -1,6 +1,7 @@
 package work.lclpnet.illwalls.entity;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
@@ -29,7 +30,6 @@ public class IllusoryWallEntity extends Entity implements ServerOnlyEntity {
     private boolean fading = false;
     private transient int fadeEnd = 0;
     private FabricStructureWrapper structure = makeStructure(FabricStructureWrapper.createSimpleStructure());
-    private int structureEntityId = 0;
 
     public IllusoryWallEntity(EntityType<?> type, World world) {
         super(type, world);
@@ -109,7 +109,9 @@ public class IllusoryWallEntity extends Entity implements ServerOnlyEntity {
 
         setFading(true);
 
-        structureEntityId = structureEntity.getId();
+        for (BlockPos pos : structure.getBlockPositions()) {
+            world.setBlockState(pos, Blocks.AIR.getDefaultState());
+        }
     }
 
     @Override
@@ -120,12 +122,6 @@ public class IllusoryWallEntity extends Entity implements ServerOnlyEntity {
 
         // fade done
         this.discard();
-
-/*        Entity structureEntity = world.getEntityById(this.structureEntityId);
-        if (structureEntity instanceof StructureEntity) structureEntity.discard();
-
-        for (BlockPos pos : structure.getBlockPositions()) {
-            world.setBlockState(pos, Blocks.AIR.getDefaultState());
-        }*/
+        System.out.println("DISCARD");
     }
 }
