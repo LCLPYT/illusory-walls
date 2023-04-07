@@ -97,21 +97,20 @@ public class IllusoryWallEntity extends Entity implements ServerOnlyEntity {
     public synchronized void fade() {
         if (this.world.isClient || isFading()) return;
 
-        var serverWorld = (ServerWorld) this.world;
-
-        // spawn a StructureEntity for display
-        var structureEntity = IllusoryWallsMod.STRUCTURE_ENTITY.spawn(serverWorld, null, entity -> {
-            structure.copyTo(entity.getStructure());
-            entity.setFading(true);
-        }, getBlockPos(), SpawnReason.CONVERSION, false, false);
-
-        if (structureEntity == null) return;
-
-        setFading(true);
-
+        // remove blocks
         for (BlockPos pos : structure.getBlockPositions()) {
             world.setBlockState(pos, Blocks.AIR.getDefaultState());
         }
+
+        setFading(true);
+
+        var serverWorld = (ServerWorld) this.world;
+
+        // spawn a StructureEntity for display
+        IllusoryWallsMod.STRUCTURE_ENTITY.spawn(serverWorld, null, entity -> {
+            structure.copyTo(entity.getStructure());
+            entity.setFading(true);
+        }, getBlockPos(), SpawnReason.CONVERSION, false, false);
     }
 
     @Override
@@ -122,6 +121,5 @@ public class IllusoryWallEntity extends Entity implements ServerOnlyEntity {
 
         // fade done
         this.discard();
-        System.out.println("DISCARD");
     }
 }

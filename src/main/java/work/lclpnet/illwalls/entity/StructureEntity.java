@@ -44,8 +44,6 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
     private transient int fadeEnd = 0;
     @Environment(EnvType.CLIENT)
     private transient long fadeStartMs = 0L;
-    @Environment(EnvType.CLIENT)
-    public BlockRenderOverrideView renderOverrideView = null;
     private FabricStructureWrapper structure = makeStructure(createSimpleStructure());
 
     public StructureEntity(EntityType<?> entityType, World world) {
@@ -72,21 +70,11 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
         }
     }
 
-    private synchronized void startFading() {
+    private void startFading() {
         fadeEnd = age + IllusoryWallEntity.FADE_DURATION_TICKS;
 
         if (world.isClient()) {
-            startFadingClient();
-        }
-    }
-
-    @Environment(EnvType.CLIENT)
-    private void startFadingClient() {
-        System.out.println("FADING CLIENT");
-        fadeStartMs = System.currentTimeMillis();
-
-        for (BlockPos blockPos : structure.getBlockPositions()) {
-            addBlockRenderOverwrite(blockPos);
+            fadeStartMs = System.currentTimeMillis();
         }
     }
 
@@ -136,7 +124,6 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
         if (world.isClient || !isFading() || age < fadeEnd) return;
 
         this.discard();
-        System.out.println("DISCARD Structure");
     }
 
     public FabricStructureWrapper getStructure() {
@@ -218,10 +205,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
     }
 
     private void onUpdate(BlockPos pos, BlockState state) {
-        if (world.isClient) {
-            onClientUpdate(pos, state);
-            return;
-        }
+        if (world.isClient) return;
 
         // move the wall entity to the block in the center of the structure
         center(this, this.structure);
@@ -232,35 +216,6 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
         deltaStructure.setBlockState(adapter.adapt(pos), adapter.adapt(state));
 
         updateStructure(deltaStructure);
-    }
-
-    @Environment(EnvType.CLIENT)
-    private void onClientUpdate(BlockPos pos, BlockState state) {
-        if (!isFading()) return;
-
-        addBlockRenderOverwrite(pos);
-    }
-
-    @Environment(EnvType.CLIENT)
-    private void addBlockRenderOverwrite(BlockPos pos) {
-        renderOverrideView.illwalls$addOverride(pos);
-    }
-
-    @Environment(EnvType.CLIENT)
-    private void removeBlockRenderOverwrite(BlockPos pos) {
-        renderOverrideView.illwalls$removeOverride(pos);
-    }
-
-    @Override
-    public void onRemoved() {
-        // removed on the CLIENT
-        super.onRemoved();
-
-        if (!isFading()) return;
-
-        for (BlockPos pos : structure.getBlockPositions()) {
-            removeBlockRenderOverwrite(pos);
-        }
     }
 
     private FabricStructureWrapper makeStructure(BlockStructure structure) {

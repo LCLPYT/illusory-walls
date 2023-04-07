@@ -24,10 +24,6 @@ public class ClientEntityManager {
             return;
         }
 
-        if (entity instanceof StructureEntity structureEntity) {
-            structureEntity.renderOverrideView = (BlockRenderOverrideView) world;
-        }
-
         entity.onSpawnPacket(packet);
 
         if (entity instanceof ExtraSpawnData extraSpawnData) {
