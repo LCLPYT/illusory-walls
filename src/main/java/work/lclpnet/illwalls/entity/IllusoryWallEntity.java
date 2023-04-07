@@ -1,7 +1,6 @@
 package work.lclpnet.illwalls.entity;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
@@ -122,11 +121,11 @@ public class IllusoryWallEntity extends Entity implements ServerOnlyEntity {
         // fade done
         this.discard();
 
-        Entity structureEntity = world.getEntityById(this.structureEntityId);
+/*        Entity structureEntity = world.getEntityById(this.structureEntityId);
         if (structureEntity instanceof StructureEntity) structureEntity.discard();
 
         for (BlockPos pos : structure.getBlockPositions()) {
             world.setBlockState(pos, Blocks.AIR.getDefaultState());
-        }
+        }*/
     }
 }

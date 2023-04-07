@@ -43,6 +43,8 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
 
     @Environment(EnvType.CLIENT)
     private long fadeStartMs = 0L;
+    @Environment(EnvType.CLIENT)
+    public BlockRenderOverrideView renderOverrideView = null;
     private FabricStructureWrapper structure = makeStructure(createSimpleStructure());
 
     public StructureEntity(EntityType<?> entityType, World world) {
@@ -64,7 +66,17 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
         this.dataTracker.set(FADING, fading);
 
         if (world.isClient() && fading) {
-            fadeStartMs = System.currentTimeMillis();
+            startFadingClient();
+        }
+    }
+
+    @Environment(EnvType.CLIENT)
+    private void startFadingClient() {
+        System.out.println("START FADING");
+        fadeStartMs = System.currentTimeMillis();
+
+        for (BlockPos blockPos : structure.getBlockPositions()) {
+            addBlockRenderOverwrite(blockPos);
         }
     }
 
@@ -74,7 +86,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
 
         if (world.isClient()) {
             if (data.equals(FADING) && isFading()) {
-                fadeStartMs = System.currentTimeMillis();
+                startFadingClient();
             }
         }
     }
@@ -186,7 +198,10 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
     }
 
     private void onUpdate(BlockPos pos, BlockState state) {
-        if (world.isClient) return;
+        if (world.isClient) {
+            onClientUpdate(pos, state);
+            return;
+        }
 
         // move the wall entity to the block in the center of the structure
         center(this, this.structure);
@@ -197,6 +212,35 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
         deltaStructure.setBlockState(adapter.adapt(pos), adapter.adapt(state));
 
         updateStructure(deltaStructure);
+    }
+
+    @Environment(EnvType.CLIENT)
+    private void onClientUpdate(BlockPos pos, BlockState state) {
+        if (!isFading()) return;
+
+        addBlockRenderOverwrite(pos);
+    }
+
+    @Environment(EnvType.CLIENT)
+    private void addBlockRenderOverwrite(BlockPos pos) {
+        renderOverrideView.illwalls$addOverride(pos);
+    }
+
+    @Environment(EnvType.CLIENT)
+    private void removeBlockRenderOverwrite(BlockPos pos) {
+        renderOverrideView.illwalls$removeOverride(pos);
+    }
+
+    @Override
+    public void onRemoved() {
+        // removed on the CLIENT
+        super.onRemoved();
+
+        if (!isFading()) return;
+
+        for (BlockPos pos : structure.getBlockPositions()) {
+            removeBlockRenderOverwrite(pos);
+        }
     }
 
     private FabricStructureWrapper makeStructure(BlockStructure structure) {

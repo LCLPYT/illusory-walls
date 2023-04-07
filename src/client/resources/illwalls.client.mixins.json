@@ -6,7 +6,11 @@
     "defaultRequire": 1
   },
   "client": [
-    "BlockRenderManagerAccessor"
+    "BlockRenderManagerAccessor",
+    "ClientWorldMixin",
+    "RenderedChunkMixin",
+    "WorldRendererAccessor"
   ],
-  "mixins": []
+  "mixins": [
+  ]
 }
