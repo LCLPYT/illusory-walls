@@ -19,6 +19,18 @@ repositories {
     maven {
         url "https://repo.lclpnet.work/repository/internal"
     }
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 loom {
@@ -40,6 +52,17 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     implementation "work.lclpnet.mods.kibu:kibu-schematic-api:${project.kibu_schematic_api_version}"
     implementation "work.lclpnet.mods.kibu:kibu-nbt-api:${project.kibu_nbt_api_version}"
+
+    if (project.hasProperty('sodium_version')) {
+        modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    }
+
+    if (project.hasProperty('iris_version')) {
+        modImplementation "maven.modrinth:iris:${project.iris_version}"
+        implementation "org.anarres:jcpp:1.4.14"
+        implementation "io.github.douira:glsl-transformer:2.0.0-pre9"
+        implementation "org.antlr:antlr4-runtime:4.11.1"
+    }
 
     /* other Java dependencies */
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
