@@ -36,5 +36,6 @@
       "fabric-api": "*",
       "kibu-schematic-api": ">=0.7.0"
     },
-	"suggests": {}
+	"suggests": {},
+	"accessWidener": "illwalls.accesswidener"
 }

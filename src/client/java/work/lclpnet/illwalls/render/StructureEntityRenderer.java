@@ -1,5 +1,10 @@
 package work.lclpnet.illwalls.render;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
+import net.minecraft.client.render.TexturedRenderLayers;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
@@ -10,7 +15,7 @@ import net.minecraft.util.math.MathHelper;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.entity.StructureEntity;
 
-public class StructureEntityRenderer extends EntityRenderer<StructureEntity> {
+public class StructureEntityRenderer extends EntityRenderer<StructureEntity> implements RenderLayerGetter {
 
     private final StructureRenderer structureRenderer;
 
@@ -18,7 +23,7 @@ public class StructureEntityRenderer extends EntityRenderer<StructureEntity> {
         super(context);
 
         var blockRenderManager = context.getBlockRenderManager();
-        var blockIllusionRenderManager = new BlockIllusionRenderManager(blockRenderManager);
+        var blockIllusionRenderManager = new BlockIllusionRenderManager(blockRenderManager, this);
         this.structureRenderer = new CullStructureRenderer(blockIllusionRenderManager);
     }
 
@@ -51,5 +56,16 @@ public class StructureEntityRenderer extends EntityRenderer<StructureEntity> {
         var structure = entity.getStructure();
 
         structureRenderer.render(structure, entity.getPos(), matrices, vertexConsumers, light, alpha);
+    }
+
+    @Override
+    public RenderLayer getRenderLayer(BlockState state, float alpha) {
+        if (alpha >= 1.0f) {
+            return RenderLayers.getEntityBlockLayer(state, false);
+        }
+
+        return MinecraftClient.isFabulousGraphicsOrBetter()
+                ? TexturedRenderLayers.getItemEntityTranslucentCull()
+                : TexturedRenderLayers.getEntityTranslucentCull();
     }
 }

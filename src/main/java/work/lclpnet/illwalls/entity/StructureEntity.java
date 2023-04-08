@@ -23,12 +23,11 @@ import work.lclpnet.illwalls.impl.FabricNbtConversion;
 import work.lclpnet.illwalls.impl.FabricStructureWrapper;
 import work.lclpnet.illwalls.impl.ListenerStructureWrapper;
 import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
+import work.lclpnet.illwalls.network.PacketBufUtils;
 import work.lclpnet.illwalls.network.ServerNetworkHandler;
 import work.lclpnet.illwalls.network.StructureUpdatePacket;
 import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.structure.BlockStructure;
-
-import java.io.IOException;
 
 import static work.lclpnet.illwalls.impl.FabricStructureWrapper.createSimpleStructure;
 
@@ -138,33 +137,13 @@ public class StructureEntity extends Entity implements ExtraSpawnData {
 
     @Override
     public void writeExtraSpawnData(PacketByteBuf buf) {
-        final var structure = this.structure.getStructure();
-
-        final byte[] bytes;
-        try {
-            bytes = IllusoryWallsMod.SCHEMATIC_FORMAT.writer().toArray(structure);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to serialize structure", e);
-        }
-
-        buf.writeVarInt(bytes.length);
-        buf.writeByteArray(bytes);
+        PacketBufUtils.writeBlockStructure(buf, structure.getStructure(), IllusoryWallsMod.SCHEMATIC_FORMAT);
         buf.writeBoolean(isFading());
     }
 
     @Override
     public void readExtraSpawnData(PacketByteBuf buf) {
-        final int length = buf.readVarInt();
-        final byte[] bytes = buf.readByteArray(length);
-
-        final var adapter = FabricBlockStateAdapter.getInstance();
-
-        final BlockStructure structure;
-        try {
-            structure = IllusoryWallsMod.SCHEMATIC_FORMAT.reader().fromArray(bytes, adapter);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to deserialize structure", e);
-        }
+        BlockStructure structure = PacketBufUtils.readBlockStructure(buf, IllusoryWallsMod.SCHEMATIC_FORMAT);
 
         this.structure = makeStructure(structure);
         setFading(buf.readBoolean());

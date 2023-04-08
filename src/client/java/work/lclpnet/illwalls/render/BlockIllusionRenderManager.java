@@ -2,10 +2,7 @@ package work.lclpnet.illwalls.render;
 
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.TexturedRenderLayers;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.model.BakedModel;
@@ -19,9 +16,11 @@ import javax.annotation.Nullable;
 public class BlockIllusionRenderManager {
 
     private final BlockRenderManager blockRenderManager;
+    private final RenderLayerGetter renderLayerGetter;
 
-    public BlockIllusionRenderManager(BlockRenderManager blockRenderManager) {
+    public BlockIllusionRenderManager(BlockRenderManager blockRenderManager, RenderLayerGetter renderLayerGetter) {
         this.blockRenderManager = blockRenderManager;
+        this.renderLayerGetter = renderLayerGetter;
     }
 
     public void renderBlockAsEntity(BlockState state, @Nullable CullInfo cullInfo, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float alpha) {
@@ -38,14 +37,7 @@ public class BlockIllusionRenderManager {
                 float g = (float) (i >> 8 & 0xFF) / 255.0f;
                 float b = (float) (i & 0xFF) / 255.0f;
 
-                RenderLayer renderLayer;
-                if (alpha >= 1.0f) {
-                    renderLayer = RenderLayers.getEntityBlockLayer(state, false);
-                } else {
-                    renderLayer = MinecraftClient.isFabulousGraphicsOrBetter()
-                            ? TexturedRenderLayers.getItemEntityTranslucentCull()
-                            : TexturedRenderLayers.getEntityTranslucentCull();
-                }
+                RenderLayer renderLayer = renderLayerGetter.getRenderLayer(state, alpha);
 
                 var buffer = vertexConsumers.getBuffer(renderLayer);
                 if (cullInfo != null) {

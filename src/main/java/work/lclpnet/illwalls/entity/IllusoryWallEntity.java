@@ -5,21 +5,27 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.impl.FabricBlockStateAdapter;
 import work.lclpnet.illwalls.impl.FabricNbtConversion;
 import work.lclpnet.illwalls.impl.FabricStructureWrapper;
 import work.lclpnet.illwalls.impl.ListenerStructureWrapper;
+import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
+import work.lclpnet.illwalls.network.PacketBufUtils;
 import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.structure.BlockStructure;
 
-public class IllusoryWallEntity extends Entity implements ServerOnlyEntity {
+public class IllusoryWallEntity extends Entity implements EntityConditionalTracking, ExtraSpawnData {
 
     public static final String
             FADING_NBT_KEY = "fading",
@@ -33,6 +39,7 @@ public class IllusoryWallEntity extends Entity implements ServerOnlyEntity {
 
     public IllusoryWallEntity(EntityType<?> type, World world) {
         super(type, world);
+        this.ignoreCameraFrustum = true;
     }
 
     @Override
@@ -90,8 +97,26 @@ public class IllusoryWallEntity extends Entity implements ServerOnlyEntity {
     }
 
     @Override
+    public boolean shouldBeTrackedBy(ServerPlayerEntity player) {
+        return PlayerInfo.get(player).canSeeIllusoryWalls();
+    }
+
+    @Override
     public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        return null;  // technically not needed, but just for safety
+        var packet = new EntityExtraSpawnPacket(this);
+        return packet.toVanillaS2CPacket();
+    }
+
+    @Override
+    public void writeExtraSpawnData(PacketByteBuf buf) {
+        PacketBufUtils.writeBlockStructure(buf, structure.getStructure(), IllusoryWallsMod.SCHEMATIC_FORMAT);
+    }
+
+    @Override
+    public void readExtraSpawnData(PacketByteBuf buf) {
+        BlockStructure structure = PacketBufUtils.readBlockStructure(buf, IllusoryWallsMod.SCHEMATIC_FORMAT);
+
+        this.structure = makeStructure(structure);
     }
 
     public synchronized void fade() {
@@ -121,5 +146,10 @@ public class IllusoryWallEntity extends Entity implements ServerOnlyEntity {
 
         // fade done
         this.discard();
+    }
+
+    @Override
+    public boolean shouldRender(double distance) {
+        return distance < MathHelper.square(64.0 * DisplayEntity.getRenderDistanceMultiplier());
     }
 }

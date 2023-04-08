@@ -3,12 +3,12 @@ package work.lclpnet.illwalls;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.SpawnReason;
-import net.minecraft.item.Items;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -17,6 +17,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Rarity;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.entity.StructureEntity;
+import work.lclpnet.illwalls.item.StaffOfIllusionItem;
 import work.lclpnet.illwalls.wall.IllusoryWallLookup;
 import work.lclpnet.illwalls.wall.NaiveWallLookup;
 import work.lclpnet.kibu.schematic.SchematicFormats;
@@ -53,6 +55,11 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
                     .trackRangeChunks(10)
                     .trackedUpdateRate(1)
                     .build()
+    );
+    public static final StaffOfIllusionItem STAFF_OF_ILLUSION_ITEM = Registry.register(
+            Registries.ITEM,
+            identifier("staff_of_illusion"),
+            new StaffOfIllusionItem(new FabricItemSettings().maxCount(1).rarity(Rarity.EPIC))
     );
     public static final SchematicFormat SCHEMATIC_FORMAT = SchematicFormats.SPONGE_V2;
     private static IllusoryWallsMod instance = null;
@@ -89,7 +96,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
     private void test() {
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
             if (world.isClient) return ActionResult.PASS;
-            if (hand != Hand.MAIN_HAND || !player.getStackInHand(hand).isOf(Items.NETHER_STAR))
+            if (hand != Hand.MAIN_HAND || !player.getStackInHand(hand).isOf(STAFF_OF_ILLUSION_ITEM))
                 return ActionResult.PASS;
             if (hitResult.getType() != HitResult.Type.BLOCK) return ActionResult.PASS;
 
