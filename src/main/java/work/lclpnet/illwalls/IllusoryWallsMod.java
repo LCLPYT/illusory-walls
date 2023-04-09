@@ -147,7 +147,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
     }
 
     private void updateEntity(ServerWorld world, BlockPos pos, IllusoryWallEntity entity, ServerPlayerEntity invoker) {
-        var structure = entity.getStructure();
+        var structure = entity.getStructureContainer().getWrapper();
         structure.setBlockState(pos, world.getBlockState(pos));
 
         Vec3d center = pos.toCenterPos();

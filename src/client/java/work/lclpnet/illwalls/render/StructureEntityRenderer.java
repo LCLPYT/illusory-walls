@@ -53,7 +53,7 @@ public class StructureEntityRenderer extends EntityRenderer<StructureEntity> imp
             alpha = MathHelper.clamp(alpha, 0F, 1F);
         }
 
-        var structure = entity.getStructure();
+        var structure = entity.getStructureContainer().getWrapper();
 
         structureRenderer.render(structure, entity.getPos(), matrices, vertexConsumers, light, alpha);
     }

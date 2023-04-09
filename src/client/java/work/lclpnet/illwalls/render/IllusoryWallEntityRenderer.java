@@ -30,7 +30,7 @@ public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntit
 
     @Override
     public void render(IllusoryWallEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        var structure = entity.getStructure();
+        var structure = entity.getStructureContainer().getWrapper();
 
         structureRenderer.render(structure, entity.getPos(), matrices, vertexConsumers, light, 1F);
     }

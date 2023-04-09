@@ -1,6 +1,5 @@
 package work.lclpnet.illwalls.entity;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -18,14 +17,12 @@ import net.minecraft.world.World;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.impl.FabricBlockStateAdapter;
 import work.lclpnet.illwalls.impl.FabricNbtConversion;
-import work.lclpnet.illwalls.impl.FabricStructureWrapper;
-import work.lclpnet.illwalls.impl.ListenerStructureWrapper;
 import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
 import work.lclpnet.illwalls.network.PacketBufUtils;
 import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.structure.BlockStructure;
 
-public class IllusoryWallEntity extends Entity implements EntityConditionalTracking, ExtraSpawnData {
+public class IllusoryWallEntity extends Entity implements EntityConditionalTracking, ExtraSpawnData, StructureHolder {
 
     public static final String
             FADING_NBT_KEY = "fading",
@@ -35,7 +32,7 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
 
     private boolean fading = false;
     private transient int fadeEnd = 0;
-    private FabricStructureWrapper structure = makeStructure(FabricStructureWrapper.createSimpleStructure());
+    private final StructureContainer structureContainer = new StructureContainer(this);
 
     public IllusoryWallEntity(EntityType<?> type, World world) {
         super(type, world);
@@ -69,31 +66,22 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
         var adapter = FabricBlockStateAdapter.getInstance();
         BlockStructure structure = IllusoryWallsMod.SCHEMATIC_FORMAT.deserializer().deserialize(structureTag, adapter);
 
-        this.structure = makeStructure(structure);
+        this.structureContainer.setStructure(structure);
     }
 
     @Override
     protected void writeCustomDataToNbt(NbtCompound nbt) {
         nbt.putBoolean(FADING_NBT_KEY, isFading());
 
-        BlockStructure structure = this.structure.getStructure();
+        BlockStructure structure = this.structureContainer.getWrapper().getStructure();
         CompoundTag structureTag = IllusoryWallsMod.SCHEMATIC_FORMAT.serializer().serialize(structure);
         NbtCompound structureNbt = FabricNbtConversion.convert(structureTag, NbtCompound.class);
         nbt.put(STRUCTURE_NBT_KEY, structureNbt);
     }
 
-    public FabricStructureWrapper getStructure() {
-        return structure;
-    }
-
-    private void onUpdate(BlockPos pos, BlockState state) {
-        if (world.isClient) return;
-
-        StructureEntity.center(this, this.structure);
-    }
-
-    private FabricStructureWrapper makeStructure(BlockStructure structure) {
-        return new ListenerStructureWrapper(structure, this::onUpdate);
+    @Override
+    public StructureContainer getStructureContainer() {
+        return structureContainer;
     }
 
     @Override
@@ -109,21 +97,21 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
 
     @Override
     public void writeExtraSpawnData(PacketByteBuf buf) {
-        PacketBufUtils.writeBlockStructure(buf, structure.getStructure(), IllusoryWallsMod.SCHEMATIC_FORMAT);
+        PacketBufUtils.writeBlockStructure(buf, structureContainer.getWrapper().getStructure(), IllusoryWallsMod.SCHEMATIC_FORMAT);
     }
 
     @Override
     public void readExtraSpawnData(PacketByteBuf buf) {
         BlockStructure structure = PacketBufUtils.readBlockStructure(buf, IllusoryWallsMod.SCHEMATIC_FORMAT);
 
-        this.structure = makeStructure(structure);
+        this.structureContainer.setStructure(structure);
     }
 
     public synchronized void fade() {
         if (this.world.isClient || isFading()) return;
 
         // remove blocks
-        for (BlockPos pos : structure.getBlockPositions()) {
+        for (BlockPos pos : structureContainer.getWrapper().getBlockPositions()) {
             world.setBlockState(pos, Blocks.AIR.getDefaultState());
         }
 
@@ -133,7 +121,7 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
 
         // spawn a StructureEntity for display
         IllusoryWallsMod.STRUCTURE_ENTITY.spawn(serverWorld, null, entity -> {
-            structure.copyTo(entity.getStructure());
+            structureContainer.getWrapper().copyTo(entity.getStructureContainer().getWrapper());
             entity.setFading(true);
         }, getBlockPos(), SpawnReason.CONVERSION, false, false);
     }

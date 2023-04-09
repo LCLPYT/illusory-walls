@@ -31,7 +31,7 @@ public class NaiveWallLookup implements IllusoryWallLookup {
         // checks every loaded entity O(n)
         world.collectEntitiesByType(
                 TypeFilter.instanceOf(IllusoryWallEntity.class),
-                entity -> entity.getStructure().isInBounds(pos),
+                entity -> entity.getStructureContainer().getWrapper().isInBounds(pos),
                 entities,
                 1
         );

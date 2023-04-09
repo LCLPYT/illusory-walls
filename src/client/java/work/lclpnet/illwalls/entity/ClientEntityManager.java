@@ -39,11 +39,12 @@ public class ClientEntityManager {
         final int entityId = packet.getEntityId();
         final var entity = world.getEntityById(entityId);
 
-        if (!(entity instanceof StructureEntity wallEntity)) {
+        if (!(entity instanceof StructureHolder holder)) {
             logger.warn("Skipping invalid illusory wall update for id {}", entityId);
             return;
         }
 
-        wallEntity.updateStructure(packet.getDeltaStructure());
+        StructureContainer structureContainer = holder.getStructureContainer();
+        structureContainer.updateStructure(packet.getDeltaStructure());
     }
 }
