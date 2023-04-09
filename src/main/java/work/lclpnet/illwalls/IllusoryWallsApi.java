@@ -1,6 +1,7 @@
 package work.lclpnet.illwalls;
 
 import work.lclpnet.illwalls.wall.IllusoryWallLookup;
+import work.lclpnet.illwalls.wall.IllusoryWallManager;
 
 import javax.annotation.Nonnull;
 
@@ -12,4 +13,6 @@ public interface IllusoryWallsApi {
     }
 
     IllusoryWallLookup lookup();
+
+    IllusoryWallManager manager();
 }

@@ -24,6 +24,7 @@ import work.lclpnet.illwalls.item.StaffOfIllusionItem;
 import work.lclpnet.illwalls.wall.IllusoryWallLookup;
 import work.lclpnet.illwalls.wall.IllusoryWallManager;
 import work.lclpnet.illwalls.wall.NaiveWallLookup;
+import work.lclpnet.illwalls.wall.SimpleIllusoryWallManager;
 import work.lclpnet.kibu.schematic.SchematicFormats;
 import work.lclpnet.kibu.schematic.api.SchematicFormat;
 
@@ -63,7 +64,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
 
     public IllusoryWallsMod() {
         this.wallLookup = new NaiveWallLookup();
-        this.wallManager = new IllusoryWallManager(wallLookup);
+        this.wallManager = new SimpleIllusoryWallManager(wallLookup);
     }
 
     public static Identifier identifier(String path) {
@@ -104,5 +105,10 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
     @Override
     public IllusoryWallLookup lookup() {
         return wallLookup;
+    }
+
+    @Override
+    public IllusoryWallManager manager() {
+        return wallManager;
     }
 }
