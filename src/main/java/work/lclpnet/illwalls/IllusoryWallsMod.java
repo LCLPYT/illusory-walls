@@ -4,11 +4,13 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.item.ItemGroups;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -82,6 +84,13 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
         synchronized (IllusoryWallsMod.class) {
             instance = this;
         }
+
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.OPERATOR).register(entries -> {
+            //noinspection UnstableApiUsage
+            if (!entries.getContext().hasPermissions()) return;
+
+            entries.add(STAFF_OF_ILLUSION_ITEM);
+        });
 
         LOGGER.info("Initialized.");
 
