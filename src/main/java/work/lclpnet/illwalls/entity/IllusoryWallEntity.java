@@ -1,5 +1,7 @@
 package work.lclpnet.illwalls.entity;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -19,30 +21,47 @@ import work.lclpnet.illwalls.impl.FabricBlockStateAdapter;
 import work.lclpnet.illwalls.impl.FabricNbtConversion;
 import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
 import work.lclpnet.illwalls.network.PacketBufUtils;
+import work.lclpnet.illwalls.util.ColorUtil;
 import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.structure.BlockStructure;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class IllusoryWallEntity extends Entity implements EntityConditionalTracking, ExtraSpawnData, StructureHolder {
 
     public static final String
             FADING_NBT_KEY = "fading",
             STRUCTURE_NBT_KEY = "structure";
+    @Environment(EnvType.CLIENT)
+    private static final AtomicInteger nextId = new AtomicInteger(0);
     public static final int FADE_DURATION_TICKS = 20;
     public static final int FADE_DURATION_MS = FADE_DURATION_TICKS * 50;
 
     private boolean fading = false;
     private transient int fadeEnd = 0;
     private final StructureContainer structureContainer = new StructureContainer(this);
+    @Environment(EnvType.CLIENT)
+    private int wallId;
+    @Environment(EnvType.CLIENT)
+    private int color;
 
     public IllusoryWallEntity(EntityType<?> type, World world) {
         super(type, world);
         this.ignoreCameraFrustum = true;
+
+        if (world.isClient) {
+            initClient();
+        }
+    }
+
+    @Environment(EnvType.CLIENT)
+    private void initClient() {
+        this.wallId = nextId.getAndIncrement();
+        this.color = ColorUtil.getRandomColor(this.random);
     }
 
     @Override
-    protected void initDataTracker() {
-        // server only have no data trackers
-    }
+    protected void initDataTracker() {}
 
     public boolean isFading() {
         return fading;
@@ -139,5 +158,15 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     @Override
     public boolean shouldRender(double distance) {
         return distance < MathHelper.square(64.0 * DisplayEntity.getRenderDistanceMultiplier());
+    }
+
+    @Environment(EnvType.CLIENT)
+    public int getColor() {
+        return color;
+    }
+
+    @Environment(EnvType.CLIENT)
+    public int getWallId() {
+        return wallId;
     }
 }
