@@ -27,6 +27,15 @@ class ColorUtilTest {
         assertEquals(0xf07f02, ColorUtil.getRgbPacked(240, 127, 2));
     }
 
+    @Test
+    void testSetArgbPackedAlpha() {
+        assertEquals(0xff000000, ColorUtil.setArgbPackedAlpha(0x000000, 255));
+        assertEquals(0xffffffff, ColorUtil.setArgbPackedAlpha(0xffffff, 255));
+        assertEquals(0x00ffffff, ColorUtil.setArgbPackedAlpha(0xffffff, 0));
+        assertEquals(0x00000000, ColorUtil.setArgbPackedAlpha(0x000000, 0));
+        assertEquals(0xf001f030, ColorUtil.setArgbPackedAlpha(0x01f030, 240));
+    }
+
     private static Stream<HsvRgbSample> hsvRgbSamples() {
         return Stream.of(
                 new HsvRgbSample(44, 0.99f, 0.99f, 0xfcba03),

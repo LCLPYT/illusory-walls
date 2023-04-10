@@ -43,7 +43,7 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     @Environment(EnvType.CLIENT)
     private int wallId;
     @Environment(EnvType.CLIENT)
-    private int color;
+    private int outlineColor;
 
     public IllusoryWallEntity(EntityType<?> type, World world) {
         super(type, world);
@@ -57,7 +57,9 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     @Environment(EnvType.CLIENT)
     private void initClient() {
         this.wallId = nextId.getAndIncrement();
-        this.color = ColorUtil.getRandomColor(this.random);
+
+        int hsvColor = ColorUtil.getRandomHsvColor(this.random);
+        this.outlineColor = ColorUtil.setArgbPackedAlpha(hsvColor, 255);
     }
 
     @Override
@@ -161,8 +163,8 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     }
 
     @Environment(EnvType.CLIENT)
-    public int getColor() {
-        return color;
+    public int getOutlineColor() {
+        return outlineColor;
     }
 
     @Environment(EnvType.CLIENT)

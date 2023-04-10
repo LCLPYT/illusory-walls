@@ -10,7 +10,7 @@ public class ColorUtil {
 
     private ColorUtil() {}
 
-    public static int getRandomColor(Random random) {
+    public static int getRandomHsvColor(Random random) {
         // hue between 0 and 360
         final float hue = random.nextFloat() * 360;
         // saturation between 0.6 and 1
@@ -51,5 +51,9 @@ public class ColorUtil {
 
     public static int getRgbPacked(int red, int green, int blue) {
         return red << 16 | green << 8 | blue;
+    }
+
+    public static int setArgbPackedAlpha(int color, int alpha) {
+        return color | alpha << 24;
     }
 }
