@@ -11,10 +11,13 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 import net.minecraft.world.World;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.impl.FabricBlockStateAdapter;
@@ -25,15 +28,11 @@ import work.lclpnet.illwalls.util.ColorUtil;
 import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.structure.BlockStructure;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class IllusoryWallEntity extends Entity implements EntityConditionalTracking, ExtraSpawnData, StructureHolder {
 
     public static final String
             FADING_NBT_KEY = "fading",
             STRUCTURE_NBT_KEY = "structure";
-    @Environment(EnvType.CLIENT)
-    private static final AtomicInteger nextId = new AtomicInteger(0);
     public static final int FADE_DURATION_TICKS = 20;
     public static final int FADE_DURATION_MS = FADE_DURATION_TICKS * 50;
 
@@ -41,13 +40,16 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     private transient int fadeEnd = 0;
     private final StructureContainer structureContainer = new StructureContainer(this);
     @Environment(EnvType.CLIENT)
-    private int wallId;
-    @Environment(EnvType.CLIENT)
     private int outlineColor;
 
     public IllusoryWallEntity(EntityType<?> type, World world) {
         super(type, world);
         this.ignoreCameraFrustum = true;
+    }
+
+    @Override
+    public void onSpawnPacket(EntitySpawnS2CPacket packet) {
+        super.onSpawnPacket(packet);
 
         if (world.isClient) {
             initClient();
@@ -56,9 +58,10 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
 
     @Environment(EnvType.CLIENT)
     private void initClient() {
-        this.wallId = nextId.getAndIncrement();
-
-        int hsvColor = ColorUtil.getRandomHsvColor(this.random);
+        // the outline color of an illusory wall should always be the same.
+        // Therefore, use a persistent seed for a random.
+        Random colorRandom = new Xoroshiro128PlusPlusRandom(this.getId());
+        int hsvColor = ColorUtil.getRandomHsvColor(colorRandom);
         this.outlineColor = ColorUtil.setArgbPackedAlpha(hsvColor, 255);
     }
 
@@ -165,10 +168,5 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     @Environment(EnvType.CLIENT)
     public int getOutlineColor() {
         return outlineColor;
-    }
-
-    @Environment(EnvType.CLIENT)
-    public int getWallId() {
-        return wallId;
     }
 }
