@@ -1,11 +1,14 @@
 package work.lclpnet.illwalls.item;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
@@ -35,20 +38,51 @@ public class StaffOfIllusionItem extends Item {
         World world = context.getWorld();
         BlockPos pos = context.getBlockPos();
 
-        if (!world.isClient && player != null && !use((ServerPlayerEntity) player, (ServerWorld) world, pos)) {
+        if (!world.isClient && player != null && !makeIllusoryWall((ServerPlayerEntity) player, (ServerWorld) world, pos)) {
             return ActionResult.FAIL;
         }
 
         return ActionResult.success(world.isClient);
     }
 
-    private boolean use(ServerPlayerEntity player, ServerWorld world, BlockPos pos) {
+    @Override
+    public boolean canMine(BlockState state, World world, BlockPos pos, PlayerEntity miner) {
+        if (!world.isClient) {
+            this.destroyIllusoryWall((ServerPlayerEntity) miner, (ServerWorld) world, pos);
+        }
+
+        return false;
+    }
+
+    private void destroyIllusoryWall(ServerPlayerEntity player, ServerWorld world, BlockPos pos) {
+        if (!player.isCreativeLevelTwoOp()) return;
+
+        IllusoryWallLookup wallLookup = IllusoryWallsApi.getInstance().lookup();
+        var optWall = wallLookup.getWallAt(world, pos);
+
+        if (optWall.isEmpty()) {
+            return;  // there is no wall
+        }
+
+        IllusoryWallEntity entity = optWall.get();
+
+        var structure = entity.getStructureContainer().getWrapper();
+        structure.setBlockState(pos, Blocks.AIR.getDefaultState());
+
+        Vec3d center = pos.toCenterPos();
+
+        world.spawnParticles(player, ParticleTypes.FLAME,
+                false, center.x, center.y, center.z, 25, 0.5f, 0.5f, 0.5f, 0.05);
+    }
+
+    private boolean makeIllusoryWall(ServerPlayerEntity player, ServerWorld world, BlockPos pos) {
         if (!player.isCreativeLevelTwoOp()) return false;
 
         IllusoryWallLookup wallLookup = IllusoryWallsApi.getInstance().lookup();
 
-        if (wallLookup.getWallAt(world, pos).isPresent())
+        if (wallLookup.getWallAt(world, pos).isPresent()) {
             return false;  // there is already a wall
+        }
 
         // check neighbours
         IllusoryWallEntity entity = null;

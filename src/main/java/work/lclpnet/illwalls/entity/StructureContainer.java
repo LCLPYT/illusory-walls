@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
+import work.lclpnet.illwalls.impl.EmptyBlockState;
 import work.lclpnet.illwalls.impl.FabricBlockStateAdapter;
 import work.lclpnet.illwalls.impl.FabricStructureWrapper;
 import work.lclpnet.illwalls.impl.ListenerStructureWrapper;
@@ -30,12 +31,20 @@ public class StructureContainer {
     private void onUpdate(BlockPos pos, BlockState state) {
         if (entity.world.isClient) return;
 
+        if (this.structure.getStructure().isEmpty()) {
+            entity.discard();
+            return;
+        }
+
         center(entity, this.structure);
 
         // on the server world, update send a delta update structure to the players
         var deltaStructure = createSimpleStructure();
         var adapter = FabricBlockStateAdapter.getInstance();
-        deltaStructure.setBlockState(adapter.adapt(pos), adapter.adapt(state));
+
+        // air blocks will be skipped by the serializer. Therefore, put a special block state with a unique id
+        var deltaState = state.isAir() ? EmptyBlockState.INSTANCE : adapter.adapt(state);
+        deltaStructure.setBlockState(adapter.adapt(pos), deltaState);
 
         updateStructure(deltaStructure);
     }

@@ -1,5 +1,6 @@
 package work.lclpnet.illwalls.impl;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
@@ -27,6 +28,11 @@ public class FabricBlockStateAdapter implements BlockStateAdapter {
     @Nullable
     @Override
     public BlockState getBlockState(String string) {
+        // handle special block states
+        if (EmptyBlockState.ID.equals(string)) {
+            return EmptyBlockState.INSTANCE;
+        }
+
         var nativeBlockState = getNativeBlockState(string);
         return nativeBlockState != null ? adapt(nativeBlockState) : null;
     }
@@ -71,6 +77,11 @@ public class FabricBlockStateAdapter implements BlockStateAdapter {
 
     @Nullable
     public net.minecraft.block.BlockState revert(BlockState state) {
+        // handle special block states
+        if (EmptyBlockState.INSTANCE == state) {
+            return Blocks.AIR.getDefaultState();
+        }
+
         if (state instanceof FabricBlockState fState) {
             return fState.getState();
         }

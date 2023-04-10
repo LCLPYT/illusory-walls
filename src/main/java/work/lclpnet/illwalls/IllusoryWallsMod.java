@@ -9,6 +9,7 @@ import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.world.ServerWorld;
@@ -94,6 +95,9 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
 
         AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
             if (world.isClient || hand != Hand.MAIN_HAND) return ActionResult.PASS;
+
+            ItemStack stack = player.getStackInHand(hand);
+            if (stack.isOf(STAFF_OF_ILLUSION_ITEM)) return ActionResult.PASS;
 
             boolean success = wallManager.fadeWallAtIfPresent((ServerWorld) world, pos);
             return success ? ActionResult.CONSUME : ActionResult.PASS;
