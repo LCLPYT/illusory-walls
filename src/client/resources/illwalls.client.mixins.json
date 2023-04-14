@@ -7,7 +7,8 @@
   },
   "client": [
     "BlockRenderManagerAccessor",
-    "WorldRendererAccessor"
+    "WorldRendererAccessor",
+    "WorldRendererMixin"
   ],
   "mixins": [
   ]

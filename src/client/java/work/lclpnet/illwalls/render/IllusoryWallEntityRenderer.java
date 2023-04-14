@@ -46,6 +46,9 @@ public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntit
                 ColorHelper.Argb.getAlpha(color)
         );
 
+        // override the outline rendering so the outline post processor is guaranteed to always render
+        ((OutlineRenderOverride) worldRenderer).illwalls$markOverridden();
+
         var structure = entity.getStructureContainer().getWrapper();
 
         structureRenderer.render(structure, entity.getPos(), matrices, vertexConsumers, light, 1F);
