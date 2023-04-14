@@ -21,12 +21,14 @@ import net.minecraft.util.Rarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
+import work.lclpnet.illwalls.entity.PlayerInfo;
 import work.lclpnet.illwalls.entity.StructureEntity;
 import work.lclpnet.illwalls.item.StaffOfIllusionItem;
 import work.lclpnet.illwalls.wall.IllusoryWallLookup;
 import work.lclpnet.illwalls.wall.IllusoryWallManager;
 import work.lclpnet.illwalls.wall.NaiveWallLookup;
 import work.lclpnet.illwalls.wall.SimpleIllusoryWallManager;
+import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
 import work.lclpnet.kibu.schematic.SchematicFormats;
 import work.lclpnet.kibu.schematic.api.SchematicFormat;
 
@@ -112,7 +114,13 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
             return success ? ActionResult.CONSUME : ActionResult.PASS;
         });
 
+        registerStaffHeldEvents();
+
         LOGGER.info("Initialized.");
+    }
+
+    private static void registerStaffHeldEvents() {
+        PlayerInventoryHooks.SLOT_CHANGE.register((player, slot) -> PlayerInfo.get(player).updatePlayerCanSeeIllusoryWalls());
     }
 
     @Override

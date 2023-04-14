@@ -52,8 +52,8 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    implementation "work.lclpnet.mods.kibu:kibu-schematic-api:${project.kibu_schematic_api_version}"
-    implementation "work.lclpnet.mods.kibu:kibu-nbt-api:${project.kibu_nbt_api_version}"
+    modImplementation "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"
+    modImplementation "work.lclpnet.mods.kibu:kibu-scheduler-api:${project.kibu_scheduler_api_version}"
 
     if (project.hasProperty('sodium_version')) {
         modImplementation "maven.modrinth:sodium:${project.sodium_version}"
@@ -68,6 +68,8 @@ dependencies {
 
     /* other Java dependencies */
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation "work.lclpnet.mods.kibu:kibu-schematic-api:${project.kibu_schematic_api_version}"
+    implementation "work.lclpnet.mods.kibu:kibu-nbt-api:${project.kibu_nbt_api_version}"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'

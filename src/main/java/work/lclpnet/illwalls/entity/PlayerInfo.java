@@ -1,9 +1,12 @@
 package work.lclpnet.illwalls.entity;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
+import net.minecraft.util.Hand;
 import work.lclpnet.illwalls.IllusoryWallsApi;
+import work.lclpnet.illwalls.IllusoryWallsMod;
 
 public class PlayerInfo {
 
@@ -32,6 +35,17 @@ public class PlayerInfo {
         var entities = IllusoryWallsApi.getInstance().lookup().getAll(world);
         for (IllusoryWallEntity entity : entities) {
             entityTrackingUpdatable.illwalls$updateTrackedStatus(entity, player);
+        }
+    }
+
+    public void updatePlayerCanSeeIllusoryWalls() {
+        ItemStack stack = this.player.getStackInHand(Hand.MAIN_HAND);
+
+        if (stack.isOf(IllusoryWallsMod.STAFF_OF_ILLUSION_ITEM)) {
+            setCanSeeIllusoryWalls(true);
+        } else {
+            stack = this.player.getStackInHand(Hand.OFF_HAND);
+            setCanSeeIllusoryWalls(stack.isOf(IllusoryWallsMod.STAFF_OF_ILLUSION_ITEM));
         }
     }
 
