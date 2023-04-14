@@ -1,5 +1,6 @@
 {
   "item.illwalls.staff_of_illusion": "Stab der Illusionen",
   "entity.illwalls.structure": "Struktur",
-  "entity.illwalls.illusory_wall": "Illusionswand"
+  "entity.illwalls.illusory_wall": "Illusions-Wand",
+  "subtitle.entity.illusory_wall.fade": "Illusions-Wand schwindet"
 }

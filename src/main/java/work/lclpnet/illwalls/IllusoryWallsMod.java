@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -35,6 +36,8 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
 
     public static final String MOD_ID = "illwalls";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+    // entity types
     public static final EntityType<IllusoryWallEntity> ILLUSORY_WALL_ENTITY = Registry.register(
             Registries.ENTITY_TYPE,
             identifier("illusory_wall"),
@@ -53,11 +56,17 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
                     .trackedUpdateRate(1)
                     .build()
     );
+
+    // items
     public static final StaffOfIllusionItem STAFF_OF_ILLUSION_ITEM = Registry.register(
             Registries.ITEM,
             identifier("staff_of_illusion"),
             new StaffOfIllusionItem(new FabricItemSettings().maxCount(1).rarity(Rarity.EPIC))
     );
+
+    // sounds
+    public static final SoundEvent ILLUSORY_WALL_FADE_SOUND = registerSound(identifier("entity.illusory_wall.fade"));
+
     public static final SchematicFormat SCHEMATIC_FORMAT = SchematicFormats.SPONGE_V2;
     private static IllusoryWallsMod instance = null;
     private final IllusoryWallLookup wallLookup;
@@ -114,5 +123,9 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
     @Override
     public IllusoryWallManager manager() {
         return wallManager;
+    }
+
+    private static SoundEvent registerSound(Identifier id) {
+        return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(id));
     }
 }

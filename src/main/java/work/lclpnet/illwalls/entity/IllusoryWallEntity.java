@@ -14,8 +14,10 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 import net.minecraft.world.World;
@@ -138,6 +140,11 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
         for (BlockPos pos : structureContainer.getWrapper().getBlockPositions()) {
             world.setBlockState(pos, Blocks.AIR.getDefaultState());
         }
+
+        Vec3d soundPos = getBlockPos().toCenterPos();
+
+        world.playSound(null, soundPos.getX(), soundPos.getY(), soundPos.getZ(),
+                IllusoryWallsMod.ILLUSORY_WALL_FADE_SOUND, SoundCategory.BLOCKS, 0.85f, 1f);
 
         setFading(true);
 

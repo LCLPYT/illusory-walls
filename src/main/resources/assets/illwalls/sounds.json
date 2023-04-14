@@ -1,0 +1,11 @@
+{
+  "entity.illusory_wall.fade": {
+    "sounds": [
+      {
+        "name": "illwalls:entity/illusory_wall/illusory_wall_fade",
+        "stream": false
+      }
+    ],
+    "subtitle": "subtitle.entity.illusory_wall.fade"
+  }
+}
