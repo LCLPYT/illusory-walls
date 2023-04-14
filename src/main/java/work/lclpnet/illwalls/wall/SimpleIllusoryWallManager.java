@@ -65,13 +65,14 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
     }
 
     @Override
-    public void removeIllusoryBlock(ServerWorld world, BlockPos pos) {
+    public boolean removeIllusoryBlock(ServerWorld world, BlockPos pos) {
         var optWall = wallLookup.getWallAt(world, pos);
-        if (optWall.isEmpty()) return;  // there is no wall
+        if (optWall.isEmpty()) return false;  // there is no wall
 
         IllusoryWallEntity entity = optWall.get();
 
         FabricStructureWrapper structure = entity.getStructureContainer().getWrapper();
         structure.setBlockState(pos, Blocks.AIR.getDefaultState());
+        return true;
     }
 }

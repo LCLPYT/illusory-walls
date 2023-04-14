@@ -53,7 +53,7 @@ public class StaffOfIllusionItem extends Item {
         if (!player.isCreativeLevelTwoOp()) return;
 
         IllusoryWallManager wallManager = IllusoryWallsApi.getInstance().manager();
-        wallManager.removeIllusoryBlock(world, pos);
+        if (!wallManager.removeIllusoryBlock(world, pos)) return;
 
         // spawn visual particles
         Vec3d center = pos.toCenterPos();

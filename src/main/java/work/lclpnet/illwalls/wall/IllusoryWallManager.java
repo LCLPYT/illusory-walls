@@ -9,5 +9,5 @@ public interface IllusoryWallManager {
 
     boolean makeBlockIllusory(ServerWorld world, BlockPos pos);
 
-    void removeIllusoryBlock(ServerWorld world, BlockPos pos);
+    boolean removeIllusoryBlock(ServerWorld world, BlockPos pos);
 }
