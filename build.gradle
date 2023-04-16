@@ -2,6 +2,7 @@ plugins {
 	id 'fabric-loom' version '1.1.8'
 	id 'maven-publish'
 	id 'gradle-build-utils' version '1.2.1'
+    id 'com.modrinth.minotaur' version '2.4.3'
 }
 
 Properties props = loadProperties.call('publish.properties') as Properties
@@ -112,6 +113,19 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${project.archivesBaseName}"}
 	}
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+
+    projectId = "illusory-walls"
+    versionName = "[$project.minecraft_version] Illusory Walls $project.version"
+    versionType = "release"
+    uploadFile = remapJar
+
+    dependencies {
+        required.project "fabric-api"
+    }
 }
 
 // configure the maven publication
