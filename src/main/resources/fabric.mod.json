@@ -30,11 +30,14 @@
 		}
 	],
 	"depends": {
-      "fabricloader": ">=0.14.17",
+      "fabricloader": ">=0.14.18",
       "minecraft": "~1.19.4",
       "java": ">=17",
       "fabric-api": "*",
-      "kibu-schematic-api": ">=0.7.0"
+      "kibu-hook-api": "*",
+      "kibu-hooks": "*",
+      "kibu-nbt-api": "*",
+      "kibu-schematic-api": "*"
     },
 	"suggests": {},
 	"accessWidener": "illwalls.accesswidener"
