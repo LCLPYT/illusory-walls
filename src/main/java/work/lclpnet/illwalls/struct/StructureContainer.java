@@ -38,11 +38,24 @@ public class StructureContainer {
         var deltaStructure = createSimpleStructure();
         var adapter = FabricBlockStateAdapter.getInstance();
 
-        // air blocks will be skipped by the serializer. Therefore, put a special block state with a unique id
-        var deltaState = state.isAir() ? EmptyBlockState.INSTANCE : adapter.adapt(state);
-        deltaStructure.setBlockState(adapter.adapt(pos), deltaState);
+        if (pos == null && state == null && structure instanceof StructureBatchUpdate batchUpdate) {
+            for (var entry : batchUpdate.getBatch().entrySet()) {
+                BlockPos batchPos = entry.getKey();
+                BlockState batchState = entry.getValue();
 
-        updateStructure(deltaStructure);
+                // air blocks will be skipped by the serializer. Therefore, put a special block state with a unique id
+                var deltaState = batchState.isAir() ? EmptyBlockState.INSTANCE : adapter.adapt(batchState);
+                deltaStructure.setBlockState(adapter.adapt(batchPos), deltaState);
+            }
+        } else if (pos != null && state != null) {
+            // air blocks will be skipped by the serializer. Therefore, put a special block state with a unique id
+            var deltaState = state.isAir() ? EmptyBlockState.INSTANCE : adapter.adapt(state);
+            deltaStructure.setBlockState(adapter.adapt(pos), deltaState);
+        }
+
+        if (!deltaStructure.isEmpty()) {
+            updateStructure(deltaStructure);
+        }
     }
 
     public void updateStructure(BlockStructure delta) {
