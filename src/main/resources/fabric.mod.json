@@ -3,7 +3,7 @@
 	"id": "illwalls",
 	"version": "${version}",
 	"name": "Illusory Walls",
-	"description": "A Fabric mod to add illusory walls from the Dark Souls series to Minecraft",
+	"description": "A Fabric mod to add illusory walls to Minecraft",
 	"authors": [
 		"LCLP"
 	],
