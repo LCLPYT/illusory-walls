@@ -1,4 +1,4 @@
-package work.lclpnet.illwalls.impl;
+package work.lclpnet.illwalls.struct;
 
 import com.google.common.collect.Streams;
 import net.minecraft.SharedConstants;

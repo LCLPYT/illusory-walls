@@ -15,10 +15,12 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import work.lclpnet.illwalls.IllusoryWallsMod;
-import work.lclpnet.illwalls.impl.FabricBlockStateAdapter;
-import work.lclpnet.illwalls.impl.FabricNbtConversion;
+import work.lclpnet.illwalls.struct.FabricBlockStateAdapter;
+import work.lclpnet.illwalls.struct.FabricNbtConversion;
 import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
 import work.lclpnet.illwalls.network.PacketBufUtils;
+import work.lclpnet.illwalls.struct.StructureContainer;
+import work.lclpnet.illwalls.struct.StructureHolder;
 import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.structure.BlockStructure;
 

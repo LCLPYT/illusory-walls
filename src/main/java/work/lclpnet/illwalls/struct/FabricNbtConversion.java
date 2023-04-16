@@ -1,4 +1,4 @@
-package work.lclpnet.illwalls.impl;
+package work.lclpnet.illwalls.struct;
 
 import net.minecraft.nbt.*;
 import work.lclpnet.kibu.jnbt.*;

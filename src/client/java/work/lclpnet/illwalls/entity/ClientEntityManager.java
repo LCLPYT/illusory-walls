@@ -4,6 +4,8 @@ import net.minecraft.client.world.ClientWorld;
 import org.slf4j.Logger;
 import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
 import work.lclpnet.illwalls.network.StructureUpdatePacket;
+import work.lclpnet.illwalls.struct.StructureContainer;
+import work.lclpnet.illwalls.struct.StructureHolder;
 
 public class ClientEntityManager {
 

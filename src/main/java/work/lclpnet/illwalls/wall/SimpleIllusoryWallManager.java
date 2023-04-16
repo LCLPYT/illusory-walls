@@ -7,7 +7,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
-import work.lclpnet.illwalls.impl.FabricStructureWrapper;
+import work.lclpnet.illwalls.struct.FabricStructureWrapper;
 
 import java.util.Objects;
 

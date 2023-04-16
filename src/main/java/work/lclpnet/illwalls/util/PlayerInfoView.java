@@ -1,4 +1,4 @@
-package work.lclpnet.illwalls.entity;
+package work.lclpnet.illwalls.util;
 
 public interface PlayerInfoView {
 

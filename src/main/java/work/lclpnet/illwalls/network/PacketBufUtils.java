@@ -1,7 +1,7 @@
 package work.lclpnet.illwalls.network;
 
 import net.minecraft.network.PacketByteBuf;
-import work.lclpnet.illwalls.impl.FabricBlockStateAdapter;
+import work.lclpnet.illwalls.struct.FabricBlockStateAdapter;
 import work.lclpnet.kibu.schematic.api.SchematicFormat;
 import work.lclpnet.kibu.structure.BlockStructure;
 

@@ -1,18 +1,14 @@
-package work.lclpnet.illwalls.entity;
+package work.lclpnet.illwalls.struct;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
-import work.lclpnet.illwalls.impl.EmptyBlockState;
-import work.lclpnet.illwalls.impl.FabricBlockStateAdapter;
-import work.lclpnet.illwalls.impl.FabricStructureWrapper;
-import work.lclpnet.illwalls.impl.ListenerStructureWrapper;
 import work.lclpnet.illwalls.network.ServerNetworkHandler;
 import work.lclpnet.illwalls.network.StructureUpdatePacket;
 import work.lclpnet.kibu.structure.BlockStructure;
 
-import static work.lclpnet.illwalls.impl.FabricStructureWrapper.createSimpleStructure;
+import static work.lclpnet.illwalls.struct.FabricStructureWrapper.createSimpleStructure;
 
 public class StructureContainer {
 

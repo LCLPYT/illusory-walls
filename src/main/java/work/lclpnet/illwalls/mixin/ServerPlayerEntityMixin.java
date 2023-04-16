@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import work.lclpnet.illwalls.entity.PlayerInfo;
-import work.lclpnet.illwalls.entity.PlayerInfoView;
+import work.lclpnet.illwalls.util.PlayerInfo;
+import work.lclpnet.illwalls.util.PlayerInfoView;
 
 @Mixin(ServerPlayerEntity.class)
 public class ServerPlayerEntityMixin implements PlayerInfoView {

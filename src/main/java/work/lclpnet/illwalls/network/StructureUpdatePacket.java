@@ -3,7 +3,7 @@ package work.lclpnet.illwalls.network;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import work.lclpnet.illwalls.IllusoryWallsMod;
-import work.lclpnet.illwalls.impl.FabricBlockStateAdapter;
+import work.lclpnet.illwalls.struct.FabricBlockStateAdapter;
 import work.lclpnet.kibu.structure.BlockStructure;
 
 import java.io.IOException;

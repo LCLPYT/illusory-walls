@@ -8,26 +8,32 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
+import net.minecraft.util.math.BlockPos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
-import work.lclpnet.illwalls.entity.PlayerInfo;
+import work.lclpnet.illwalls.util.PlayerInfo;
 import work.lclpnet.illwalls.entity.StructureEntity;
 import work.lclpnet.illwalls.item.StaffOfIllusionItem;
 import work.lclpnet.illwalls.wall.IllusoryWallLookup;
 import work.lclpnet.illwalls.wall.IllusoryWallManager;
 import work.lclpnet.illwalls.wall.NaiveWallLookup;
 import work.lclpnet.illwalls.wall.SimpleIllusoryWallManager;
+import work.lclpnet.kibu.hook.entity.ProjectileHooks;
+import work.lclpnet.kibu.hook.player.PlayerGameModeChangeCallback;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
 import work.lclpnet.kibu.schematic.SchematicFormats;
 import work.lclpnet.kibu.schematic.api.SchematicFormat;
@@ -114,6 +120,15 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
             return success ? ActionResult.CONSUME : ActionResult.PASS;
         });
 
+        ProjectileHooks.HIT_BLOCK.register((projectile, hit) -> {
+            if (projectile.world.isClient) return;
+
+            BlockPos pos = hit.getBlockPos();
+            IllusoryWallManager manager = IllusoryWallsApi.getInstance().manager();
+
+            manager.fadeWallAtIfPresent((ServerWorld) projectile.world, pos);
+        });
+
         registerStaffHeldEvents();
 
         LOGGER.info("Initialized.");
@@ -121,6 +136,50 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
 
     private static void registerStaffHeldEvents() {
         PlayerInventoryHooks.SLOT_CHANGE.register((player, slot) -> PlayerInfo.get(player).updatePlayerCanSeeIllusoryWalls());
+        PlayerGameModeChangeCallback.HOOK.register((player, gameMode) -> PlayerInfo.get(player).updatePlayerCanSeeIllusoryWalls());
+
+        PlayerInventoryHooks.MODIFY_CREATIVE_INVENTORY.register(event -> {
+            ServerPlayerEntity player = event.player();
+
+            int handlerSlotIdx = event.slot();
+            if (handlerSlotIdx < 1 || handlerSlotIdx > 45) return;
+
+            Slot handlerSlot = player.currentScreenHandler.getSlot(handlerSlotIdx);
+            if (handlerSlot == null) return;
+
+            int slot = handlerSlot.getIndex();
+            if (player.getInventory().selectedSlot != slot) return;
+
+            ItemStack handStack = event.stack();
+            if (handStack.isOf(STAFF_OF_ILLUSION_ITEM)) {
+                PlayerInfo.get(player).setCanSeeIllusoryWalls(true);
+                return;
+            }
+
+            ItemStack stack = player.getInventory().getStack(slot);
+
+            if (stack.isOf(STAFF_OF_ILLUSION_ITEM) && handStack.isEmpty()) {
+                PlayerInfo.get(player).setCanSeeIllusoryWalls(false);
+            }
+        });
+
+        PlayerInventoryHooks.DROP_ITEM.register((player, slot) -> {
+            if (player.world.isClient) return false;
+
+            ItemStack stack = player.getInventory().getStack(slot);
+
+            if (stack.isOf(STAFF_OF_ILLUSION_ITEM)) {
+                PlayerInfo.get((ServerPlayerEntity) player).setCanSeeIllusoryWalls(false);
+            }
+
+            return false;
+        });
+
+        PlayerInventoryHooks.PLAYER_PICKED_UP.register((player, itemEntity) -> {
+            if (player.world.isClient) return;
+
+            PlayerInfo.get((ServerPlayerEntity) player).updatePlayerCanSeeIllusoryWalls();
+        });
     }
 
     @Override
