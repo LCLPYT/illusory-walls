@@ -10,7 +10,10 @@ import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.struct.FabricStructureWrapper;
 import work.lclpnet.illwalls.struct.StructureBatchUpdate;
 
-import java.util.*;
+import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 public class SimpleIllusoryWallManager implements IllusoryWallManager {
 
@@ -21,12 +24,12 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
     }
 
     @Override
-    public boolean fadeWallAtIfPresent(ServerWorld world, BlockPos pos) {
+    public boolean fadeWallAtIfPresent(ServerWorld world, BlockPos pos, @Nullable BlockPos from) {
         var optWall = wallLookup.getWallAt(world, pos);
         if (optWall.isEmpty()) return false;
 
         var entity = optWall.get();
-        entity.fade();
+        entity.fade(from);
 
         return true;
     }

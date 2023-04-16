@@ -22,16 +22,18 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 import net.minecraft.world.World;
 import work.lclpnet.illwalls.IllusoryWallsMod;
-import work.lclpnet.illwalls.struct.FabricBlockStateAdapter;
-import work.lclpnet.illwalls.struct.FabricNbtConversion;
 import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
 import work.lclpnet.illwalls.network.PacketBufUtils;
+import work.lclpnet.illwalls.struct.FabricBlockStateAdapter;
+import work.lclpnet.illwalls.struct.FabricNbtConversion;
 import work.lclpnet.illwalls.struct.StructureContainer;
 import work.lclpnet.illwalls.struct.StructureHolder;
 import work.lclpnet.illwalls.util.ColorUtil;
 import work.lclpnet.illwalls.util.PlayerInfo;
 import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.structure.BlockStructure;
+
+import javax.annotation.Nullable;
 
 public class IllusoryWallEntity extends Entity implements EntityConditionalTracking, ExtraSpawnData, StructureHolder {
 
@@ -136,7 +138,7 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
         this.structureContainer.setStructure(structure);
     }
 
-    public synchronized void fade() {
+    public synchronized void fade(@Nullable BlockPos from) {
         if (this.world.isClient || isFading()) return;
 
         // remove blocks
@@ -144,7 +146,8 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
             world.setBlockState(pos, Blocks.AIR.getDefaultState());
         }
 
-        Vec3d soundPos = getBlockPos().toCenterPos();
+        BlockPos pos = getBlockPos();
+        Vec3d soundPos = pos.toCenterPos();
 
         world.playSound(null, soundPos.getX(), soundPos.getY(), soundPos.getZ(),
                 IllusoryWallsMod.ILLUSORY_WALL_FADE_SOUND, SoundCategory.BLOCKS, 0.85f, 1f);
@@ -157,7 +160,8 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
         IllusoryWallsMod.STRUCTURE_ENTITY.spawn(serverWorld, null, entity -> {
             structureContainer.getWrapper().copyTo(entity.getStructureContainer().getWrapper());
             entity.setFading(true);
-        }, getBlockPos(), SpawnReason.CONVERSION, false, false);
+            entity.setFadingFrom(from != null ? from : pos);
+        }, pos, SpawnReason.CONVERSION, false, false);
     }
 
     @Override

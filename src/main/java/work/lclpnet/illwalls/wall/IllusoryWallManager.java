@@ -3,9 +3,15 @@ package work.lclpnet.illwalls.wall;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
+import javax.annotation.Nullable;
+
 public interface IllusoryWallManager {
 
-    boolean fadeWallAtIfPresent(ServerWorld world, BlockPos pos);
+    default boolean fadeWallAtIfPresent(ServerWorld world, BlockPos pos) {
+        return fadeWallAtIfPresent(world, pos, null);
+    }
+
+    boolean fadeWallAtIfPresent(ServerWorld world, BlockPos pos, @Nullable BlockPos from);
 
     boolean makeBlockIllusory(ServerWorld world, BlockPos pos);
 

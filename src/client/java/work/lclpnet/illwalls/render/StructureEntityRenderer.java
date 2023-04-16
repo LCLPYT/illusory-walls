@@ -2,18 +2,17 @@ package work.lclpnet.illwalls.render;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.TexturedRenderLayers;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.entity.StructureEntity;
+import work.lclpnet.illwalls.struct.FabricStructureWrapper;
 
 public class StructureEntityRenderer extends EntityRenderer<StructureEntity> implements RenderLayerGetter {
 
@@ -53,7 +52,14 @@ public class StructureEntityRenderer extends EntityRenderer<StructureEntity> imp
             alpha = MathHelper.clamp(alpha, 0F, 1F);
         }
 
-        var structure = entity.getStructureContainer().getWrapper();
+        BlockPos fadingFrom = entity.getFadingFrom();
+        if (fadingFrom != null) {
+            int blockLight = this.getBlockLight(entity, fadingFrom);
+            int skyLight = this.getSkyLight(entity, fadingFrom);
+            light = LightmapTextureManager.pack(blockLight, skyLight);
+        }
+
+        FabricStructureWrapper structure = entity.getStructureContainer().getWrapper();
 
         structureRenderer.render(structure, entity.getPos(), matrices, vertexConsumers, light, alpha);
     }

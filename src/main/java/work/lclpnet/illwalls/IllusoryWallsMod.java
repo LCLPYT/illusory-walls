@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -25,9 +24,9 @@ import net.minecraft.util.math.BlockPos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
-import work.lclpnet.illwalls.util.PlayerInfo;
 import work.lclpnet.illwalls.entity.StructureEntity;
 import work.lclpnet.illwalls.item.StaffOfIllusionItem;
+import work.lclpnet.illwalls.util.PlayerInfo;
 import work.lclpnet.illwalls.wall.IllusoryWallLookup;
 import work.lclpnet.illwalls.wall.IllusoryWallManager;
 import work.lclpnet.illwalls.wall.NaiveWallLookup;
@@ -116,7 +115,8 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
             ItemStack stack = player.getStackInHand(hand);
             if (stack.isOf(STAFF_OF_ILLUSION_ITEM)) return ActionResult.PASS;
 
-            boolean success = wallManager.fadeWallAtIfPresent((ServerWorld) world, pos);
+            BlockPos from = pos.offset(direction);
+            boolean success = wallManager.fadeWallAtIfPresent((ServerWorld) world, pos, from);
             return success ? ActionResult.CONSUME : ActionResult.PASS;
         });
 
@@ -126,7 +126,8 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
             BlockPos pos = hit.getBlockPos();
             IllusoryWallManager manager = IllusoryWallsApi.getInstance().manager();
 
-            manager.fadeWallAtIfPresent((ServerWorld) projectile.world, pos);
+            BlockPos from = pos.offset(hit.getSide());
+            manager.fadeWallAtIfPresent((ServerWorld) projectile.world, pos, from);
         });
 
         registerStaffHeldEvents();
