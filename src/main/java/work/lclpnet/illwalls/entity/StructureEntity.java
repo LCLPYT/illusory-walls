@@ -18,11 +18,11 @@ import net.minecraft.world.World;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
 import work.lclpnet.illwalls.network.PacketBufUtils;
-import work.lclpnet.illwalls.struct.FabricBlockStateAdapter;
-import work.lclpnet.illwalls.struct.FabricNbtConversion;
+import work.lclpnet.illwalls.struct.ExtendedBlockStateAdapter;
 import work.lclpnet.illwalls.struct.StructureContainer;
 import work.lclpnet.illwalls.struct.StructureHolder;
 import work.lclpnet.kibu.jnbt.CompoundTag;
+import work.lclpnet.kibu.nbt.FabricNbtConversion;
 import work.lclpnet.kibu.structure.BlockStructure;
 
 import javax.annotation.Nullable;
@@ -107,7 +107,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
         NbtCompound structureNbt = nbt.getCompound(STRUCTURE_NBT_KEY);
         CompoundTag structureTag = FabricNbtConversion.convert(structureNbt, CompoundTag.class);
 
-        var adapter = FabricBlockStateAdapter.getInstance();
+        var adapter = ExtendedBlockStateAdapter.getInstance();
         BlockStructure structure = IllusoryWallsMod.SCHEMATIC_FORMAT.deserializer().deserialize(structureTag, adapter);
 
         this.structureContainer.setStructure(structure);

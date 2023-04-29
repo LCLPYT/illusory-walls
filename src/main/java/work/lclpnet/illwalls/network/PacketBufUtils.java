@@ -1,7 +1,7 @@
 package work.lclpnet.illwalls.network;
 
 import net.minecraft.network.PacketByteBuf;
-import work.lclpnet.illwalls.struct.FabricBlockStateAdapter;
+import work.lclpnet.illwalls.struct.ExtendedBlockStateAdapter;
 import work.lclpnet.kibu.schematic.api.SchematicFormat;
 import work.lclpnet.kibu.structure.BlockStructure;
 
@@ -25,7 +25,7 @@ public class PacketBufUtils {
         final int length = buf.readVarInt();
         final byte[] bytes = buf.readByteArray(length);
 
-        final var adapter = FabricBlockStateAdapter.getInstance();
+        final var adapter = ExtendedBlockStateAdapter.getInstance();
 
         try {
             return format.reader().fromArray(bytes, adapter);

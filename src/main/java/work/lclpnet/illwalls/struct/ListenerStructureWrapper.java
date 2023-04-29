@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
-public class ListenerStructureWrapper extends FabricStructureWrapper implements StructureBatchUpdate {
+public class ListenerStructureWrapper extends ExtendedStructureWrapper implements StructureBatchUpdate {
 
     private final BiConsumer<BlockPos, BlockState> listener;
     private Map<BlockPos, BlockState> batch = null;

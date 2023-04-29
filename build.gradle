@@ -56,8 +56,10 @@ dependencies {
 
     modImplementation "work.lclpnet.mods.kibu:kibu-hook-api:${project.kibu_hook_api_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"
+    modImplementation "work.lclpnet.mods.kibu:kibu-schematic-fabric:${project.kibu_schematic_fabric_version}"
     include "work.lclpnet.mods.kibu:kibu-hook-api:${project.kibu_hook_api_version}"
     include "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"
+    include "work.lclpnet.mods.kibu:kibu-schematic-fabric:${project.kibu_schematic_fabric_version}"
 
     if (project.hasProperty('sodium_version')) {
         modImplementation "maven.modrinth:sodium:${project.sodium_version}"

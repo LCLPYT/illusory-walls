@@ -8,16 +8,16 @@ import work.lclpnet.illwalls.network.ServerNetworkHandler;
 import work.lclpnet.illwalls.network.StructureUpdatePacket;
 import work.lclpnet.kibu.structure.BlockStructure;
 
-import static work.lclpnet.illwalls.struct.FabricStructureWrapper.createSimpleStructure;
+import static work.lclpnet.kibu.schematic.FabricStructureWrapper.createSimpleStructure;
 
 public class StructureContainer {
 
     private final Entity entity;
-    private FabricStructureWrapper structure;
+    private ExtendedStructureWrapper structure;
 
     public StructureContainer(Entity entity) {
         this.entity = entity;
-        this.structure = makeStructure(FabricStructureWrapper.createSimpleStructure());
+        this.structure = makeStructure(createSimpleStructure());
     }
 
     private boolean existsInWorld() {
@@ -36,7 +36,7 @@ public class StructureContainer {
 
         // on the server world, update send a delta update structure to the players
         var deltaStructure = createSimpleStructure();
-        var adapter = FabricBlockStateAdapter.getInstance();
+        var adapter = ExtendedBlockStateAdapter.getInstance();
 
         if (pos == null && state == null && structure instanceof StructureBatchUpdate batchUpdate) {
             for (var entry : batchUpdate.getBatch().entrySet()) {
@@ -69,17 +69,17 @@ public class StructureContainer {
         }
 
         // sync the received delta structure
-        var deltaWrapper = new FabricStructureWrapper(delta);
+        var deltaWrapper = new ExtendedStructureWrapper(delta);
         var positions = deltaWrapper.getBlockPositions();
 
         positions.forEach(pos -> structure.setBlockState(pos, deltaWrapper.getBlockState(pos)));
     }
 
-    private FabricStructureWrapper makeStructure(BlockStructure structure) {
+    private ExtendedStructureWrapper makeStructure(BlockStructure structure) {
         return new ListenerStructureWrapper(structure, this::onUpdate);
     }
 
-    public FabricStructureWrapper getWrapper() {
+    public ExtendedStructureWrapper getWrapper() {
         return structure;
     }
 
@@ -91,7 +91,7 @@ public class StructureContainer {
      * Moves this entity to the nearest block of the center of the structure.
      * This is done, so that the wall loads evenly from all directions.
      */
-    public static void center(Entity entity, FabricStructureWrapper structure) {
+    public static void center(Entity entity, ExtendedStructureWrapper structure) {
         BlockPos center = structure.getCenter();
         int centerX = center.getX();
         int centerY = center.getY();

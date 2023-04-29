@@ -12,7 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.entity.StructureEntity;
-import work.lclpnet.illwalls.struct.FabricStructureWrapper;
+import work.lclpnet.illwalls.struct.ExtendedStructureWrapper;
 
 public class StructureEntityRenderer extends EntityRenderer<StructureEntity> implements RenderLayerGetter {
 
@@ -59,7 +59,7 @@ public class StructureEntityRenderer extends EntityRenderer<StructureEntity> imp
             light = LightmapTextureManager.pack(blockLight, skyLight);
         }
 
-        FabricStructureWrapper structure = entity.getStructureContainer().getWrapper();
+        ExtendedStructureWrapper structure = entity.getStructureContainer().getWrapper();
 
         structureRenderer.render(structure, entity.getPos(), matrices, vertexConsumers, light, alpha);
     }

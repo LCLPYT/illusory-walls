@@ -3,7 +3,7 @@ package work.lclpnet.illwalls.network;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import work.lclpnet.illwalls.IllusoryWallsMod;
-import work.lclpnet.illwalls.struct.FabricBlockStateAdapter;
+import work.lclpnet.illwalls.struct.ExtendedBlockStateAdapter;
 import work.lclpnet.kibu.structure.BlockStructure;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class StructureUpdatePacket implements PacketSerializer {
         final int length = buf.readVarInt();
         final byte[] bytes = buf.readByteArray(length);
 
-        final var adapter = FabricBlockStateAdapter.getInstance();
+        final var adapter = ExtendedBlockStateAdapter.getInstance();
 
         try {
             this.deltaStructure = IllusoryWallsMod.SCHEMATIC_FORMAT.reader().fromArray(bytes, adapter);

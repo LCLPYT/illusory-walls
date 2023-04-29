@@ -7,7 +7,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
-import work.lclpnet.illwalls.struct.FabricStructureWrapper;
+import work.lclpnet.illwalls.struct.ExtendedStructureWrapper;
 import work.lclpnet.illwalls.struct.StructureBatchUpdate;
 
 import javax.annotation.Nullable;
@@ -52,7 +52,7 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
         if (nearbyWalls.isEmpty()) {
             // there is no illusory wall nearby, create one
             IllusoryWallsMod.ILLUSORY_WALL_ENTITY.spawn(world, null, created -> {
-                FabricStructureWrapper structure = created.getStructureContainer().getWrapper();
+                ExtendedStructureWrapper structure = created.getStructureContainer().getWrapper();
                 structure.setBlockState(pos, world.getBlockState(pos));
             }, pos, SpawnReason.SPAWN_EGG, false, false);
         } else {
@@ -60,7 +60,7 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
 
             // get one nearby wall (there is at least one wall present)
             IllusoryWallEntity wall = iterator.next();
-            FabricStructureWrapper structure = wall.getStructureContainer().getWrapper();
+            ExtendedStructureWrapper structure = wall.getStructureContainer().getWrapper();
 
             if (!iterator.hasNext()) {
                 // there is only one wall nearby
@@ -77,7 +77,7 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
                 // merge other nearby walls
                 while (iterator.hasNext()) {
                     IllusoryWallEntity other = iterator.next();
-                    FabricStructureWrapper otherStructure = other.getStructureContainer().getWrapper();
+                    ExtendedStructureWrapper otherStructure = other.getStructureContainer().getWrapper();
 
                     otherStructure.copyTo(structure);
 
@@ -100,7 +100,7 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
 
         IllusoryWallEntity entity = optWall.get();
 
-        FabricStructureWrapper structure = entity.getStructureContainer().getWrapper();
+        ExtendedStructureWrapper structure = entity.getStructureContainer().getWrapper();
         structure.setBlockState(pos, Blocks.AIR.getDefaultState());
         return true;
     }
