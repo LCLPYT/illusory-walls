@@ -37,7 +37,8 @@
       "kibu-hook-api": "*",
       "kibu-hooks": "*",
       "kibu-nbt-api": "*",
-      "kibu-schematic-api": "*"
+      "kibu-schematic-api": "*",
+      "kibu-schematic-fabric": "*"
     },
 	"suggests": {},
 	"accessWidener": "illwalls.accesswidener"
