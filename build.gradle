@@ -54,12 +54,20 @@ dependencies {
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation "work.lclpnet.mods.kibu:kibu-hook-api:${project.kibu_hook_api_version}"
-    modImplementation "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"
-    modImplementation "work.lclpnet.mods.kibu:kibu-schematic-fabric:${project.kibu_schematic_fabric_version}"
-    include "work.lclpnet.mods.kibu:kibu-hook-api:${project.kibu_hook_api_version}"
-    include "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"
-    include "work.lclpnet.mods.kibu:kibu-schematic-fabric:${project.kibu_schematic_fabric_version}"
+    "work.lclpnet.mods.kibu:kibu-hook-api:${project.kibu_hook_api_version}".with {
+        modImplementation it
+        include it
+    }
+
+    "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}".with {
+        modImplementation it
+        include it
+    }
+
+    "work.lclpnet.mods.kibu:kibu-schematic-fabric:${project.kibu_schematic_fabric_version}".with {
+        modImplementation it
+        include it
+    }
 
     if (project.hasProperty('sodium_version')) {
         modImplementation "maven.modrinth:sodium:${project.sodium_version}"
@@ -75,10 +83,15 @@ dependencies {
     /* other Java dependencies */
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
-    implementation "work.lclpnet.mods.kibu:kibu-schematic-api:${project.kibu_schematic_api_version}"
-    implementation "work.lclpnet.mods.kibu:kibu-nbt-api:${project.kibu_nbt_api_version}"
-    include "work.lclpnet.mods.kibu:kibu-schematic-api:${project.kibu_schematic_api_version}"
-    include "work.lclpnet.mods.kibu:kibu-nbt-api:${project.kibu_nbt_api_version}"
+    "work.lclpnet.mods.kibu:kibu-schematic-api:${project.kibu_schematic_api_version}".with {
+        implementation it
+        include it
+    }
+
+    "work.lclpnet.mods.kibu:kibu-nbt-api:${project.kibu_nbt_api_version}".with {
+        implementation it
+        include it
+    }
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
@@ -90,8 +103,8 @@ test {
 }
 
 configurations {
-    testCompileClasspath.extendsFrom(minecraftCommonNamed)
-    testRuntimeClasspath.extendsFrom(minecraftCommonNamed)
+    testCompileClasspath.extendsFrom(minecraftCommonNamedCompile)
+    testRuntimeClasspath.extendsFrom(minecraftCommonNamedRuntime)
 }
 
 processResources {
