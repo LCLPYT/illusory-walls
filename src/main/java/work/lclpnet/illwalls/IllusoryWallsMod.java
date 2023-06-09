@@ -121,13 +121,13 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
         });
 
         ProjectileHooks.HIT_BLOCK.register((projectile, hit) -> {
-            if (projectile.world.isClient) return;
+            if (projectile.getWorld().isClient) return;
 
             BlockPos pos = hit.getBlockPos();
             IllusoryWallManager manager = IllusoryWallsApi.getInstance().manager();
 
             BlockPos from = pos.offset(hit.getSide());
-            manager.fadeWallAtIfPresent((ServerWorld) projectile.world, pos, from);
+            manager.fadeWallAtIfPresent((ServerWorld) projectile.getWorld(), pos, from);
         });
 
         registerStaffHeldEvents();
@@ -165,7 +165,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
         });
 
         PlayerInventoryHooks.DROP_ITEM.register((player, slot) -> {
-            if (player.world.isClient) return false;
+            if (player.getWorld().isClient) return false;
 
             ItemStack stack = player.getInventory().getStack(slot);
 
@@ -177,7 +177,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
         });
 
         PlayerInventoryHooks.PLAYER_PICKED_UP.register((player, itemEntity) -> {
-            if (player.world.isClient) return;
+            if (player.getWorld().isClient) return;
 
             PlayerInfo.get((ServerPlayerEntity) player).updatePlayerCanSeeIllusoryWalls();
         });

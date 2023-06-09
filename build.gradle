@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.1.8'
+	id 'fabric-loom' version '1.2.7'
 	id 'maven-publish'
 	id 'gradle-build-utils' version '1.2.1'
     id 'com.modrinth.minotaur' version '2.4.3'
@@ -103,7 +103,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 17
+	it.options.release.convention(17)
 }
 
 java {

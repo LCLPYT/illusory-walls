@@ -30,7 +30,7 @@ public class PlayerInfo {
 
         // TODO debounce 1 sec
         // update tracking status for all illusory walls in the players world
-        ServerWorld world = player.getWorld();
+        ServerWorld world = player.getServerWorld();
         ThreadedAnvilChunkStorage chunkManager = world.getChunkManager().threadedAnvilChunkStorage;
         if (!(chunkManager instanceof EntityTrackingUpdatable entityTrackingUpdatable)) return;
 
