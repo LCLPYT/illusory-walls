@@ -1,17 +1,19 @@
+import work.lclpnet.build.task.GithubDeploymentTask
+
 plugins {
 	id 'fabric-loom' version '1.1.8'
 	id 'maven-publish'
-	id 'gradle-build-utils' version '1.2.1'
+	id 'gradle-build-utils' version '1.4.0'
     id 'com.modrinth.minotaur' version '2.4.3'
 }
 
-Properties props = loadProperties.call('publish.properties') as Properties
+Properties props = buildUtils.loadProperties('publish.properties') as Properties
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
-version = gitVersion.call()
+version = buildUtils.gitVersion()
 group = project.maven_group
 
 repositories {
@@ -117,8 +119,26 @@ jar {
 	}
 }
 
+def env = System.getenv()
+
+tasks.register("github", GithubDeploymentTask) {
+    dependsOn tasks.remapJar
+
+    config {
+        token = env.get("GITHUB_TOKEN")
+        repository = env.get("GITHUB_REPO")
+    }
+
+    release {
+        title = "[$project.minecraft_version] Illusory Walls $project.version"
+        tag = buildUtils.latestTag()
+    }
+
+    assets.add(tasks.remapJar.archiveFile.get())
+}
+
 modrinth {
-    token = System.getenv("MODRINTH_TOKEN")
+    token = env.get("MODRINTH_TOKEN")
 
     projectId = "illusory-walls"
     versionName = "[$project.minecraft_version] Illusory Walls $project.version"
@@ -130,7 +150,6 @@ modrinth {
     }
 }
 
-// configure the maven publication
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -147,7 +166,6 @@ publishing {
 
     repositories {
         maven {
-            def env = System.getenv()
             if (Arrays.stream("DEPLOY_URL", "DEPLOY_USER", "DEPLOY_PASSWORD").allMatch(env.&containsKey)) {
                 credentials {
                     username env.get("DEPLOY_USER")
