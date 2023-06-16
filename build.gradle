@@ -3,11 +3,11 @@ import work.lclpnet.build.task.GithubDeploymentTask
 plugins {
 	id 'fabric-loom' version '1.1.8'
 	id 'maven-publish'
-	id 'gradle-build-utils' version '1.4.0'
+	id 'gradle-build-utils' version '1.5.3'
     id 'com.modrinth.minotaur' version '2.4.3'
 }
 
-Properties props = buildUtils.loadProperties('publish.properties') as Properties
+Properties props = buildUtils.loadProperties('publish.properties')
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -164,24 +164,5 @@ publishing {
         }
     }
 
-    repositories {
-        maven {
-            if (Arrays.stream("DEPLOY_URL", "DEPLOY_USER", "DEPLOY_PASSWORD").allMatch(env.&containsKey)) {
-                credentials {
-                    username env.get("DEPLOY_USER")
-                    password env.get("DEPLOY_PASSWORD")
-                }
-                url env.get("DEPLOY_URL")
-            }
-            else if (Arrays.stream("mavenHost", "mavenUser", "mavenPassword").allMatch(props.&containsKey)) {
-                credentials {
-                    username props.getProperty('mavenUser')
-                    password props.getProperty('mavenPassword')
-                }
-                url props.getProperty('mavenHost')
-            } else {
-                url "file:///${project.projectDir}/repo"
-            }
-        }
-    }
+    buildUtils.setupPublishRepository(repositories, props)
 }
