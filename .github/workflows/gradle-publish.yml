@@ -27,7 +27,7 @@ jobs:
 
       # perform the gradle build
       - name: Execute Gradle Build
-        run: ./gradlew build publish github --stacktrace -Porg.gradle.parallel.threads=4
+        run: ./gradlew build publish github modrinth --stacktrace -Porg.gradle.parallel.threads=4
         env:
           DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
