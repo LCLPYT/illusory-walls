@@ -34,6 +34,7 @@ import work.lclpnet.illwalls.wall.SimpleIllusoryWallManager;
 import work.lclpnet.kibu.hook.entity.ProjectileHooks;
 import work.lclpnet.kibu.hook.player.PlayerGameModeChangeCallback;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
+import work.lclpnet.kibu.hook.world.BlockModificationHooks;
 import work.lclpnet.kibu.schematic.SchematicFormats;
 import work.lclpnet.kibu.schematic.api.SchematicFormat;
 
@@ -128,6 +129,20 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
 
             BlockPos from = pos.offset(hit.getSide());
             manager.fadeWallAtIfPresent((ServerWorld) projectile.getWorld(), pos, from);
+        });
+
+        BlockModificationHooks.PLACE_BLOCK.register((world, pos, entity, newState) -> {
+            if (world.isClient || !(world instanceof ServerWorld serverWorld)) return false;
+
+            // prevent block placement in an illusory wall
+            return IllusoryWallsApi.getInstance().lookup().getWallAt(serverWorld, pos).isPresent();
+        });
+
+        BlockModificationHooks.PLACE_FLUID.register((world, pos, entity, newState) -> {
+            if (world.isClient || !(world instanceof ServerWorld serverWorld)) return false;
+
+            // prevent fluid placement in an illusory wall
+            return IllusoryWallsApi.getInstance().lookup().getWallAt(serverWorld, pos).isPresent();
         });
 
         registerStaffHeldEvents();

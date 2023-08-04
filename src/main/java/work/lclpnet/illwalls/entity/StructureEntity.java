@@ -28,12 +28,18 @@ import work.lclpnet.kibu.structure.BlockStructure;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * An entity consisting of multiple blocks (a structure) that is rendered similar to {@link net.minecraft.entity.decoration.DisplayEntity.BlockDisplayEntity}.
+ * However, this entity can be rendered with opacity, determined by the fading parameters.
+ */
 public class StructureEntity extends Entity implements ExtraSpawnData, StructureHolder {
 
     public static final String
             FADING_NBT_KEY = "fading",
             VIEW_RANGE_NBT_KEY = "view_range",
-            STRUCTURE_NBT_KEY = "structure";
+            STRUCTURE_NBT_KEY = "structure",
+            FADE_MODE_NBT_KEY = "fade_mode";
+    public static final int FADE_OUT = 0, FADE_IN = 1;
     private static final TrackedData<Boolean> FADING = DataTracker.registerData(StructureEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Float> VIEW_RANGE = DataTracker.registerData(StructureEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Optional<BlockPos>> FADING_FROM = DataTracker.registerData(StructureEntity.class, TrackedDataHandlerRegistry.OPTIONAL_BLOCK_POS);
@@ -42,6 +48,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
     @Environment(EnvType.CLIENT)
     private transient long fadeStartMs = 0L;
     private final StructureContainer structureContainer = new StructureContainer(this);
+    private int fadeMode = FADE_OUT;
 
     public StructureEntity(EntityType<?> entityType, World world) {
         super(entityType, world);
@@ -66,6 +73,14 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
         if (!wasFading && fading) {
             startFading();
         }
+    }
+
+    public int getFadeMode() {
+        return fadeMode;
+    }
+
+    public void setFadeMode(int fadeMode) {
+        this.fadeMode = fadeMode;
     }
 
     @Nullable
@@ -111,6 +126,10 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
         BlockStructure structure = IllusoryWallsMod.SCHEMATIC_FORMAT.deserializer().deserialize(structureTag, adapter);
 
         this.structureContainer.setStructure(structure);
+
+        if (nbt.contains(FADE_MODE_NBT_KEY)) {
+            fadeMode = nbt.getInt(FADE_MODE_NBT_KEY);
+        }
     }
 
     @Override
@@ -122,13 +141,15 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
         CompoundTag structureTag = IllusoryWallsMod.SCHEMATIC_FORMAT.serializer().serialize(structure);
         NbtCompound structureNbt = FabricNbtConversion.convert(structureTag, NbtCompound.class);
         nbt.put(STRUCTURE_NBT_KEY, structureNbt);
+
+        nbt.putInt(FADE_MODE_NBT_KEY, fadeMode);
     }
 
     @Override
     public void tick() {
         super.tick();
 
-        if (getWorld().isClient || !isFading() || age < fadeEnd) return;
+        if (getWorld().isClient || !isFading() || age < fadeEnd + 2) return;
 
         this.discard();
     }
@@ -149,6 +170,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
         PacketBufUtils.writeBlockStructure(buf, structureContainer.getWrapper().getStructure(), IllusoryWallsMod.SCHEMATIC_FORMAT);
         buf.writeBoolean(isFading());
         buf.writeBlockPos(getFadingFrom());
+        buf.writeVarInt(getFadeMode());
     }
 
     @Override
@@ -158,6 +180,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
         this.structureContainer.setStructure(structure);
         setFading(buf.readBoolean());
         setFadingFrom(buf.readBlockPos());
+        setFadeMode(buf.readVarInt());
     }
 
     private float getViewRange() {

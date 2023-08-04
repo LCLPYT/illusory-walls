@@ -48,7 +48,12 @@ public class StructureEntityRenderer extends EntityRenderer<StructureEntity> imp
 
             long now = System.currentTimeMillis();
 
-            alpha = 1F - (now - start) / (float) IllusoryWallEntity.FADE_DURATION_MS;
+            alpha = (now - start) / (float) IllusoryWallEntity.FADE_DURATION_MS;
+
+            if (entity.getFadeMode() != StructureEntity.FADE_IN) {
+                alpha = 1F - alpha;
+            }
+
             alpha = MathHelper.clamp(alpha, 0F, 1F);
         }
 
