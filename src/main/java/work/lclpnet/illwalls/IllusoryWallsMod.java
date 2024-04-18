@@ -91,8 +91,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
         }
 
         new ModEventListener(wallManager, wallLookup).register();
-
-        new ServerNetworkHandler().init();
+        new ServerNetworkHandler(wallManager).init();
 
         LOGGER.info("Initialized.");
     }
