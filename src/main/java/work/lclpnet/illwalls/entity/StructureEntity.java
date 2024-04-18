@@ -46,13 +46,22 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
 
     private transient int fadeEnd = 0;
     @Environment(EnvType.CLIENT)
-    private transient long fadeStartMs = 0L;
+    private transient long fadeStartMs;
     private final StructureContainer structureContainer = new StructureContainer(this);
     private int fadeMode = FADE_OUT;
 
     public StructureEntity(EntityType<?> entityType, World world) {
         super(entityType, world);
         this.ignoreCameraFrustum = true;
+
+        if (world.isClient) {
+            initClient();
+        }
+    }
+
+    @Environment(EnvType.CLIENT)
+    private void initClient() {
+        fadeStartMs = 0;
     }
 
     @Override
