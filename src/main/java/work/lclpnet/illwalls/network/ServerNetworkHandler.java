@@ -1,6 +1,5 @@
 package work.lclpnet.illwalls.network;
 
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -65,7 +64,7 @@ public class ServerNetworkHandler {
         });
     }
 
-    private <T extends FabricPacket> void attackBlockAdventure(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+    private void attackBlockAdventure(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         final var packet = new AttackBlockAdventureC2SPacket(buf);
         final ServerWorld world = player.getServerWorld();
 
