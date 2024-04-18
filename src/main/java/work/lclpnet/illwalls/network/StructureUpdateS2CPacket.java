@@ -4,8 +4,10 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.struct.ExtendedBlockStateAdapter;
+import work.lclpnet.illwalls.struct.StructureContainer;
 import work.lclpnet.kibu.structure.BlockStructure;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -30,7 +32,8 @@ public class StructureUpdateS2CPacket implements PacketSerializer {
         final var adapter = ExtendedBlockStateAdapter.getInstance();
 
         try {
-            this.deltaStructure = IllusoryWallsMod.SCHEMATIC_FORMAT.reader().fromArray(bytes, adapter);
+            var in = new ByteArrayInputStream(bytes);
+            this.deltaStructure = IllusoryWallsMod.SCHEMATIC_FORMAT.reader().read(in, adapter, StructureContainer::createMutableStructure);
         } catch (IOException e) {
             throw new RuntimeException("Failed to deserialize structure", e);
         }

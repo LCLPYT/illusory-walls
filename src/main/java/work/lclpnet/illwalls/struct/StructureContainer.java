@@ -6,7 +6,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import work.lclpnet.illwalls.network.ServerNetworkHandler;
 import work.lclpnet.illwalls.network.StructureUpdateS2CPacket;
+import work.lclpnet.kibu.mc.KibuBlockPos;
 import work.lclpnet.kibu.structure.BlockStructure;
+import work.lclpnet.kibu.structure.SimpleBlockStructure;
 
 import static work.lclpnet.kibu.schematic.FabricStructureWrapper.createSimpleStructure;
 
@@ -102,5 +104,10 @@ public class StructureContainer {
         if (currentPos.getX() == centerX && currentPos.getY() == centerY && currentPos.getZ() == centerZ) return;
 
         entity.setPosition(centerX, centerY, centerZ);
+    }
+
+    @SuppressWarnings("unused")
+    public static SimpleBlockStructure createMutableStructure(int width, int height, int length, KibuBlockPos origin, int dataVersion) {
+        return new SimpleBlockStructure(dataVersion);
     }
 }

@@ -1,8 +1,8 @@
 package work.lclpnet.illwalls.struct;
 
-import work.lclpnet.kibu.mc.BlockState;
+import work.lclpnet.kibu.mc.KibuBlockState;
 
-public class EmptyBlockState implements BlockState {
+public class EmptyBlockState implements KibuBlockState {
 
     public static final String ID = "@EMPTY";
     public static final EmptyBlockState INSTANCE = new EmptyBlockState();

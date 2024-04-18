@@ -2,8 +2,8 @@ package work.lclpnet.illwalls.mixin;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.network.EntityTrackerEntry;
+import net.minecraft.server.network.PlayerAssociatedNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.EntityTrackingListener;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,7 +21,7 @@ public class ThreadedAnvilChunkStorageEntityTrackerMixin {
     @Shadow @Final
     Entity entity;
 
-    @Shadow @Final private Set<EntityTrackingListener> listeners;
+    @Shadow @Final private Set<PlayerAssociatedNetworkHandler> listeners;
 
     @Shadow @Final
     EntityTrackerEntry entry;

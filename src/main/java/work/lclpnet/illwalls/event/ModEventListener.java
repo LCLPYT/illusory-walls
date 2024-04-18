@@ -67,7 +67,6 @@ public class ModEventListener {
 
     private void registryEvents() {
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.OPERATOR).register(entries -> {
-            //noinspection UnstableApiUsage
             if (!entries.getContext().hasPermissions()) return;
 
             entries.add(STAFF_OF_ILLUSION_ITEM);
@@ -142,7 +141,7 @@ public class ModEventListener {
             }
         });
 
-        PlayerInventoryHooks.DROP_ITEM.register((player, slot) -> {
+        PlayerInventoryHooks.DROP_ITEM.register((player, slot, inInventory) -> {
             if (player.getWorld().isClient) return false;
 
             ItemStack stack = player.getInventory().getStack(slot);

@@ -1,6 +1,7 @@
 package work.lclpnet.illwalls.mixin;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -22,7 +23,7 @@ public class ServerPlayerEntityMixin implements PlayerInfoView {
             method = "<init>",
             at = @At("TAIL")
     )
-    public void illwalls$onInit(MinecraftServer server, ServerWorld world, GameProfile profile, CallbackInfo ci) {
+    public void illwalls$onInit(MinecraftServer server, ServerWorld world, GameProfile profile, SyncedClientOptions clientOptions, CallbackInfo ci) {
         playerInfo = PlayerInfo.create((ServerPlayerEntity) (Object) this);
     }
 

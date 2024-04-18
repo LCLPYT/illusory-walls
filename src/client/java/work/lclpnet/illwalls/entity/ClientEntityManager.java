@@ -34,7 +34,8 @@ public class ClientEntityManager {
         }
 
         int id = packet.getId();
-        world.addEntity(id, entity);
+        entity.setId(id);
+        world.addEntity(entity);
     }
 
     public void updateIllusoryWall(StructureUpdateS2CPacket packet, ClientWorld world) {

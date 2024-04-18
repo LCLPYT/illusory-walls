@@ -2,9 +2,11 @@ package work.lclpnet.illwalls.network;
 
 import net.minecraft.network.PacketByteBuf;
 import work.lclpnet.illwalls.struct.ExtendedBlockStateAdapter;
+import work.lclpnet.illwalls.struct.StructureContainer;
 import work.lclpnet.kibu.schematic.api.SchematicFormat;
 import work.lclpnet.kibu.structure.BlockStructure;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 public class PacketBufUtils {
@@ -28,7 +30,8 @@ public class PacketBufUtils {
         final var adapter = ExtendedBlockStateAdapter.getInstance();
 
         try {
-            return format.reader().fromArray(bytes, adapter);
+            var in = new ByteArrayInputStream(bytes);
+            return format.reader().read(in, adapter, StructureContainer::createMutableStructure);
         } catch (IOException e) {
             throw new RuntimeException("Failed to deserialize structure", e);
         }

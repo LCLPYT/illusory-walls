@@ -1,10 +1,10 @@
 import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
-	id 'fabric-loom' version '1.2.7'
+	id 'fabric-loom' version '1.6-SNAPSHOT'
 	id 'maven-publish'
-	id 'gradle-build-utils' version '1.5.3'
-    id 'com.modrinth.minotaur' version '2.4.3'
+	id 'gradle-build-utils' version '1.7.0'
+    id 'com.modrinth.minotaur' version '2.+'
 }
 
 Properties props = buildUtils.loadProperties('publish.properties')
@@ -56,20 +56,9 @@ dependencies {
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    "work.lclpnet.mods.kibu:kibu-hook-api:${project.kibu_hook_api_version}".with {
-        modImplementation it
-        include it
-    }
-
-    "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}".with {
-        modImplementation it
-        include it
-    }
-
-    "work.lclpnet.mods.kibu:kibu-schematic-fabric:${project.kibu_schematic_fabric_version}".with {
-        modImplementation it
-        include it
-    }
+    include(modImplementation("work.lclpnet.mods.kibu:kibu-hook-api:${project.kibu_hook_api_version}"))
+    include(modImplementation("work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"))
+    include(modImplementation("work.lclpnet.mods.kibu:kibu-schematic-fabric:${project.kibu_schematic_fabric_version}"))
 
     if (project.hasProperty('sodium_version')) {
         modImplementation "maven.modrinth:sodium:${project.sodium_version}"
@@ -85,15 +74,8 @@ dependencies {
     /* other Java dependencies */
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
-    "work.lclpnet.mods.kibu:kibu-schematic-api:${project.kibu_schematic_api_version}".with {
-        implementation it
-        include it
-    }
-
-    "work.lclpnet.mods.kibu:kibu-nbt-api:${project.kibu_nbt_api_version}".with {
-        implementation it
-        include it
-    }
+    include(implementation("work.lclpnet.mods.kibu:kibu-schematic-api:${project.kibu_schematic_api_version}"))
+    include(implementation("work.lclpnet.mods.kibu:kibu-nbt-api:${project.kibu_nbt_api_version}"))
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'

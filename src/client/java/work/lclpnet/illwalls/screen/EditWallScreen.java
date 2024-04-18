@@ -14,7 +14,6 @@ import work.lclpnet.illwalls.network.ApplyWallSettingsC2SPacket;
 import work.lclpnet.illwalls.network.ClientNetworkHandler;
 import work.lclpnet.illwalls.screen.lib.RowWidget;
 import work.lclpnet.illwalls.screen.lib.UiBuilder;
-import work.lclpnet.illwalls.screen.lib.WideCheckboxWidget;
 import work.lclpnet.illwalls.util.McTimeUnit;
 import work.lclpnet.illwalls.wall.IllusoryWallPlayerSettings;
 import work.lclpnet.illwalls.wall.IllusoryWallProperties;
@@ -29,7 +28,7 @@ public class EditWallScreen extends Screen {
     private final IllusoryWallPlayerSettings settings;
     @Nullable
     private final IllusoryWallEntity entity;
-    private WideCheckboxWidget respawnCheckbox = null;
+    private CheckboxWidget respawnCheckbox = null;
     private TextWidget cooldownHeader = null;
     private TextFieldWidget cooldownInput = null;
     private CyclingButtonWidget<McTimeUnit> unitButton = null;
@@ -46,16 +45,17 @@ public class EditWallScreen extends Screen {
     protected void init() {
         boolean shouldRespawn = settings.shouldRespawn();
 
-        respawnCheckbox = new WideCheckboxWidget(0, 0, 20, 20,
-                Text.translatable("illusory_wall.edit.respawn"), shouldRespawn);
-
-        respawnCheckbox.setOnClick(checkbox -> {
-            if (checkbox.isChecked()) {
-                addCooldownUi();
-            } else {
-                removeCooldownUi();
-            }
-        });
+        respawnCheckbox = CheckboxWidget.builder(Text.translatable("illusory_wall.edit.respawn"), textRenderer)
+                .pos(0, 0)
+                .checked(shouldRespawn)
+                .callback((checkbox, checked) -> {
+                    if (checked) {
+                        addCooldownUi();
+                    } else {
+                        removeCooldownUi();
+                    }
+                })
+                .build();
 
         addDrawableChild(respawnCheckbox);
 
@@ -169,10 +169,6 @@ public class EditWallScreen extends Screen {
 
     @Override
     public void tick() {
-        if (cooldownInput != null) {
-            cooldownInput.tick();
-        }
-
         if (entity != null && entity.isRemoved()) {
             this.close();
         }
@@ -180,7 +176,7 @@ public class EditWallScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context);
+        this.renderInGameBackground(context);
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, OFFSET_Y, 0xFFFFFF);
         super.render(context, mouseX, mouseY, delta);
     }

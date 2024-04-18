@@ -132,7 +132,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
         CompoundTag structureTag = FabricNbtConversion.convert(structureNbt, CompoundTag.class);
 
         var adapter = ExtendedBlockStateAdapter.getInstance();
-        BlockStructure structure = IllusoryWallsMod.SCHEMATIC_FORMAT.deserializer().deserialize(structureTag, adapter);
+        BlockStructure structure = IllusoryWallsMod.SCHEMATIC_FORMAT.deserializer().deserialize(structureTag, adapter, StructureContainer::createMutableStructure);
 
         this.structureContainer.setStructure(structure);
 

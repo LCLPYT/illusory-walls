@@ -2,8 +2,6 @@ package work.lclpnet.illwalls;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
-import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.registry.Registries;
@@ -36,19 +34,19 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
     public static final EntityType<IllusoryWallEntity> ILLUSORY_WALL_ENTITY = Registry.register(
             Registries.ENTITY_TYPE,
             identifier("illusory_wall"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MISC, IllusoryWallEntity::new)
-                    .dimensions(EntityDimensions.changing(0f, 0f))
-                    .trackRangeChunks(10)
-                    .trackedUpdateRate(1)
+            EntityType.Builder.create(IllusoryWallEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0f, 0f)
+                    .maxTrackingRange(10)
+                    .trackingTickInterval(1)
                     .build()
     );
     public static final EntityType<StructureEntity> STRUCTURE_ENTITY = Registry.register(
             Registries.ENTITY_TYPE,
             identifier("structure"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MISC, StructureEntity::new)
-                    .dimensions(EntityDimensions.changing(0f, 0f))
-                    .trackRangeChunks(10)
-                    .trackedUpdateRate(1)
+            EntityType.Builder.create(StructureEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0f, 0f)
+                    .maxTrackingRange(10)
+                    .trackingTickInterval(1)
                     .build()
     );
 

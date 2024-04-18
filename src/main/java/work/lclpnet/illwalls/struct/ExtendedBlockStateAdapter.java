@@ -2,7 +2,7 @@ package work.lclpnet.illwalls.struct;
 
 import net.minecraft.block.Blocks;
 import org.jetbrains.annotations.Nullable;
-import work.lclpnet.kibu.mc.BlockState;
+import work.lclpnet.kibu.mc.KibuBlockState;
 import work.lclpnet.kibu.schematic.FabricBlockStateAdapter;
 
 /**
@@ -15,7 +15,7 @@ public class ExtendedBlockStateAdapter extends FabricBlockStateAdapter {
 
     @Nullable
     @Override
-    public BlockState getBlockState(String string) {
+    public KibuBlockState getBlockState(String string) {
         // handle special block states
         if (EmptyBlockState.ID.equals(string)) {
             return EmptyBlockState.INSTANCE;
@@ -26,7 +26,7 @@ public class ExtendedBlockStateAdapter extends FabricBlockStateAdapter {
 
     @Nullable
     @Override
-    public net.minecraft.block.BlockState revert(BlockState state) {
+    public net.minecraft.block.BlockState revert(KibuBlockState state) {
         // handle special block states
         if (EmptyBlockState.INSTANCE == state) {
             return Blocks.AIR.getDefaultState();
