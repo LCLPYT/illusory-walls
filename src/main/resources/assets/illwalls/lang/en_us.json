@@ -2,5 +2,14 @@
   "item.illwalls.staff_of_illusion": "Staff of Illusion",
   "entity.illwalls.structure": "Structure",
   "entity.illwalls.illusory_wall": "Illusory Wall",
-  "subtitle.entity.illusory_wall.fade": "Illusory Wall fades"
+  "subtitle.entity.illusory_wall.fade": "Illusory Wall fades",
+  "illusory_wall.edit": "Edit Illusory Wall",
+  "illusory_wall.edit_defaults": "Edit Illusory Wall defaults",
+  "illusory_wall.edit.respawn": "Respawn",
+  "illusory_wall.edit.respawn_duration": "Cooldown",
+  "illusory_wall.edit.cooldown": "Cooldown",
+  "illusory_wall.edit.unit": "Unit",
+  "illusory_wall.unit.ticks": "Tick(s)",
+  "illusory_wall.unit.seconds": "Second(s)",
+  "illusory_wall.unit.minutes": "Minute(s)"
 }

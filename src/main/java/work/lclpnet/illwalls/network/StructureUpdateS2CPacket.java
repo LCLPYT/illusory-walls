@@ -9,19 +9,19 @@ import work.lclpnet.kibu.structure.BlockStructure;
 import java.io.IOException;
 import java.util.Objects;
 
-public class StructureUpdatePacket implements PacketSerializer {
+public class StructureUpdateS2CPacket implements PacketSerializer {
 
     public static final Identifier ID = IllusoryWallsMod.identifier("structure_update");
 
     private final int entityId;
     private final BlockStructure deltaStructure;
 
-    public StructureUpdatePacket(int entityId, BlockStructure deltaStructure) {
+    public StructureUpdateS2CPacket(int entityId, BlockStructure deltaStructure) {
         this.entityId = entityId;
         this.deltaStructure = Objects.requireNonNull(deltaStructure);
     }
 
-    public StructureUpdatePacket(PacketByteBuf buf) {
+    public StructureUpdateS2CPacket(PacketByteBuf buf) {
         this.entityId = buf.readVarInt();
 
         final int length = buf.readVarInt();

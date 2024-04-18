@@ -22,7 +22,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 import net.minecraft.world.World;
 import work.lclpnet.illwalls.IllusoryWallsMod;
-import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
+import work.lclpnet.illwalls.network.EntityExtraSpawnS2CPacket;
 import work.lclpnet.illwalls.network.PacketBufUtils;
 import work.lclpnet.illwalls.struct.ExtendedBlockStateAdapter;
 import work.lclpnet.illwalls.struct.ExtendedStructureWrapper;
@@ -160,7 +160,7 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
 
     @Override
     public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        var packet = new EntityExtraSpawnPacket(this);
+        var packet = new EntityExtraSpawnS2CPacket(this);
         return packet.toVanillaS2CPacket();
     }
 

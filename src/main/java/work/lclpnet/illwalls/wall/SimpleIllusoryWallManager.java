@@ -2,6 +2,7 @@ package work.lclpnet.illwalls.wall;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -9,6 +10,7 @@ import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.struct.ExtendedStructureWrapper;
 import work.lclpnet.illwalls.struct.StructureBatchUpdate;
+import work.lclpnet.illwalls.util.PlayerInfo;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -35,7 +37,7 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
     }
 
     @Override
-    public boolean makeBlockIllusory(ServerWorld world, BlockPos pos) {
+    public boolean makeBlockIllusory(ServerWorld world, BlockPos pos, @Nullable ServerPlayerEntity player) {
         if (wallLookup.getWallAt(world, pos).isPresent()) return false;  // there is already a wall
 
         // check neighbours for any existing illusory walls
@@ -51,10 +53,14 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
 
         if (nearbyWalls.isEmpty()) {
             // there is no illusory wall nearby, create one
-            IllusoryWallsMod.ILLUSORY_WALL_ENTITY.spawn(world, null, created -> {
+            IllusoryWallEntity wall = IllusoryWallsMod.ILLUSORY_WALL_ENTITY.spawn(world, null, created -> {
                 ExtendedStructureWrapper structure = created.getStructureContainer().getWrapper();
                 structure.setBlockState(pos, world.getBlockState(pos));
             }, pos, SpawnReason.SPAWN_EGG, false, false);
+
+            if (player != null && wall != null) {
+                PlayerInfo.get(player).getWallSettings().applyTo(wall);
+            }
         } else {
             var iterator = nearbyWalls.iterator();
 

@@ -2,8 +2,8 @@ package work.lclpnet.illwalls.entity;
 
 import net.minecraft.client.world.ClientWorld;
 import org.slf4j.Logger;
-import work.lclpnet.illwalls.network.EntityExtraSpawnPacket;
-import work.lclpnet.illwalls.network.StructureUpdatePacket;
+import work.lclpnet.illwalls.network.EntityExtraSpawnS2CPacket;
+import work.lclpnet.illwalls.network.StructureUpdateS2CPacket;
 import work.lclpnet.illwalls.struct.StructureContainer;
 import work.lclpnet.illwalls.struct.StructureHolder;
 
@@ -15,7 +15,7 @@ public class ClientEntityManager {
         this.logger = logger;
     }
 
-    public void spawnEntity(EntityExtraSpawnPacket extraPacket, ClientWorld world) {
+    public void spawnEntity(EntityExtraSpawnS2CPacket extraPacket, ClientWorld world) {
         final var packet = extraPacket.getPacket();
 
         var entityType = packet.getEntityType();
@@ -37,7 +37,7 @@ public class ClientEntityManager {
         world.addEntity(id, entity);
     }
 
-    public void updateIllusoryWall(StructureUpdatePacket packet, ClientWorld world) {
+    public void updateIllusoryWall(StructureUpdateS2CPacket packet, ClientWorld world) {
         final int entityId = packet.getEntityId();
         final var entity = world.getEntityById(entityId);
 

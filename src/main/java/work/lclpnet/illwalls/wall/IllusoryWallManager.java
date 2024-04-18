@@ -1,5 +1,6 @@
 package work.lclpnet.illwalls.wall;
 
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
@@ -13,7 +14,11 @@ public interface IllusoryWallManager {
 
     boolean fadeWallAtIfPresent(ServerWorld world, BlockPos pos, @Nullable BlockPos from);
 
-    boolean makeBlockIllusory(ServerWorld world, BlockPos pos);
+    boolean makeBlockIllusory(ServerWorld world, BlockPos pos, @Nullable ServerPlayerEntity player);
 
     boolean removeIllusoryBlock(ServerWorld world, BlockPos pos);
+
+    default boolean makeBlockIllusory(ServerWorld world, BlockPos pos) {
+        return makeBlockIllusory(world, pos, null);
+    }
 }

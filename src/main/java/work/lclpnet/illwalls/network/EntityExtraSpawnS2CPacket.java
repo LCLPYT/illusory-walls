@@ -10,23 +10,23 @@ import work.lclpnet.illwalls.entity.ExtraSpawnData;
 
 import java.util.Objects;
 
-public class EntityExtraSpawnPacket implements PacketSerializer {
+public class EntityExtraSpawnS2CPacket implements PacketSerializer {
 
     public static final Identifier ID = IllusoryWallsMod.identifier("spawn");
 
     private final EntitySpawnS2CPacket packet;
     private final PacketByteBuf data;
 
-    public EntityExtraSpawnPacket(EntitySpawnS2CPacket packet, PacketByteBuf data) {
+    public EntityExtraSpawnS2CPacket(EntitySpawnS2CPacket packet, PacketByteBuf data) {
         this.packet = Objects.requireNonNull(packet);
         this.data = Objects.requireNonNull(data);
     }
 
-    public EntityExtraSpawnPacket(Entity entity) {
+    public EntityExtraSpawnS2CPacket(Entity entity) {
         this(new EntitySpawnS2CPacket(entity), createDataBuffer(entity));
     }
 
-    public EntityExtraSpawnPacket(PacketByteBuf buf) {
+    public EntityExtraSpawnS2CPacket(PacketByteBuf buf) {
         // read packet bytes
         int size = buf.readVarInt();
         var raw = buf.readBytes(size);

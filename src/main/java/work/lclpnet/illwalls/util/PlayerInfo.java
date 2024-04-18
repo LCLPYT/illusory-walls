@@ -9,11 +9,13 @@ import work.lclpnet.illwalls.IllusoryWallsApi;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.entity.EntityTrackingUpdatable;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
+import work.lclpnet.illwalls.wall.IllusoryWallPlayerSettings;
 
 public class PlayerInfo {
 
     private final ServerPlayerEntity player;
     private boolean seeIllusoryWalls = false;
+    private volatile IllusoryWallPlayerSettings wallSettings = null;
 
     private PlayerInfo(ServerPlayerEntity player) {
         this.player = player;
@@ -57,6 +59,18 @@ public class PlayerInfo {
         stack = this.player.getStackInHand(Hand.OFF_HAND);
 
         return stack.isOf(IllusoryWallsMod.STAFF_OF_ILLUSION_ITEM);
+    }
+
+    public IllusoryWallPlayerSettings getWallSettings() {
+        if (wallSettings != null) return wallSettings;
+
+        synchronized (this) {
+            if (wallSettings != null) return wallSettings;
+
+            wallSettings = new IllusoryWallPlayerSettings();
+        }
+
+        return wallSettings;
     }
 
     public static PlayerInfo create(ServerPlayerEntity player) {

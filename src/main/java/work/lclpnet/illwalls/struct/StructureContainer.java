@@ -5,7 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import work.lclpnet.illwalls.network.ServerNetworkHandler;
-import work.lclpnet.illwalls.network.StructureUpdatePacket;
+import work.lclpnet.illwalls.network.StructureUpdateS2CPacket;
 import work.lclpnet.kibu.structure.BlockStructure;
 
 import static work.lclpnet.kibu.schematic.FabricStructureWrapper.createSimpleStructure;
@@ -63,7 +63,7 @@ public class StructureContainer {
             if (!this.existsInWorld()) return;  // too early
 
             // if we are in the server world, send an update packet
-            var updatePacket = new StructureUpdatePacket(entity.getId(), delta);
+            var updatePacket = new StructureUpdateS2CPacket(entity.getId(), delta);
             ServerNetworkHandler.send(updatePacket, PlayerLookup.tracking(entity));
             return;
         }

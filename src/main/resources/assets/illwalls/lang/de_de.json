@@ -2,5 +2,14 @@
   "item.illwalls.staff_of_illusion": "Stab der Illusionen",
   "entity.illwalls.structure": "Struktur",
   "entity.illwalls.illusory_wall": "Illusions-Wand",
-  "subtitle.entity.illusory_wall.fade": "Illusions-Wand schwindet"
+  "subtitle.entity.illusory_wall.fade": "Illusions-Wand schwindet",
+  "illusory_wall.edit": "Illusions-Wand bearbeiten",
+  "illusory_wall.edit_defaults": "Illusions-Wand Standards bearbeiten",
+  "illusory_wall.edit.respawn": "Wiederherstellung",
+  "illusory_wall.edit.respawn_duration": "Abklingzeit",
+  "illusory_wall.edit.cooldown": "Abklingzeit",
+  "illusory_wall.edit.unit": "Einheit",
+  "illusory_wall.unit.ticks": "Tick(s)",
+  "illusory_wall.unit.seconds": "Sekunde(n)",
+  "illusory_wall.unit.minutes": "Minute(n)"
 }

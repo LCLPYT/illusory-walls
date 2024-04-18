@@ -7,8 +7,9 @@ public class IllusoryWallProperties {
     public static final String
             RESPAWN_DURATION_NBT_KEY = "respawn_duration",
             RESPAWN_TIMER_NBT_KEY = "respawn_timer";
+    public static final int NO_RESPAWN = -1;
 
-    private int respawnDuration = -1;
+    private int respawnDuration = NO_RESPAWN;
     private int respawnTimer = -1;
 
     /**
