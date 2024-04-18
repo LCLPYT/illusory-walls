@@ -11,3 +11,13 @@ Right click to make any block illusory.
 Left click a block to remove it from an illusory wall.
 
 ![Editor mode for illusory walls](https://i.imgur.com/MPr4FWI.gif)
+
+You can configure walls to respawn after a certain amount of in-game time.
+Using the Staff of Illusion, `Shift + Right Click` on an illusory wall to edit its properties.
+In the configuration screen, tick the "Respawn" checkbox to enable respawning for that wall.
+You can also configure an individual cooldown that should pass before the wall respawns.
+If you want to choose another time unit, just click on the unit button.
+
+![Editing the properties of an Illusory Wall](https://i.imgur.com/g4lqqe4.jpeg)
+
+If you `Shift + Right Click` into the air or on a non-illusory block, you can also edit your default settings for new illusory walls you create.
