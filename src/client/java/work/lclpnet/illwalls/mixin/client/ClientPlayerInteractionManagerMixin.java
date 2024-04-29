@@ -1,5 +1,6 @@
 package work.lclpnet.illwalls.mixin.client;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
@@ -13,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.illwalls.network.AttackBlockAdventureC2SPacket;
-import work.lclpnet.illwalls.network.ClientNetworkHandler;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public class ClientPlayerInteractionManagerMixin {
@@ -31,6 +31,6 @@ public class ClientPlayerInteractionManagerMixin {
 
         if (player == null || player.isSpectator() || !player.isBlockBreakingRestricted(this.client.world, pos, this.gameMode)) return;
 
-        ClientNetworkHandler.send(new AttackBlockAdventureC2SPacket(pos, direction));
+        ClientPlayNetworking.send(new AttackBlockAdventureC2SPacket(pos, direction));
     }
 }

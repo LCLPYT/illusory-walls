@@ -1,18 +1,16 @@
 package work.lclpnet.illwalls.network;
 
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.network.listener.ClientCommonPacketListener;
+import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.util.PlayerInfo;
 import work.lclpnet.illwalls.wall.IllusoryWallManager;
@@ -32,18 +30,28 @@ public class ServerNetworkHandler {
     }
 
     public void init() {
+        var playS2C = PayloadTypeRegistry.playS2C();
+        playS2C.register(EntityExtraSpawnS2CPacket.ID, EntityExtraSpawnS2CPacket.CODEC);
+        playS2C.register(StructureUpdateS2CPacket.ID, StructureUpdateS2CPacket.CODEC);
+        playS2C.register(EditWallScreenS2CPacket.ID, EditWallScreenS2CPacket.CODEC);
+
+        var playC2S = PayloadTypeRegistry.playC2S();
+        playC2S.register(ApplyWallSettingsC2SPacket.ID, ApplyWallSettingsC2SPacket.CODEC);
+        playC2S.register(AttackBlockAdventureC2SPacket.ID, AttackBlockAdventureC2SPacket.CODEC);
+
         registerGlobalReceiver(ApplyWallSettingsC2SPacket.ID, this::applyWallSettings);
         registerGlobalReceiver(AttackBlockAdventureC2SPacket.ID, this::attackBlockAdventure);
     }
 
-    private void applyWallSettings(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+    private void applyWallSettings(ApplyWallSettingsC2SPacket payload, ServerPlayNetworking.Context context) {
+        ServerPlayerEntity player = context.player();
+
         if (!player.isCreativeLevelTwoOp()) return;
 
-        final var packet = new ApplyWallSettingsC2SPacket(buf);
         final ServerWorld world = player.getServerWorld();
 
-        server.execute(() -> {
-            int entityId = packet.getEntityId();
+        world.getServer().execute(() -> {
+            int entityId = payload.entityId();
             IllusoryWallEntity wallEntity = null;
 
             if (entityId != -1) {
@@ -54,7 +62,7 @@ public class ServerNetworkHandler {
                 }
             }
 
-            final IllusoryWallPlayerSettings settings = packet.getSettings();
+            final IllusoryWallPlayerSettings settings = payload.settings();
 
             if (wallEntity != null) {
                 settings.applyTo(wallEntity);
@@ -64,19 +72,19 @@ public class ServerNetworkHandler {
         });
     }
 
-    private void attackBlockAdventure(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        final var packet = new AttackBlockAdventureC2SPacket(buf);
+    private void attackBlockAdventure(AttackBlockAdventureC2SPacket payload, ServerPlayNetworking.Context context) {
+        ServerPlayerEntity player = context.player();
         final ServerWorld world = player.getServerWorld();
 
-        server.submit(() -> {
-            BlockPos pos = packet.getPos();
+        world.getServer().execute(() -> {
+            BlockPos pos = payload.pos();
 
             if (player.isSpectator()) {
                 // spectators should not be able to trigger illusory walls
                 return;
             }
 
-            if (player.getEyePos().squaredDistanceTo(Vec3d.ofCenter(pos)) > ServerPlayNetworkHandler.MAX_BREAK_SQUARED_DISTANCE) {
+            if (!player.canInteractWithBlockAt(pos, 1.0)) {
                 // too far
                 return;
             }
@@ -93,17 +101,19 @@ public class ServerNetworkHandler {
                 return;
             }
 
-            Direction direction = packet.getDirection();
+            Direction direction = payload.direction();
             BlockPos from = pos.offset(direction);
 
             wallManager.fadeWallAtIfPresent(world, pos, from);
         });
     }
 
-    public static void send(PacketSerializer packet, Collection<ServerPlayerEntity> players) {
-        final var buf = PacketByteBufs.create();
-        packet.writeTo(buf);
+    public static void send(CustomPayload packet, Collection<ServerPlayerEntity> players) {
+        players.forEach(player -> ServerPlayNetworking.send(player, packet));
+    }
 
-        players.forEach(player -> ServerPlayNetworking.send(player, packet.getIdentifier(), buf));
+    @SuppressWarnings("unchecked")
+    public static <T extends ClientCommonPacketListener> Packet<T> createS2CPacket(CustomPayload packet) {
+        return (Packet<T>) ServerPlayNetworking.createS2CPacket(packet);
     }
 }

@@ -1,12 +1,8 @@
 package work.lclpnet.illwalls.network;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.PacketByteBuf;
 import work.lclpnet.illwalls.entity.ClientEntityManager;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.screen.EditWallScreen;
@@ -27,27 +23,25 @@ public class ClientNetworkHandler {
         registerGlobalReceiver(EditWallScreenS2CPacket.ID, this::editWallScreen);
     }
 
-    private void spawn(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        final var packet = new EntityExtraSpawnS2CPacket(buf);
-        final var world = handler.getWorld();
+    private void spawn(EntityExtraSpawnS2CPacket payload, ClientPlayNetworking.Context context) {
+        final var world = context.player().clientWorld;
 
         // execute in main thread
-        client.execute(() -> entityManager.spawnEntity(packet, world));
+        context.client().execute(() -> entityManager.spawnEntity(payload, world));
     }
 
-    private void illusoryWallUpdate(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        final var packet = new StructureUpdateS2CPacket(buf);
-        final var world = handler.getWorld();
+    private void illusoryWallUpdate(StructureUpdateS2CPacket payload, ClientPlayNetworking.Context context) {
+        final var world = context.player().clientWorld;
 
-        client.execute(() -> entityManager.updateIllusoryWall(packet, world));
+        context.client().execute(() -> entityManager.updateIllusoryWall(payload, world));
     }
 
-    private void editWallScreen(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        final var packet = new EditWallScreenS2CPacket(buf);
-        final var world = handler.getWorld();
+    private void editWallScreen(EditWallScreenS2CPacket payload, ClientPlayNetworking.Context context) {
+        final var world = context.player().clientWorld;
+        MinecraftClient client = context.client();
 
         client.execute(() -> {
-            int entityId = packet.getEntityId();
+            int entityId = payload.entityId();
             IllusoryWallEntity wallEntity = null;
 
             if (entityId != -1) {
@@ -58,16 +52,8 @@ public class ClientNetworkHandler {
                 }
             }
 
-            EditWallScreen screen = new EditWallScreen(packet.getSettings(), wallEntity);
+            EditWallScreen screen = new EditWallScreen(payload.settings(), wallEntity);
             client.setScreen(screen);
         });
-    }
-
-    public static void send(PacketSerializer packet) {
-        final var buf = PacketByteBufs.create();
-
-        packet.writeTo(buf);
-
-        ClientPlayNetworking.send(packet.getIdentifier(), buf);
     }
 }

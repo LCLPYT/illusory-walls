@@ -9,8 +9,8 @@ plugins {
 
 Properties props = buildUtils.loadProperties('publish.properties')
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
 
 archivesBaseName = project.archives_base_name
 version = buildUtils.gitVersion()
@@ -100,7 +100,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release.convention(17)
+	it.options.release.convention(21)
 }
 
 java {

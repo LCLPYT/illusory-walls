@@ -53,7 +53,7 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
 
         if (nearbyWalls.isEmpty()) {
             // there is no illusory wall nearby, create one
-            IllusoryWallEntity wall = IllusoryWallsMod.ILLUSORY_WALL_ENTITY.spawn(world, null, created -> {
+            IllusoryWallEntity wall = IllusoryWallsMod.ILLUSORY_WALL_ENTITY.spawn(world, created -> {
                 ExtendedStructureWrapper structure = created.getStructureContainer().getWrapper();
                 structure.setBlockState(pos, world.getBlockState(pos));
             }, pos, SpawnReason.SPAWN_EGG, false, false);

@@ -17,7 +17,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.network.EntityExtraSpawnS2CPacket;
-import work.lclpnet.illwalls.network.PacketBufUtils;
+import work.lclpnet.illwalls.network.IllusoryWallsPacketCodecs;
+import work.lclpnet.illwalls.network.ServerNetworkHandler;
 import work.lclpnet.illwalls.struct.ExtendedBlockStateAdapter;
 import work.lclpnet.illwalls.struct.StructureContainer;
 import work.lclpnet.illwalls.struct.StructureHolder;
@@ -65,10 +66,10 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
     }
 
     @Override
-    protected void initDataTracker() {
-        this.dataTracker.startTracking(FADING, false);
-        this.dataTracker.startTracking(VIEW_RANGE, 1f);
-        this.dataTracker.startTracking(FADING_FROM, Optional.empty());
+    protected void initDataTracker(DataTracker.Builder builder) {
+        builder.add(FADING, false)
+                .add(VIEW_RANGE, 1f)
+                .add(FADING_FROM, Optional.empty());
     }
 
     public boolean isFading() {
@@ -171,12 +172,12 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
     @Override
     public Packet<ClientPlayPacketListener> createSpawnPacket() {
         var packet = new EntityExtraSpawnS2CPacket(this);
-        return packet.toVanillaS2CPacket();
+        return ServerNetworkHandler.createS2CPacket(packet);
     }
 
     @Override
     public void writeExtraSpawnData(PacketByteBuf buf) {
-        PacketBufUtils.writeBlockStructure(buf, structureContainer.getWrapper().getStructure(), IllusoryWallsMod.SCHEMATIC_FORMAT);
+        IllusoryWallsPacketCodecs.STRUCTURE_PACKET_CODEC.encode(buf, structureContainer.getWrapper().getStructure());
         buf.writeBoolean(isFading());
         buf.writeBlockPos(getFadingFrom());
         buf.writeVarInt(getFadeMode());
@@ -184,7 +185,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
 
     @Override
     public void readExtraSpawnData(PacketByteBuf buf) {
-        BlockStructure structure = PacketBufUtils.readBlockStructure(buf, IllusoryWallsMod.SCHEMATIC_FORMAT);
+        BlockStructure structure = IllusoryWallsPacketCodecs.STRUCTURE_PACKET_CODEC.decode(buf);
 
         this.structureContainer.setStructure(structure);
         setFading(buf.readBoolean());

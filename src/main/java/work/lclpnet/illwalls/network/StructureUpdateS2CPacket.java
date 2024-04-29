@@ -1,69 +1,29 @@
 package work.lclpnet.illwalls.network;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.packet.CustomPayload;
 import work.lclpnet.illwalls.IllusoryWallsMod;
-import work.lclpnet.illwalls.struct.ExtendedBlockStateAdapter;
-import work.lclpnet.illwalls.struct.StructureContainer;
 import work.lclpnet.kibu.structure.BlockStructure;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.Objects;
 
-public class StructureUpdateS2CPacket implements PacketSerializer {
+public record StructureUpdateS2CPacket(int entityId, BlockStructure deltaStructure) implements CustomPayload {
 
-    public static final Identifier ID = IllusoryWallsMod.identifier("structure_update");
-
-    private final int entityId;
-    private final BlockStructure deltaStructure;
+    public static final Id<StructureUpdateS2CPacket> ID = new Id<>(IllusoryWallsMod.identifier("structure_update"));
+    public static final PacketCodec<ByteBuf, StructureUpdateS2CPacket> CODEC = PacketCodec.tuple(
+            PacketCodecs.VAR_INT, StructureUpdateS2CPacket::entityId,
+            IllusoryWallsPacketCodecs.STRUCTURE_PACKET_CODEC, StructureUpdateS2CPacket::deltaStructure,
+            StructureUpdateS2CPacket::new);
 
     public StructureUpdateS2CPacket(int entityId, BlockStructure deltaStructure) {
         this.entityId = entityId;
         this.deltaStructure = Objects.requireNonNull(deltaStructure);
     }
 
-    public StructureUpdateS2CPacket(PacketByteBuf buf) {
-        this.entityId = buf.readVarInt();
-
-        final int length = buf.readVarInt();
-        final byte[] bytes = buf.readByteArray(length);
-
-        final var adapter = ExtendedBlockStateAdapter.getInstance();
-
-        try {
-            var in = new ByteArrayInputStream(bytes);
-            this.deltaStructure = IllusoryWallsMod.SCHEMATIC_FORMAT.reader().read(in, adapter, StructureContainer::createMutableStructure);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to deserialize structure", e);
-        }
-    }
-
     @Override
-    public void writeTo(PacketByteBuf buf) {
-        buf.writeVarInt(entityId);
-
-        final byte[] bytes;
-        try {
-            bytes = IllusoryWallsMod.SCHEMATIC_FORMAT.writer().toArray(deltaStructure);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to serialize structure", e);
-        }
-
-        buf.writeVarInt(bytes.length);
-        buf.writeByteArray(bytes);
-    }
-
-    @Override
-    public Identifier getIdentifier() {
+    public Id<? extends CustomPayload> getId() {
         return ID;
-    }
-
-    public int getEntityId() {
-        return entityId;
-    }
-
-    public BlockStructure getDeltaStructure() {
-        return deltaStructure;
     }
 }

@@ -1,5 +1,6 @@
 package work.lclpnet.illwalls.screen;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -11,7 +12,6 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.network.ApplyWallSettingsC2SPacket;
-import work.lclpnet.illwalls.network.ClientNetworkHandler;
 import work.lclpnet.illwalls.screen.lib.RowWidget;
 import work.lclpnet.illwalls.screen.lib.UiBuilder;
 import work.lclpnet.illwalls.util.McTimeUnit;
@@ -198,7 +198,7 @@ public class EditWallScreen extends Screen {
         settings.setRespawnDuration(respawnDuration.getAsInt());
 
         var packet = new ApplyWallSettingsC2SPacket(settings, entity);
-        ClientNetworkHandler.send(packet);
+        ClientPlayNetworking.send(packet);
     }
 
     private OptionalInt getRespawnDurationTicks(CheckboxWidget respawnCheckbox) {

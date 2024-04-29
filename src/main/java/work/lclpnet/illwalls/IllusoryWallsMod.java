@@ -1,9 +1,9 @@
 package work.lclpnet.illwalls;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
+import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvent;
@@ -35,7 +35,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
             Registries.ENTITY_TYPE,
             identifier("illusory_wall"),
             EntityType.Builder.create(IllusoryWallEntity::new, SpawnGroup.MISC)
-                    .setDimensions(0f, 0f)
+                    .dimensions(0f, 0f)
                     .maxTrackingRange(10)
                     .trackingTickInterval(1)
                     .build()
@@ -44,7 +44,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
             Registries.ENTITY_TYPE,
             identifier("structure"),
             EntityType.Builder.create(StructureEntity::new, SpawnGroup.MISC)
-                    .setDimensions(0f, 0f)
+                    .dimensions(0f, 0f)
                     .maxTrackingRange(10)
                     .trackingTickInterval(1)
                     .build()
@@ -54,7 +54,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
     public static final StaffOfIllusionItem STAFF_OF_ILLUSION_ITEM = Registry.register(
             Registries.ITEM,
             identifier("staff_of_illusion"),
-            new StaffOfIllusionItem(new FabricItemSettings().maxCount(1).rarity(Rarity.EPIC))
+            new StaffOfIllusionItem(new Item.Settings().maxCount(1).rarity(Rarity.EPIC))
     );
 
     // sounds

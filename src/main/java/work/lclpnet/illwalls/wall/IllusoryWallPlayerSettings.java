@@ -1,6 +1,7 @@
 package work.lclpnet.illwalls.wall;
 
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 
 /**
@@ -8,6 +9,7 @@ import work.lclpnet.illwalls.entity.IllusoryWallEntity;
  */
 public class IllusoryWallPlayerSettings {
 
+    public static final PacketCodec<PacketByteBuf, IllusoryWallPlayerSettings> PACKET_CODEC = PacketCodec.of(IllusoryWallPlayerSettings::writeTo, IllusoryWallPlayerSettings::new);
     private int respawnDuration = IllusoryWallProperties.NO_RESPAWN;
 
     public IllusoryWallPlayerSettings() {}

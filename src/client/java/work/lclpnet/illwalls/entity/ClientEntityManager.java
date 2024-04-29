@@ -16,7 +16,7 @@ public class ClientEntityManager {
     }
 
     public void spawnEntity(EntityExtraSpawnS2CPacket extraPacket, ClientWorld world) {
-        final var packet = extraPacket.getPacket();
+        final var packet = extraPacket.packet();
 
         var entityType = packet.getEntityType();
         var entity = entityType.create(world);
@@ -29,7 +29,7 @@ public class ClientEntityManager {
         entity.onSpawnPacket(packet);
 
         if (entity instanceof ExtraSpawnData extraSpawnData) {
-            var data = extraPacket.getData();
+            var data = extraPacket.data();
             extraSpawnData.readExtraSpawnData(data);
         }
 
@@ -39,7 +39,7 @@ public class ClientEntityManager {
     }
 
     public void updateIllusoryWall(StructureUpdateS2CPacket packet, ClientWorld world) {
-        final int entityId = packet.getEntityId();
+        final int entityId = packet.entityId();
         final var entity = world.getEntityById(entityId);
 
         if (!(entity instanceof StructureHolder holder)) {
@@ -48,6 +48,6 @@ public class ClientEntityManager {
         }
 
         StructureContainer structureContainer = holder.getStructureContainer();
-        structureContainer.updateStructure(packet.getDeltaStructure());
+        structureContainer.updateStructure(packet.deltaStructure());
     }
 }

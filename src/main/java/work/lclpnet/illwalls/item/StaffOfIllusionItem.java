@@ -1,9 +1,11 @@
 package work.lclpnet.illwalls.item;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -17,7 +19,6 @@ import net.minecraft.world.World;
 import work.lclpnet.illwalls.IllusoryWallsApi;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.network.EditWallScreenS2CPacket;
-import work.lclpnet.illwalls.network.PacketSerializer;
 import work.lclpnet.illwalls.wall.IllusoryWallLookup;
 import work.lclpnet.illwalls.wall.IllusoryWallManager;
 
@@ -68,7 +69,7 @@ public class StaffOfIllusionItem extends Item {
     }
 
     private static void openEditScreen(ServerPlayerEntity player, @Nullable IllusoryWallEntity wall) {
-        PacketSerializer packet;
+        CustomPayload packet;
 
         if (wall == null) {
             packet = new EditWallScreenS2CPacket(player);
@@ -76,7 +77,7 @@ public class StaffOfIllusionItem extends Item {
             packet = new EditWallScreenS2CPacket(wall);
         }
 
-        player.networkHandler.sendPacket(packet.toVanillaS2CPacket());
+        ServerPlayNetworking.send(player, packet);
     }
 
     @Nullable

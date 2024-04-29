@@ -6,6 +6,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -23,7 +24,8 @@ import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 import net.minecraft.world.World;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.network.EntityExtraSpawnS2CPacket;
-import work.lclpnet.illwalls.network.PacketBufUtils;
+import work.lclpnet.illwalls.network.IllusoryWallsPacketCodecs;
+import work.lclpnet.illwalls.network.ServerNetworkHandler;
 import work.lclpnet.illwalls.struct.ExtendedBlockStateAdapter;
 import work.lclpnet.illwalls.struct.ExtendedStructureWrapper;
 import work.lclpnet.illwalls.struct.StructureContainer;
@@ -88,7 +90,7 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     }
 
     @Override
-    protected void initDataTracker() {}
+    protected void initDataTracker(DataTracker.Builder builder) {}
 
     public boolean isFading() {
         return fading;
@@ -161,17 +163,17 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     @Override
     public Packet<ClientPlayPacketListener> createSpawnPacket() {
         var packet = new EntityExtraSpawnS2CPacket(this);
-        return packet.toVanillaS2CPacket();
+        return ServerNetworkHandler.createS2CPacket(packet);
     }
 
     @Override
     public void writeExtraSpawnData(PacketByteBuf buf) {
-        PacketBufUtils.writeBlockStructure(buf, structureContainer.getWrapper().getStructure(), IllusoryWallsMod.SCHEMATIC_FORMAT);
+        IllusoryWallsPacketCodecs.STRUCTURE_PACKET_CODEC.encode(buf, structureContainer.getWrapper().getStructure());
     }
 
     @Override
     public void readExtraSpawnData(PacketByteBuf buf) {
-        BlockStructure structure = PacketBufUtils.readBlockStructure(buf, IllusoryWallsMod.SCHEMATIC_FORMAT);
+        BlockStructure structure = IllusoryWallsPacketCodecs.STRUCTURE_PACKET_CODEC.decode(buf);
 
         this.structureContainer.setStructure(structure);
     }
@@ -238,7 +240,7 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     }
 
     private void spawnStructureEntity(BlockPos pos, ServerWorld serverWorld, int fadeIn) {
-        IllusoryWallsMod.STRUCTURE_ENTITY.spawn(serverWorld, null, entity -> {
+        IllusoryWallsMod.STRUCTURE_ENTITY.spawn(serverWorld, entity -> {
             structureContainer.getWrapper().copyTo(entity.getStructureContainer().getWrapper());
             entity.setFading(true);
             entity.setFadeMode(fadeIn);

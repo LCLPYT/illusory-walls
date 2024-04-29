@@ -3,19 +3,23 @@ package work.lclpnet.illwalls.network;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.util.Identifier;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.entity.ExtraSpawnData;
 
 import java.util.Objects;
 
-public class EntityExtraSpawnS2CPacket implements PacketSerializer {
+public record EntityExtraSpawnS2CPacket(EntitySpawnS2CPacket packet, PacketByteBuf data) implements CustomPayload {
 
-    public static final Identifier ID = IllusoryWallsMod.identifier("spawn");
+    public static final Id<EntityExtraSpawnS2CPacket> ID = new Id<>(IllusoryWallsMod.identifier("spawn"));
 
-    private final EntitySpawnS2CPacket packet;
-    private final PacketByteBuf data;
+    public static final PacketCodec<RegistryByteBuf, EntityExtraSpawnS2CPacket> CODEC = PacketCodec.tuple(
+            EntitySpawnS2CPacket.CODEC, EntityExtraSpawnS2CPacket::packet,
+            IllusoryWallsPacketCodecs.BYTE_BUF_CODEC, EntityExtraSpawnS2CPacket::data,
+            EntityExtraSpawnS2CPacket::new);
 
     public EntityExtraSpawnS2CPacket(EntitySpawnS2CPacket packet, PacketByteBuf data) {
         this.packet = Objects.requireNonNull(packet);
@@ -24,21 +28,6 @@ public class EntityExtraSpawnS2CPacket implements PacketSerializer {
 
     public EntityExtraSpawnS2CPacket(Entity entity) {
         this(new EntitySpawnS2CPacket(entity), createDataBuffer(entity));
-    }
-
-    public EntityExtraSpawnS2CPacket(PacketByteBuf buf) {
-        // read packet bytes
-        int size = buf.readVarInt();
-        var raw = buf.readBytes(size);
-
-        // re-create packet
-        final var packetBuf = new PacketByteBuf(raw);
-        this.packet = new EntitySpawnS2CPacket(packetBuf);
-
-        // read data
-        size = buf.readVarInt();
-        raw = buf.readBytes(size);
-        data = new PacketByteBuf(raw);
     }
 
     public static PacketByteBuf createDataBuffer(Object any) {
@@ -52,29 +41,7 @@ public class EntityExtraSpawnS2CPacket implements PacketSerializer {
     }
 
     @Override
-    public void writeTo(PacketByteBuf buf) {
-        var packetBuf = PacketByteBufs.create();
-        packet.write(packetBuf);
-
-        int packetBufSize = packetBuf.readableBytes();
-        buf.writeVarInt(packetBufSize);
-        buf.writeBytes(packetBuf);
-
-        int dataSize = data.readableBytes();
-        buf.writeVarInt(dataSize);
-        buf.writeBytes(data);
-    }
-
-    @Override
-    public Identifier getIdentifier() {
+    public Id<? extends CustomPayload> getId() {
         return ID;
-    }
-
-    public EntitySpawnS2CPacket getPacket() {
-        return packet;
-    }
-
-    public PacketByteBuf getData() {
-        return data;
     }
 }
