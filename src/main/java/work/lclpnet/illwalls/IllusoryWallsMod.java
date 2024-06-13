@@ -71,7 +71,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
     }
 
     public static Identifier identifier(String path) {
-        return new Identifier(MOD_ID, path);
+        return Identifier.of(MOD_ID, path);
     }
 
     @Nonnull

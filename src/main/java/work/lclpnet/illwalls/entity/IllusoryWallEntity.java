@@ -13,6 +13,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.server.network.EntityTrackerEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -161,8 +162,8 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     }
 
     @Override
-    public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        var packet = new EntityExtraSpawnS2CPacket(this);
+    public Packet<ClientPlayPacketListener> createSpawnPacket(EntityTrackerEntry entityTrackerEntry) {
+        var packet = new EntityExtraSpawnS2CPacket(this, entityTrackerEntry);
         return ServerNetworkHandler.createS2CPacket(packet);
     }
 

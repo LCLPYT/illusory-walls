@@ -6,8 +6,8 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "ServerPlayerEntityMixin",
-    "ThreadedAnvilChunkStorageEntityTrackerMixin",
-    "ThreadedAnvilChunkStorageMixin"
+    "ServerChunkLoadingManagerEntityTrackerMixin",
+    "ServerChunkLoadingManagerMixin",
+    "ServerPlayerEntityMixin"
   ]
 }

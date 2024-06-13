@@ -116,13 +116,12 @@ public class AlphaBlockModelRenderer {
 
                 var pos = posMatrix.transform(new Vector4f(relX, relY, relZ, 1.0f));
 
-                vertexConsumer.vertex(
-                        pos.x(), pos.y(), pos.z(),
-                        r, g, b, alpha,
-                        u, v,
-                        overlay, lightValues[i],
-                        normal.x(), normal.y(), normal.z()
-                );
+                vertexConsumer.vertex(pos.x(), pos.y(), pos.z());
+                vertexConsumer.color(r, g, b, alpha);
+                vertexConsumer.texture(u, v);
+                vertexConsumer.overlay(overlay);
+                vertexConsumer.light(lightValues[i]);
+                vertexConsumer.normal(normal.x(), normal.y(), normal.z());
             }
         }
     }

@@ -2,8 +2,8 @@ package work.lclpnet.illwalls.util;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerChunkLoadingManager;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.server.world.ThreadedAnvilChunkStorage;
 import net.minecraft.util.Hand;
 import work.lclpnet.illwalls.IllusoryWallsApi;
 import work.lclpnet.illwalls.IllusoryWallsMod;
@@ -33,7 +33,7 @@ public class PlayerInfo {
         // TODO debounce 1 sec
         // update tracking status for all illusory walls in the players world
         ServerWorld world = player.getServerWorld();
-        ThreadedAnvilChunkStorage chunkManager = world.getChunkManager().threadedAnvilChunkStorage;
+        ServerChunkLoadingManager chunkManager = world.getChunkManager().chunkLoadingManager;
         if (!(chunkManager instanceof EntityTrackingUpdatable entityTrackingUpdatable)) return;
 
         var entities = IllusoryWallsApi.getInstance().lookup().getAll(world);

@@ -1,2 +1,2 @@
 accessWidener	v1  named
-accessible  class   net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTracker
+accessible  class   net/minecraft/server/world/ServerChunkLoadingManager$EntityTracker

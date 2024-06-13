@@ -12,6 +12,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.server.network.EntityTrackerEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -170,8 +171,8 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
     }
 
     @Override
-    public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        var packet = new EntityExtraSpawnS2CPacket(this);
+    public Packet<ClientPlayPacketListener> createSpawnPacket(EntityTrackerEntry entityTrackerEntry) {
+        var packet = new EntityExtraSpawnS2CPacket(this, entityTrackerEntry);
         return ServerNetworkHandler.createS2CPacket(packet);
     }
 

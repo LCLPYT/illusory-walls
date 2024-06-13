@@ -7,6 +7,7 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.server.network.EntityTrackerEntry;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.entity.ExtraSpawnData;
 
@@ -26,8 +27,8 @@ public record EntityExtraSpawnS2CPacket(EntitySpawnS2CPacket packet, PacketByteB
         this.data = Objects.requireNonNull(data);
     }
 
-    public EntityExtraSpawnS2CPacket(Entity entity) {
-        this(new EntitySpawnS2CPacket(entity), createDataBuffer(entity));
+    public EntityExtraSpawnS2CPacket(Entity entity, EntityTrackerEntry entityTrackerEntry) {
+        this(new EntitySpawnS2CPacket(entity, entityTrackerEntry), createDataBuffer(entity));
     }
 
     public static PacketByteBuf createDataBuffer(Object any) {

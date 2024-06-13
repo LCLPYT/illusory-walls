@@ -2,10 +2,7 @@ package work.lclpnet.illwalls.mixin.client;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.PostEffectProcessor;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.render.*;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.objectweb.asm.Opcodes;
@@ -51,7 +48,7 @@ public class WorldRendererMixin implements OutlineRenderOverride {
                     target = "Lnet/minecraft/client/render/BufferBuilderStorage;getOutlineVertexConsumers()Lnet/minecraft/client/render/OutlineVertexConsumerProvider;"
             )
     )
-    public void illwalls$beforeOutlineRender(float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+    public void illwalls$beforeOutlineRender(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
         renderedOutline = false;
     }
 
@@ -63,7 +60,7 @@ public class WorldRendererMixin implements OutlineRenderOverride {
                     opcode = Opcodes.GETFIELD
             )
     )
-    public void illwalls$onOutlineRender(float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+    public void illwalls$onOutlineRender(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
         renderedOutline = true;
     }
 
@@ -74,11 +71,11 @@ public class WorldRendererMixin implements OutlineRenderOverride {
                     args = "stringValue=destroyProgress"
             )
     )
-    public void illwalls$afterOutlineMaybeRendered(float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+    public void illwalls$afterOutlineMaybeRendered(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
         if (renderedOutline || !overrideOutline || this.entityOutlinePostProcessor == null) return;
 
         this.overrideOutline = false;
-        this.entityOutlinePostProcessor.render(tickDelta);
+        this.entityOutlinePostProcessor.render(tickCounter.getLastFrameDuration());
         this.client.getFramebuffer().beginWrite(false);
     }
 

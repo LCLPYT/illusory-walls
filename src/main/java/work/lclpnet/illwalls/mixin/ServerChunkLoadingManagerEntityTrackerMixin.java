@@ -4,7 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.network.EntityTrackerEntry;
 import net.minecraft.server.network.PlayerAssociatedNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ThreadedAnvilChunkStorage;
+import net.minecraft.server.world.ServerChunkLoadingManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,8 +15,8 @@ import work.lclpnet.illwalls.entity.EntityConditionalTracking;
 
 import java.util.Set;
 
-@Mixin(ThreadedAnvilChunkStorage.EntityTracker.class)
-public class ThreadedAnvilChunkStorageEntityTrackerMixin {
+@Mixin(ServerChunkLoadingManager.EntityTracker.class)
+public class ServerChunkLoadingManagerEntityTrackerMixin {
 
     @Shadow @Final
     Entity entity;
