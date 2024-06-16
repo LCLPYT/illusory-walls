@@ -3,6 +3,7 @@ package work.lclpnet.illwalls.event;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
@@ -144,7 +145,11 @@ public class ModEventListener {
         PlayerInventoryHooks.DROP_ITEM.register((player, slot, inInventory) -> {
             if (player.getWorld().isClient) return false;
 
-            ItemStack stack = player.getInventory().getStack(slot);
+            PlayerInventory inventory = player.getInventory();
+
+            if (slot < 0 || slot >= inventory.size()) return false;
+
+            ItemStack stack = inventory.getStack(slot);
 
             if (stack.isOf(STAFF_OF_ILLUSION_ITEM)) {
                 PlayerInfo.get((ServerPlayerEntity) player).setCanSeeIllusoryWalls(false);
