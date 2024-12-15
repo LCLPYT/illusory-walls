@@ -34,50 +34,49 @@ import work.lclpnet.illwalls.render.OutlineRenderOverride;
 @Mixin(WorldRenderer.class)
 public class WorldRendererMixin implements OutlineRenderOverride {
 
-    @Shadow private @Nullable PostEffectProcessor entityOutlinePostProcessor;
     @Shadow @Final private MinecraftClient client;
     @Unique
     private boolean renderedOutline = false;
     @Unique
     private boolean overrideOutline = false;
 
-    @Inject(
-            method = "render",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/client/render/BufferBuilderStorage;getOutlineVertexConsumers()Lnet/minecraft/client/render/OutlineVertexConsumerProvider;"
-            )
-    )
-    public void illwalls$beforeOutlineRender(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-        renderedOutline = false;
-    }
-
-    @Inject(
-            method = "render",
-            at = @At(
-                    value = "FIELD",
-                    target = "Lnet/minecraft/client/render/WorldRenderer;entityOutlinePostProcessor:Lnet/minecraft/client/gl/PostEffectProcessor;",
-                    opcode = Opcodes.GETFIELD
-            )
-    )
-    public void illwalls$onOutlineRender(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-        renderedOutline = true;
-    }
-
-    @Inject(
-            method = "render",
-            at = @At(
-                    value = "CONSTANT",
-                    args = "stringValue=destroyProgress"
-            )
-    )
-    public void illwalls$afterOutlineMaybeRendered(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-        if (renderedOutline || !overrideOutline || this.entityOutlinePostProcessor == null) return;
-
-        this.overrideOutline = false;
-        this.entityOutlinePostProcessor.render(tickCounter.getLastFrameDuration());
-        this.client.getFramebuffer().beginWrite(false);
-    }
+//    @Inject(
+//            method = "render",
+//            at = @At(
+//                    value = "INVOKE",
+//                    target = "Lnet/minecraft/client/render/BufferBuilderStorage;getOutlineVertexConsumers()Lnet/minecraft/client/render/OutlineVertexConsumerProvider;"
+//            )
+//    )
+//    public void illwalls$beforeOutlineRender(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+//        renderedOutline = false;
+//    }
+//
+//    @Inject(
+//            method = "render",
+//            at = @At(
+//                    value = "FIELD",
+//                    target = "Lnet/minecraft/client/render/WorldRenderer;entityOutlinePostProcessor:Lnet/minecraft/client/gl/PostEffectProcessor;",
+//                    opcode = Opcodes.GETFIELD
+//            )
+//    )
+//    public void illwalls$onOutlineRender(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+//        renderedOutline = true;
+//    }
+//
+//    @Inject(
+//            method = "render",
+//            at = @At(
+//                    value = "CONSTANT",
+//                    args = "stringValue=destroyProgress"
+//            )
+//    )
+//    public void illwalls$afterOutlineMaybeRendered(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+//        if (renderedOutline || !overrideOutline || this.entityOutlinePostProcessor == null) return;
+//
+//        this.overrideOutline = false;
+//        this.entityOutlinePostProcessor.render(tickCounter.getLastFrameDuration());
+//        this.client.getFramebuffer().beginWrite(false);
+//    }
 
     @Override
     public void illwalls$markOverridden() {

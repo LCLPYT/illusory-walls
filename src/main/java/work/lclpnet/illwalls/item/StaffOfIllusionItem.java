@@ -12,7 +12,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -36,14 +35,14 @@ public class StaffOfIllusionItem extends Item {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         if (!user.isSneaking()) return super.use(world, user, hand);
 
         if (!world.isClient && user instanceof ServerPlayerEntity player) {
             openEditScreen(player, null);
         }
 
-        return TypedActionResult.success(user.getStackInHand(hand), world.isClient);
+        return ActionResult.SUCCESS;
     }
 
     @Override
@@ -107,7 +106,7 @@ public class StaffOfIllusionItem extends Item {
         if (created) {
             Vec3d center = pos.toCenterPos();
 
-            DustParticleEffect effect = new DustParticleEffect(Vec3d.unpackRgb(0x770077).toVector3f(), 0.6f);
+            DustParticleEffect effect = new DustParticleEffect(0x770077, 0.6f);
             world.spawnParticles(player, effect, false, center.x, center.y, center.z, 100,
                     0.5f, 0.5f, 0.5f, 0.1);
         }

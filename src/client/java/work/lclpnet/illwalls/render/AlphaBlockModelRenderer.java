@@ -48,7 +48,7 @@ public class AlphaBlockModelRenderer {
 
         for (Direction direction : DIRECTIONS) {
             adjPos.set(pos, direction);
-            if (!Block.shouldDrawSide(state, view, pos, direction, adjPos)) continue;
+            if (!Block.shouldDrawSide(state, view.getBlockState(pos.offset(direction)), direction)) continue;
 
             random.setSeed(seed);
             AlphaBlockModelRenderer.renderQuads(entry, vertexConsumer, red, green, blue, alpha, bakedModel.getQuads(state, direction, random), light, overlay);

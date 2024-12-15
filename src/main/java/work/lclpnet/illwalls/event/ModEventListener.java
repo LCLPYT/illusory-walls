@@ -62,7 +62,7 @@ public class ModEventListener {
                 }
             }
 
-            return ActionResult.success(world.isClient);
+            return ActionResult.SUCCESS;
         });
     }
 

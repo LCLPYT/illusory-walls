@@ -56,44 +56,48 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
             IllusoryWallEntity wall = IllusoryWallsMod.ILLUSORY_WALL_ENTITY.spawn(world, created -> {
                 ExtendedStructureWrapper structure = created.getStructureContainer().getWrapper();
                 structure.setBlockState(pos, world.getBlockState(pos));
-            }, pos, SpawnReason.SPAWN_EGG, false, false);
+            }, pos, SpawnReason.SPAWN_ITEM_USE, false, false);
 
             if (player != null && wall != null) {
                 PlayerInfo.get(player).getWallSettings().applyTo(wall);
             }
-        } else {
-            var iterator = nearbyWalls.iterator();
 
-            // get one nearby wall (there is at least one wall present)
-            IllusoryWallEntity wall = iterator.next();
-            ExtendedStructureWrapper structure = wall.getStructureContainer().getWrapper();
+            return true;
+        }
 
-            if (!iterator.hasNext()) {
-                // there is only one wall nearby
-                structure.setBlockState(pos, world.getBlockState(pos));
-            } else {
-                // there are more than one neighbouring walls
-                StructureBatchUpdate batchUpdate = structure instanceof StructureBatchUpdate ? (StructureBatchUpdate) structure : null;
-                if (batchUpdate != null) {
-                    batchUpdate.beginBatch();
-                }
+        var iterator = nearbyWalls.iterator();
 
-                structure.setBlockState(pos, world.getBlockState(pos));
+        // get one nearby wall (there is at least one wall present)
+        IllusoryWallEntity wall = iterator.next();
+        ExtendedStructureWrapper structure = wall.getStructureContainer().getWrapper();
 
-                // merge other nearby walls
-                while (iterator.hasNext()) {
-                    IllusoryWallEntity other = iterator.next();
-                    ExtendedStructureWrapper otherStructure = other.getStructureContainer().getWrapper();
+        if (!iterator.hasNext()) {
+            // there is only one wall nearby
+            structure.setBlockState(pos, world.getBlockState(pos));
+            return true;
+        }
 
-                    otherStructure.copyTo(structure);
+        // there are more than one neighbouring walls
+        StructureBatchUpdate batchUpdate = structure instanceof StructureBatchUpdate ? (StructureBatchUpdate) structure : null;
 
-                    other.discard();
-                }
+        if (batchUpdate != null) {
+            batchUpdate.beginBatch();
+        }
 
-                if (batchUpdate != null) {
-                    batchUpdate.endBatch();
-                }
-            }
+        structure.setBlockState(pos, world.getBlockState(pos));
+
+        // merge other nearby walls
+        while (iterator.hasNext()) {
+            IllusoryWallEntity other = iterator.next();
+            ExtendedStructureWrapper otherStructure = other.getStructureContainer().getWrapper();
+
+            otherStructure.copyTo(structure);
+
+            other.discard();
+        }
+
+        if (batchUpdate != null) {
+            batchUpdate.endBatch();
         }
 
         return true;

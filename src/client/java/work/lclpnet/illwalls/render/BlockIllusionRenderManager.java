@@ -1,14 +1,13 @@
 package work.lclpnet.illwalls.render;
 
-import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ModelTransformationMode;
 import work.lclpnet.illwalls.mixin.client.BlockRenderManagerAccessor;
 
 import javax.annotation.Nullable;
@@ -24,10 +23,7 @@ public class BlockIllusionRenderManager {
     }
 
     public void renderBlockAsEntity(BlockState state, @Nullable CullInfo cullInfo, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float alpha) {
-        BlockRenderType blockRenderType = state.getRenderType();
-        if (blockRenderType == BlockRenderType.INVISIBLE) return;
-
-        switch (blockRenderType) {
+        switch (state.getRenderType()) {
             case MODEL -> {
                 BakedModel bakedModel = blockRenderManager.getModel(state);
                 var blockColors = ((BlockRenderManagerAccessor) blockRenderManager).getBlockColors();
@@ -53,6 +49,7 @@ public class BlockIllusionRenderManager {
                 // todo add culling and opacity support
                 renderer.render(itemStack, ModelTransformationMode.NONE, matrices, vertexConsumers, light, overlay);
             }
+            case INVISIBLE -> {}
         }
     }
 }

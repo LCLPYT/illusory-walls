@@ -6,6 +6,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -69,7 +70,6 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
 
     public IllusoryWallEntity(EntityType<?> type, World world) {
         super(type, world);
-        this.ignoreCameraFrustum = true;
     }
 
     @Override
@@ -300,5 +300,10 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
 
     public IllusoryWallProperties getIllusoryWallProperties() {
         return properties;
+    }
+
+    @Override
+    public final boolean damage(ServerWorld world, DamageSource source, float amount) {
+        return false;
     }
 }

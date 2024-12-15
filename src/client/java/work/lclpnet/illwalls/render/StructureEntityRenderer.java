@@ -1,20 +1,16 @@
 package work.lclpnet.illwalls.render;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.entity.StructureEntity;
-import work.lclpnet.illwalls.struct.ExtendedStructureWrapper;
 
-public class StructureEntityRenderer extends EntityRenderer<StructureEntity> implements RenderLayerGetter {
+public class StructureEntityRenderer extends EntityRenderer<StructureEntity, StructureEntityRenderState> implements RenderLayerGetter {
 
     private final StructureRenderer structureRenderer;
 
@@ -26,20 +22,36 @@ public class StructureEntityRenderer extends EntityRenderer<StructureEntity> imp
         this.structureRenderer = new CullStructureRenderer(blockIllusionRenderManager);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public Identifier getTexture(StructureEntity entity) {
-        return SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE;
+    public StructureEntityRenderState createRenderState() {
+        return new StructureEntityRenderState();
     }
 
     @Override
-    public void render(StructureEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
+    public void updateRenderState(StructureEntity entity, StructureEntityRenderState state, float tickDelta) {
+        super.updateRenderState(entity, state, tickDelta);
+
+        state.fading = entity.isFading();
+        state.fadeStartMs = entity.getFadeStartMs();
+        state.fadeMode = entity.getFadeMode();
+        state.fadingFrom = entity.getFadingFrom();
+
+        if (state.fadingFrom != null) {
+            state.blockLight = this.getBlockLight(entity, state.fadingFrom);
+            state.skyLight = this.getSkyLight(entity, state.fadingFrom);
+        }
+
+        state.structure = entity.getStructureContainer().getWrapper();
+    }
+
+    @Override
+    public void render(StructureEntityRenderState state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+        super.render(state, matrices, vertexConsumers, light);
 
         float alpha = 1F;
 
-        if (entity.isFading()) {
-            long start = entity.getFadeStartMs();
+        if (state.fading) {
+            long start = state.fadeStartMs;
 
             if (start == 0L) {
                 // in case the render is invoked between the set of fadeStartMs
@@ -50,33 +62,33 @@ public class StructureEntityRenderer extends EntityRenderer<StructureEntity> imp
 
             alpha = (now - start) / (float) IllusoryWallEntity.FADE_DURATION_MS;
 
-            if (entity.getFadeMode() != StructureEntity.FADE_IN) {
+            if (state.fadeMode != StructureEntity.FADE_IN) {
                 alpha = 1F - alpha;
             }
 
             alpha = MathHelper.clamp(alpha, 0F, 1F);
         }
 
-        BlockPos fadingFrom = entity.getFadingFrom();
+        BlockPos fadingFrom = state.fadingFrom;
+
         if (fadingFrom != null) {
-            int blockLight = this.getBlockLight(entity, fadingFrom);
-            int skyLight = this.getSkyLight(entity, fadingFrom);
-            light = LightmapTextureManager.pack(blockLight, skyLight);
+            light = LightmapTextureManager.pack(state.blockLight, state.skyLight);
         }
 
-        ExtendedStructureWrapper structure = entity.getStructureContainer().getWrapper();
-
-        structureRenderer.render(structure, entity.getPos(), matrices, vertexConsumers, light, alpha);
+        structureRenderer.render(state.structure, state.x, state.y, state.z, matrices, vertexConsumers, light, alpha);
     }
 
     @Override
     public RenderLayer getRenderLayer(BlockState state, float alpha) {
         if (alpha >= 1.0f) {
-            return RenderLayers.getEntityBlockLayer(state, false);
+            return RenderLayers.getEntityBlockLayer(state);
         }
 
-        return MinecraftClient.isFabulousGraphicsOrBetter()
-                ? TexturedRenderLayers.getItemEntityTranslucentCull()
-                : TexturedRenderLayers.getEntityTranslucentCull();
+        return TexturedRenderLayers.getItemEntityTranslucentCull();
+    }
+
+    @Override
+    protected boolean canBeCulled(StructureEntity entity) {
+        return false;  // ignore camera frustum culling for now
     }
 }

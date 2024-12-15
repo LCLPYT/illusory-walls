@@ -1,6 +1,7 @@
 package work.lclpnet.illwalls.entity;
 
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.SpawnReason;
 import org.slf4j.Logger;
 import work.lclpnet.illwalls.network.EntityExtraSpawnS2CPacket;
 import work.lclpnet.illwalls.network.StructureUpdateS2CPacket;
@@ -19,7 +20,7 @@ public class ClientEntityManager {
         final var packet = extraPacket.packet();
 
         var entityType = packet.getEntityType();
-        var entity = entityType.create(world);
+        var entity = entityType.create(world, SpawnReason.LOAD);
 
         if (entity == null) {
             logger.warn("Skipping entity with id {}", entityType);
@@ -33,8 +34,7 @@ public class ClientEntityManager {
             extraSpawnData.readExtraSpawnData(data);
         }
 
-        int id = packet.getId();
-        entity.setId(id);
+        entity.setId(packet.getEntityId());
         world.addEntity(entity);
     }
 

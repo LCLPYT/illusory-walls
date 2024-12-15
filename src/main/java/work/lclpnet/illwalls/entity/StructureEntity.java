@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -13,6 +14,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.server.network.EntityTrackerEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -54,7 +56,6 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
 
     public StructureEntity(EntityType<?> entityType, World world) {
         super(entityType, world);
-        this.ignoreCameraFrustum = true;
 
         if (world.isClient) {
             initClient();
@@ -205,5 +206,10 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
     @Override
     public boolean shouldRender(double distance) {
         return distance < MathHelper.square((double) this.getViewRange() * 64.0 * DisplayEntity.getRenderDistanceMultiplier());
+    }
+
+    @Override
+    public final boolean damage(ServerWorld world, DamageSource source, float amount) {
+        return false;
     }
 }

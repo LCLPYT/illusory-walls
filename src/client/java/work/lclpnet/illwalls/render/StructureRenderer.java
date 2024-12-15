@@ -7,5 +7,5 @@ import work.lclpnet.kibu.schematic.FabricStructureView;
 
 public interface StructureRenderer {
 
-    void render(FabricStructureView structure, Vec3d origin, MatrixStack matrices, VertexConsumerProvider vertices, int light, float alpha);
+    void render(FabricStructureView structure, double x, double y, double z, MatrixStack matrices, VertexConsumerProvider vertices, int light, float alpha);
 }

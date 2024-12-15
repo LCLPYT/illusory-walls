@@ -7,12 +7,11 @@ import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.mixin.client.WorldRendererAccessor;
 
-public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntity> implements RenderLayerGetter {
+public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntity, IllusoryWallRenderState> implements RenderLayerGetter {
 
     private final StructureRenderer structureRenderer;
 
@@ -24,39 +23,47 @@ public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntit
         this.structureRenderer = new CullStructureRenderer(blockIllusionRenderManager);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public Identifier getTexture(IllusoryWallEntity entity) {
-        return SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE;
+    public IllusoryWallRenderState createRenderState() {
+        return new IllusoryWallRenderState();
     }
 
     @Override
-    public void render(IllusoryWallEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+    public void updateRenderState(IllusoryWallEntity entity, IllusoryWallRenderState state, float tickDelta) {
+        super.updateRenderState(entity, state, tickDelta);
+
+        state.outlineColor = entity.getOutlineColor();
+        state.structure = entity.getStructureContainer().getWrapper();
+    }
+
+    @Override
+    public void render(IllusoryWallRenderState state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         WorldRenderer worldRenderer = MinecraftClient.getInstance().worldRenderer;
         BufferBuilderStorage bufferBuilders = ((WorldRendererAccessor) worldRenderer).getBufferBuilders();
         OutlineVertexConsumerProvider outlineVertexConsumerProvider = bufferBuilders.getOutlineVertexConsumers();
 
         vertexConsumers = outlineVertexConsumerProvider;
-        int color = entity.getOutlineColor();
 
         outlineVertexConsumerProvider.setColor(
-                ColorHelper.Argb.getRed(color),
-                ColorHelper.Argb.getGreen(color),
-                ColorHelper.Argb.getBlue(color),
-                ColorHelper.Argb.getAlpha(color)
-        );
+                ColorHelper.getRed(state.outlineColor),
+                ColorHelper.getGreen(state.outlineColor),
+                ColorHelper.getBlue(state.outlineColor),
+                ColorHelper.getAlpha(state.outlineColor));
 
         // override the outline rendering so the outline post processor is guaranteed to always render
-        ((OutlineRenderOverride) worldRenderer).illwalls$markOverridden();
+        ((OutlineRenderOverride) worldRenderer).illwalls$markOverridden();  // TODO check if this is still needed
 
-        var structure = entity.getStructureContainer().getWrapper();
-
-        structureRenderer.render(structure, entity.getPos(), matrices, vertexConsumers, light, 1F);
+        structureRenderer.render(state.structure, state.x, state.y, state.z, matrices, vertexConsumers, light, 1F);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public RenderLayer getRenderLayer(BlockState state, float alpha) {
         return RenderLayer.getOutline(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE);
+    }
+
+    @Override
+    protected boolean canBeCulled(IllusoryWallEntity entity) {
+        return false;  // ignore camera frustum culling for now
     }
 }
