@@ -42,13 +42,6 @@ public class BlockIllusionRenderManager {
                     AlphaBlockModelRenderer.render(matrices.peek(), buffer, state, bakedModel, r, g, b, alpha, light, overlay);
                 }
             }
-            case ENTITYBLOCK_ANIMATED -> {
-                var renderer = ((BlockRenderManagerAccessor) blockRenderManager).getBuiltinModelItemRenderer();
-                var itemStack = new ItemStack(state.getBlock());
-
-                // todo add culling and opacity support
-                renderer.render(itemStack, ModelTransformationMode.NONE, matrices, vertexConsumers, light, overlay);
-            }
             case INVISIBLE -> {}
         }
     }

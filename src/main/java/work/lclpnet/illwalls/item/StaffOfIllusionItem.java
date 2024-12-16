@@ -63,8 +63,8 @@ public class StaffOfIllusionItem extends Item {
         // spawn visual particles
         Vec3d center = pos.toCenterPos();
 
-        world.spawnParticles(player, ParticleTypes.FLAME,
-                false, center.x, center.y, center.z, 25, 0.5f, 0.5f, 0.5f, 0.05);
+        world.spawnParticles(player, ParticleTypes.FLAME, false, false,
+                center.x, center.y, center.z, 25, 0.5f, 0.5f, 0.5f, 0.05);
     }
 
     private static void openEditScreen(ServerPlayerEntity player, @Nullable IllusoryWallEntity wall) {
@@ -107,8 +107,8 @@ public class StaffOfIllusionItem extends Item {
             Vec3d center = pos.toCenterPos();
 
             DustParticleEffect effect = new DustParticleEffect(0x770077, 0.6f);
-            world.spawnParticles(player, effect, false, center.x, center.y, center.z, 100,
-                    0.5f, 0.5f, 0.5f, 0.1);
+            world.spawnParticles(player, effect, false, false,
+                    center.x, center.y, center.z, 100, 0.5f, 0.5f, 0.5f, 0.1);
         }
 
         return created;

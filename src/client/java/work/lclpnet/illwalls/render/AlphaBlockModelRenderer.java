@@ -64,7 +64,7 @@ public class AlphaBlockModelRenderer {
         float b;
 
         for (BakedQuad bakedQuad : quads) {
-            if (bakedQuad.hasColor()) {
+            if (bakedQuad.hasTint()) {
                 b = MathHelper.clamp(red, 0.0f, 1.0f);
                 g = MathHelper.clamp(green, 0.0f, 1.0f);
                 r = MathHelper.clamp(blue, 0.0f, 1.0f);
