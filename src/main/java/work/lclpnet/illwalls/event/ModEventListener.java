@@ -17,6 +17,7 @@ import work.lclpnet.illwalls.item.StaffOfIllusionItem;
 import work.lclpnet.illwalls.util.PlayerInfo;
 import work.lclpnet.illwalls.wall.IllusoryWallLookup;
 import work.lclpnet.illwalls.wall.IllusoryWallManager;
+import work.lclpnet.kibu.access.entity.PlayerInventoryAccess;
 import work.lclpnet.kibu.hook.entity.ProjectileHooks;
 import work.lclpnet.kibu.hook.player.PlayerGameModeChangeCallback;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
@@ -127,7 +128,7 @@ public class ModEventListener {
             if (handlerSlot == null) return;
 
             int slot = handlerSlot.getIndex();
-            if (player.getInventory().selectedSlot != slot) return;
+            if (PlayerInventoryAccess.getSelectedSlot(player) != slot) return;
 
             ItemStack handStack = event.stack();
             if (handStack.isOf(STAFF_OF_ILLUSION_ITEM)) {

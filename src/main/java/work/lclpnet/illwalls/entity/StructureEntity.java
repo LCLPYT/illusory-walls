@@ -128,10 +128,10 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
 
     @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
-        this.setFading(nbt.getBoolean(FADING_NBT_KEY));
-        this.setViewRange(nbt.getFloat(VIEW_RANGE_NBT_KEY));
+        this.setFading(nbt.getBoolean(FADING_NBT_KEY).orElse(false));
+        this.setViewRange(nbt.getFloat(VIEW_RANGE_NBT_KEY).orElse(0f));
 
-        NbtCompound structureNbt = nbt.getCompound(STRUCTURE_NBT_KEY);
+        NbtCompound structureNbt = nbt.getCompound(STRUCTURE_NBT_KEY).orElseGet(NbtCompound::new);
         CompoundTag structureTag = FabricNbtConversion.convert(structureNbt, CompoundTag.class);
 
         var adapter = ExtendedBlockStateAdapter.getInstance();
@@ -140,7 +140,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
         this.structureContainer.setStructure(structure);
 
         if (nbt.contains(FADE_MODE_NBT_KEY)) {
-            fadeMode = nbt.getInt(FADE_MODE_NBT_KEY);
+            fadeMode = nbt.getInt(FADE_MODE_NBT_KEY).orElse(0);
         }
     }
 

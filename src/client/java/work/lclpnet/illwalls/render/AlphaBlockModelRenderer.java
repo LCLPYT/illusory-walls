@@ -3,62 +3,58 @@ package work.lclpnet.illwalls.render;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.render.model.BlockModelPart;
+import net.minecraft.client.render.model.BlockStateModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.random.Random;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
-import org.lwjgl.system.MemoryStack;
 
-import javax.annotation.Nullable;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.List;
 
+// BlockModelRenderer with alpha support
 public class AlphaBlockModelRenderer {
 
     private static final Direction[] DIRECTIONS = Direction.values();
+    private static final long SEED = 42L;
+    private final Random random = Random.create(SEED);
 
-    public static void render(MatrixStack.Entry entry, VertexConsumer vertexConsumer, @Nullable BlockState state, BakedModel bakedModel, float red, float green, float blue, float alpha, int light, int overlay) {
-        Random random = Random.create();
-        long seed = 42L;
+    public void render(MatrixStack.Entry entry, VertexConsumer vertexConsumer, BlockStateModel model, float red, float green, float blue, float alpha, int light, int overlay) {
+        random.setSeed(SEED);
 
-        for (Direction direction : DIRECTIONS) {
-            random.setSeed(seed);
-            AlphaBlockModelRenderer.renderQuads(entry, vertexConsumer, red, green, blue, alpha, bakedModel.getQuads(state, direction, random), light, overlay);
+        for (BlockModelPart part : model.getParts(random)) {
+            for (Direction side : DIRECTIONS) {
+                renderQuads(entry, vertexConsumer, red, green, blue, alpha, part.getQuads(side), light, overlay);
+            }
+
+            renderQuads(entry, vertexConsumer, red, green, blue, alpha, part.getQuads(null), light, overlay);
         }
-
-        random.setSeed(seed);
-        AlphaBlockModelRenderer.renderQuads(entry, vertexConsumer, red, green, blue, alpha, bakedModel.getQuads(state, null, random), light, overlay);
     }
 
-    public static void renderWithCulling(MatrixStack.Entry entry, VertexConsumer vertexConsumer, BlockState state, CullInfo cullInfo, BakedModel bakedModel, float red, float green, float blue, float alpha, int light, int overlay) {
-        final Random random = Random.create();
-        final long seed = 42L;
+    public void renderWithCulling(MatrixStack.Entry entry, VertexConsumer vertexConsumer, BlockState state, CullInfo cullInfo, BlockStateModel model, float red, float green, float blue, float alpha, int light, int overlay) {
         final var pos = cullInfo.pos();
         final var adjPos = new BlockPos.Mutable();
         final var view = cullInfo.blockView();
 
-        for (Direction direction : DIRECTIONS) {
-            adjPos.set(pos, direction);
-            if (!Block.shouldDrawSide(state, view.getBlockState(pos.offset(direction)), direction)) continue;
+        random.setSeed(SEED);
 
-            random.setSeed(seed);
-            AlphaBlockModelRenderer.renderQuads(entry, vertexConsumer, red, green, blue, alpha, bakedModel.getQuads(state, direction, random), light, overlay);
+        for (BlockModelPart part : model.getParts(random)) {
+            for (Direction side : DIRECTIONS) {
+                adjPos.set(pos, side);
+                if (!Block.shouldDrawSide(state, view.getBlockState(pos.offset(side)), side)) continue;
+
+                renderQuads(entry, vertexConsumer, red, green, blue, alpha, part.getQuads(side), light, overlay);
+            }
+
+            renderQuads(entry, vertexConsumer, red, green, blue, alpha, part.getQuads(null), light, overlay);
         }
-
-        random.setSeed(seed);
-        AlphaBlockModelRenderer.renderQuads(entry, vertexConsumer, red, green, blue, alpha, bakedModel.getQuads(state, null, random), light, overlay);
     }
 
-    public static void renderQuads(MatrixStack.Entry entry, VertexConsumer vertexConsumer, float red, float green, float blue, float alpha, List<BakedQuad> quads, int light, int overlay) {
+    public static void renderQuads(MatrixStack.Entry entry, VertexConsumer vertexConsumer,
+                                   final float red, final float green, final float blue, final float alpha,
+                                   List<BakedQuad> quads, int light, int overlay) {
         float r;
         float g;
         float b;
@@ -74,55 +70,7 @@ public class AlphaBlockModelRenderer {
                 r = 1.0f;
             }
 
-            AlphaBlockModelRenderer.alphaQuad(vertexConsumer, entry, bakedQuad, b, g, r, alpha, light, overlay);
-        }
-    }
-
-    public static void alphaQuad(VertexConsumer vertexConsumer, MatrixStack.Entry matrixEntry, BakedQuad quad, float red, float green, float blue, float alpha, int light, int overlay) {
-        alphaQuad(vertexConsumer, matrixEntry, quad, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, red, green, blue, alpha, new int[]{light, light, light, light}, overlay);
-    }
-
-    public static void alphaQuad(VertexConsumer vertexConsumer, MatrixStack.Entry matrixEntry, BakedQuad quad, float[] brightnesses, float red, float green, float blue, float alpha, int[] lights, int overlay) {
-        final float[] brightness = new float[] {brightnesses[0], brightnesses[1], brightnesses[2], brightnesses[3]};
-        final int[] lightValues = new int[] {lights[0], lights[1], lights[2], lights[3]};
-        final int[] vertexData = quad.getVertexData();
-        final Matrix4f posMatrix = matrixEntry.getPositionMatrix();
-
-        final Vec3i dir = quad.getFace().getVector();
-        final Vector3f normal = matrixEntry.getNormalMatrix().transform(new Vector3f(dir.getX(), dir.getY(), dir.getZ()));
-
-        final int bytes = vertexData.length / 8;
-
-        try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-            ByteBuffer buf = memoryStack.malloc(VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL.getVertexSizeByte());
-            IntBuffer intBuf = buf.asIntBuffer();
-
-            float r, g, b, u, v;
-
-            for (int i = 0; i < bytes; ++i) {
-                intBuf.clear();
-                intBuf.put(vertexData, i * 8, 8);
-
-                r = brightness[i] * red;
-                g = brightness[i] * green;
-                b = brightness[i] * blue;
-
-                u = buf.getFloat(16);
-                v = buf.getFloat(20);
-
-                float relX = buf.getFloat(0);
-                float relY = buf.getFloat(4);
-                float relZ = buf.getFloat(8);
-
-                var pos = posMatrix.transform(new Vector4f(relX, relY, relZ, 1.0f));
-
-                vertexConsumer.vertex(pos.x(), pos.y(), pos.z());
-                vertexConsumer.color(r, g, b, alpha);
-                vertexConsumer.texture(u, v);
-                vertexConsumer.overlay(overlay);
-                vertexConsumer.light(lightValues[i]);
-                vertexConsumer.normal(normal.x(), normal.y(), normal.z());
-            }
+            vertexConsumer.quad(entry, bakedQuad, r, g, b, alpha, light, overlay);
         }
     }
 }

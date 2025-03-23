@@ -107,9 +107,9 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
 
     @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
-        setFading(nbt.getBoolean(FADING_NBT_KEY));
+        setFading(nbt.getBoolean(FADING_NBT_KEY).orElse(false));
 
-        NbtCompound structureNbt = nbt.getCompound(STRUCTURE_NBT_KEY);
+        NbtCompound structureNbt = nbt.getCompound(STRUCTURE_NBT_KEY).orElseGet(NbtCompound::new);
         CompoundTag structureTag = FabricNbtConversion.convert(structureNbt, CompoundTag.class);
 
         var adapter = ExtendedBlockStateAdapter.getInstance();
@@ -118,16 +118,16 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
         this.structureContainer.setStructure(structure);
 
         if (nbt.contains(PROPERTIES_NBT_KEY)) {
-            NbtCompound propertiesNbt = nbt.getCompound(PROPERTIES_NBT_KEY);
+            NbtCompound propertiesNbt = nbt.getCompound(PROPERTIES_NBT_KEY).orElseGet(NbtCompound::new);
             properties.readFrom(propertiesNbt);
         }
 
         if (nbt.contains(FADE_MODE_NBT_KEY)) {
-            setFadeMode(nbt.getInt(FADE_MODE_NBT_KEY));
+            setFadeMode(nbt.getInt(FADE_MODE_NBT_KEY).orElse(0));
         }
 
         if (nbt.contains(FADE_FROM_NBT_KEY)) {
-            fadeFrom = BlockPos.fromLong(nbt.getLong(FADE_FROM_NBT_KEY));
+            fadeFrom = BlockPos.fromLong(nbt.getLong(FADE_FROM_NBT_KEY).orElse(0L));
         }
     }
 

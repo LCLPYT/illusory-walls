@@ -2,6 +2,7 @@ package work.lclpnet.illwalls.item;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -46,9 +47,9 @@ public class StaffOfIllusionItem extends Item {
     }
 
     @Override
-    public boolean canMine(BlockState state, World world, BlockPos pos, PlayerEntity miner) {
-        if (!world.isClient) {
-            this.destroyIllusoryWall((ServerPlayerEntity) miner, (ServerWorld) world, pos);
+    public boolean canMine(ItemStack stack, BlockState state, World world, BlockPos pos, LivingEntity user) {
+        if (!world.isClient && user instanceof ServerPlayerEntity player) {
+            this.destroyIllusoryWall(player, (ServerWorld) world, pos);
         }
 
         return false;

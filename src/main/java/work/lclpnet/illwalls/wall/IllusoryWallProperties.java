@@ -56,11 +56,11 @@ public class IllusoryWallProperties {
 
     public void readFrom(NbtCompound nbt) {
         if (nbt.contains(RESPAWN_DURATION_NBT_KEY)) {
-            respawnDuration = nbt.getInt(RESPAWN_DURATION_NBT_KEY);
+            respawnDuration = nbt.getInt(RESPAWN_DURATION_NBT_KEY).orElse(0);
         }
 
         if (nbt.contains(RESPAWN_TIMER_NBT_KEY)) {
-            respawnTimer = nbt.getInt(RESPAWN_TIMER_NBT_KEY);
+            respawnTimer = nbt.getInt(RESPAWN_TIMER_NBT_KEY).orElse(0);
         }
     }
 
