@@ -18,6 +18,8 @@ import net.minecraft.server.network.EntityTrackerEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -106,10 +108,10 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     }
 
     @Override
-    protected void readCustomDataFromNbt(NbtCompound nbt) {
-        setFading(nbt.getBoolean(FADING_NBT_KEY).orElse(false));
+    protected void readCustomData(ReadView view) {
+        setFading(view.getBoolean(FADING_NBT_KEY, false));
 
-        NbtCompound structureNbt = nbt.getCompound(STRUCTURE_NBT_KEY).orElseGet(NbtCompound::new);
+        var structureNbt = view.read(STRUCTURE_NBT_KEY, NbtCompound.CODEC).orElseGet(NbtCompound::new);
         CompoundTag structureTag = FabricNbtConversion.convert(structureNbt, CompoundTag.class);
 
         var adapter = ExtendedBlockStateAdapter.getInstance();
@@ -117,32 +119,23 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
 
         this.structureContainer.setStructure(structure);
 
-        if (nbt.contains(PROPERTIES_NBT_KEY)) {
-            NbtCompound propertiesNbt = nbt.getCompound(PROPERTIES_NBT_KEY).orElseGet(NbtCompound::new);
-            properties.readFrom(propertiesNbt);
-        }
+        properties.readFrom(view.getReadView(PROPERTIES_NBT_KEY));
 
-        if (nbt.contains(FADE_MODE_NBT_KEY)) {
-            setFadeMode(nbt.getInt(FADE_MODE_NBT_KEY).orElse(0));
-        }
+        setFadeMode(view.getInt(FADE_MODE_NBT_KEY, 0));
 
-        if (nbt.contains(FADE_FROM_NBT_KEY)) {
-            fadeFrom = BlockPos.fromLong(nbt.getLong(FADE_FROM_NBT_KEY).orElse(0L));
-        }
+        fadeFrom = BlockPos.fromLong(view.getLong(FADE_FROM_NBT_KEY, 0));
     }
 
     @Override
-    protected void writeCustomDataToNbt(NbtCompound nbt) {
+    protected void writeCustomData(WriteView nbt) {
         nbt.putBoolean(FADING_NBT_KEY, isFading());
 
         BlockStructure structure = this.structureContainer.getWrapper().getStructure();
         CompoundTag structureTag = IllusoryWallsMod.SCHEMATIC_FORMAT.serializer().serialize(structure);
         NbtCompound structureNbt = FabricNbtConversion.convert(structureTag, NbtCompound.class);
-        nbt.put(STRUCTURE_NBT_KEY, structureNbt);
+        nbt.put(STRUCTURE_NBT_KEY, NbtCompound.CODEC, structureNbt);
 
-        NbtCompound propertiesNbt = new NbtCompound();
-        getIllusoryWallProperties().writeTo(propertiesNbt);
-        nbt.put(PROPERTIES_NBT_KEY, propertiesNbt);
+        getIllusoryWallProperties().writeTo(nbt.get(PROPERTIES_NBT_KEY));
 
         nbt.putInt(FADE_MODE_NBT_KEY, getFadeMode());
 

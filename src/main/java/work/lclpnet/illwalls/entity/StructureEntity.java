@@ -15,6 +15,8 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.server.network.EntityTrackerEntry;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -127,11 +129,11 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
     }
 
     @Override
-    protected void readCustomDataFromNbt(NbtCompound nbt) {
-        this.setFading(nbt.getBoolean(FADING_NBT_KEY).orElse(false));
-        this.setViewRange(nbt.getFloat(VIEW_RANGE_NBT_KEY).orElse(0f));
+    protected void readCustomData(ReadView view) {
+        this.setFading(view.getBoolean(FADING_NBT_KEY, false));
+        this.setViewRange(view.getFloat(VIEW_RANGE_NBT_KEY, 0f));
 
-        NbtCompound structureNbt = nbt.getCompound(STRUCTURE_NBT_KEY).orElseGet(NbtCompound::new);
+        NbtCompound structureNbt = view.read(STRUCTURE_NBT_KEY, NbtCompound.CODEC).orElseGet(NbtCompound::new);
         CompoundTag structureTag = FabricNbtConversion.convert(structureNbt, CompoundTag.class);
 
         var adapter = ExtendedBlockStateAdapter.getInstance();
@@ -139,22 +141,20 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
 
         this.structureContainer.setStructure(structure);
 
-        if (nbt.contains(FADE_MODE_NBT_KEY)) {
-            fadeMode = nbt.getInt(FADE_MODE_NBT_KEY).orElse(0);
-        }
+        fadeMode = view.getInt(FADE_MODE_NBT_KEY, 0);
     }
 
     @Override
-    protected void writeCustomDataToNbt(NbtCompound nbt) {
-        nbt.putBoolean(FADING_NBT_KEY, isFading());
-        nbt.putFloat(VIEW_RANGE_NBT_KEY, getViewRange());
+    protected void writeCustomData(WriteView view) {
+        view.putBoolean(FADING_NBT_KEY, isFading());
+        view.putFloat(VIEW_RANGE_NBT_KEY, getViewRange());
 
         BlockStructure structure = this.structureContainer.getWrapper().getStructure();
         CompoundTag structureTag = IllusoryWallsMod.SCHEMATIC_FORMAT.serializer().serialize(structure);
         NbtCompound structureNbt = FabricNbtConversion.convert(structureTag, NbtCompound.class);
-        nbt.put(STRUCTURE_NBT_KEY, structureNbt);
+        view.put(STRUCTURE_NBT_KEY, NbtCompound.CODEC, structureNbt);
 
-        nbt.putInt(FADE_MODE_NBT_KEY, fadeMode);
+        view.putInt(FADE_MODE_NBT_KEY, fadeMode);
     }
 
     @Override

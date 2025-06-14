@@ -1,6 +1,7 @@
 package work.lclpnet.illwalls.wall;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 
 public class IllusoryWallProperties {
 
@@ -54,18 +55,13 @@ public class IllusoryWallProperties {
         }
     }
 
-    public void readFrom(NbtCompound nbt) {
-        if (nbt.contains(RESPAWN_DURATION_NBT_KEY)) {
-            respawnDuration = nbt.getInt(RESPAWN_DURATION_NBT_KEY).orElse(0);
-        }
-
-        if (nbt.contains(RESPAWN_TIMER_NBT_KEY)) {
-            respawnTimer = nbt.getInt(RESPAWN_TIMER_NBT_KEY).orElse(0);
-        }
+    public void readFrom(ReadView view) {
+        respawnDuration = view.getInt(RESPAWN_DURATION_NBT_KEY, 0);
+        respawnTimer = view.getInt(RESPAWN_TIMER_NBT_KEY, 0);
     }
 
-    public void writeTo(NbtCompound nbt) {
-        nbt.putInt(RESPAWN_DURATION_NBT_KEY, respawnDuration);
-        nbt.putInt(RESPAWN_TIMER_NBT_KEY, respawnTimer);
+    public void writeTo(WriteView view) {
+        view.putInt(RESPAWN_DURATION_NBT_KEY, respawnDuration);
+        view.putInt(RESPAWN_TIMER_NBT_KEY, respawnTimer);
     }
 }

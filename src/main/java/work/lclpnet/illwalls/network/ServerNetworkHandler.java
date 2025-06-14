@@ -48,7 +48,7 @@ public class ServerNetworkHandler {
 
         if (!player.isCreativeLevelTwoOp()) return;
 
-        final ServerWorld world = player.getServerWorld();
+        final ServerWorld world = player.getWorld();
 
         world.getServer().execute(() -> {
             int entityId = payload.entityId();
@@ -74,7 +74,7 @@ public class ServerNetworkHandler {
 
     private void attackBlockAdventure(AttackBlockAdventureC2SPacket payload, ServerPlayNetworking.Context context) {
         ServerPlayerEntity player = context.player();
-        final ServerWorld world = player.getServerWorld();
+        final ServerWorld world = player.getWorld();
 
         world.getServer().execute(() -> {
             BlockPos pos = payload.pos();
