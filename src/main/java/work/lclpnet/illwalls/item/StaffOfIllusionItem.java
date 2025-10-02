@@ -39,7 +39,7 @@ public class StaffOfIllusionItem extends Item {
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
         if (!user.isSneaking()) return super.use(world, user, hand);
 
-        if (!world.isClient && user instanceof ServerPlayerEntity player) {
+        if (!world.isClient() && user instanceof ServerPlayerEntity player) {
             openEditScreen(player, null);
         }
 
@@ -48,7 +48,7 @@ public class StaffOfIllusionItem extends Item {
 
     @Override
     public boolean canMine(ItemStack stack, BlockState state, World world, BlockPos pos, LivingEntity user) {
-        if (!world.isClient && user instanceof ServerPlayerEntity player) {
+        if (!world.isClient() && user instanceof ServerPlayerEntity player) {
             this.destroyIllusoryWall(player, (ServerWorld) world, pos);
         }
 

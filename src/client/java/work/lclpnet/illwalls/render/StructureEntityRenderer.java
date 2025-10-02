@@ -2,24 +2,24 @@ package work.lclpnet.illwalls.render;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.render.entity.EntityRenderManager;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.entity.StructureEntity;
 
 public class StructureEntityRenderer extends EntityRenderer<StructureEntity, StructureEntityRenderState> implements RenderLayerGetter {
 
-    private final StructureRenderer structureRenderer;
+    private final StructureEntityBatchRenderer batchRenderer;
 
     public StructureEntityRenderer(EntityRendererFactory.Context context) {
         super(context);
 
-        var blockRenderManager = context.getBlockRenderManager();
-        var blockIllusionRenderManager = new BlockIllusionRenderManager(blockRenderManager, this);
-        this.structureRenderer = new CullStructureRenderer(blockIllusionRenderManager);
+        EntityRenderManager renderDispatcher = context.getRenderDispatcher();
+
+        batchRenderer = ((IllusoryBatchRendererProvider) renderDispatcher).illwalls$getStructureEntityRenderer();
     }
 
     @Override
@@ -45,37 +45,10 @@ public class StructureEntityRenderer extends EntityRenderer<StructureEntity, Str
     }
 
     @Override
-    public void render(StructureEntityRenderState state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        super.render(state, matrices, vertexConsumers, light);
+    public void render(StructureEntityRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState) {
+        super.render(state, matrices, queue, cameraState);
 
-        float alpha = 1F;
-
-        if (state.fading) {
-            long start = state.fadeStartMs;
-
-            if (start == 0L) {
-                // in case the render is invoked between the set of fadeStartMs
-                start = System.currentTimeMillis();
-            }
-
-            long now = System.currentTimeMillis();
-
-            alpha = (now - start) / (float) IllusoryWallEntity.FADE_DURATION_MS;
-
-            if (state.fadeMode != StructureEntity.FADE_IN) {
-                alpha = 1F - alpha;
-            }
-
-            alpha = MathHelper.clamp(alpha, 0F, 1F);
-        }
-
-        BlockPos fadingFrom = state.fadingFrom;
-
-        if (fadingFrom != null) {
-            light = LightmapTextureManager.pack(state.blockLight, state.skyLight);
-        }
-
-        structureRenderer.render(state.structure, state.x, state.y, state.z, matrices, vertexConsumers, light, alpha);
+        batchRenderer.submit(matrices, state);
     }
 
     @Override

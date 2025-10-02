@@ -59,7 +59,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
     public StructureEntity(EntityType<?> entityType, World world) {
         super(entityType, world);
 
-        if (world.isClient) {
+        if (world.isClient()) {
             initClient();
         }
     }
@@ -109,7 +109,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
     private void startFading() {
         fadeEnd = age + IllusoryWallEntity.FADE_DURATION_TICKS;
 
-        if (getWorld().isClient()) {
+        if (getEntityWorld().isClient()) {
             fadeStartMs = System.currentTimeMillis();
         }
     }
@@ -161,7 +161,7 @@ public class StructureEntity extends Entity implements ExtraSpawnData, Structure
     public void tick() {
         super.tick();
 
-        if (getWorld().isClient || !isFading() || age < fadeEnd + 2) return;
+        if (getEntityWorld().isClient() || !isFading() || age < fadeEnd + 2) return;
 
         this.discard();
     }

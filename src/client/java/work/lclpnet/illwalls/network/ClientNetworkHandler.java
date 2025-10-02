@@ -2,6 +2,7 @@ package work.lclpnet.illwalls.network;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import work.lclpnet.illwalls.entity.ClientEntityManager;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
@@ -24,20 +25,20 @@ public class ClientNetworkHandler {
     }
 
     private void spawn(EntityExtraSpawnS2CPacket payload, ClientPlayNetworking.Context context) {
-        final var world = context.player().clientWorld;
+        if (!(context.player().getEntityWorld() instanceof ClientWorld world)) return;
 
         // execute in main thread
         context.client().execute(() -> entityManager.spawnEntity(payload, world));
     }
 
     private void illusoryWallUpdate(StructureUpdateS2CPacket payload, ClientPlayNetworking.Context context) {
-        final var world = context.player().clientWorld;
+        if (!(context.player().getEntityWorld() instanceof ClientWorld world)) return;
 
         context.client().execute(() -> entityManager.updateIllusoryWall(payload, world));
     }
 
     private void editWallScreen(EditWallScreenS2CPacket payload, ClientPlayNetworking.Context context) {
-        final var world = context.player().clientWorld;
+        if (!(context.player().getEntityWorld() instanceof ClientWorld world)) return;
         MinecraftClient client = context.client();
 
         client.execute(() -> {

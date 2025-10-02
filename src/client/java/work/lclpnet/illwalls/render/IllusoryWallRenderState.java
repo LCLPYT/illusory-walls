@@ -5,6 +5,5 @@ import work.lclpnet.kibu.schematic.FabricStructureView;
 
 public class IllusoryWallRenderState extends EntityRenderState {
 
-    int outlineColor;
     FabricStructureView structure;
 }

@@ -78,7 +78,7 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     public void onSpawnPacket(EntitySpawnS2CPacket packet) {
         super.onSpawnPacket(packet);
 
-        if (getWorld().isClient) {
+        if (getEntityWorld().isClient()) {
             initClient();
         }
     }
@@ -173,8 +173,8 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     }
 
     public synchronized void fade(@Nullable BlockPos from) {
-        World world = getWorld();
-        if (world.isClient || isFading()) return;
+        World world = getEntityWorld();
+        if (world.isClient() || isFading()) return;
 
         fadeFrom = from;
 
@@ -201,8 +201,8 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     public synchronized void resetWall() {
         if (isRemoved()) return;
 
-        World world = getWorld();
-        if (world.isClient || (isFading() && getFadeMode() == FADE_IN)) return;
+        World world = getEntityWorld();
+        if (world.isClient() || (isFading() && getFadeMode() == FADE_IN)) return;
 
         properties.stopRespawnTimer();
 
@@ -222,8 +222,8 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     }
 
     private void replaceBlocks() {
-        World world = getWorld();
-        if (world.isClient) return;
+        World world = getEntityWorld();
+        if (world.isClient()) return;
 
         // reset blocks
         ExtendedStructureWrapper wrapper = structureContainer.getWrapper();
@@ -246,7 +246,7 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     public void tick() {
         super.tick();
 
-        if (this.getWorld().isClient || !this.isFading() || age < fadeEnd) return;
+        if (this.getEntityWorld().isClient() || !this.isFading() || age < fadeEnd) return;
 
         if (getFadeMode() != FADE_OUT) {
             this.setFading(false);

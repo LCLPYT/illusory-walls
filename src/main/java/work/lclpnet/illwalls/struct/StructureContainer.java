@@ -23,11 +23,11 @@ public class StructureContainer {
     }
 
     private boolean existsInWorld() {
-        return entity.getWorld().getEntityById(entity.getId()) != null;
+        return entity.getEntityWorld().getEntityById(entity.getId()) != null;
     }
 
     private void onUpdate(BlockPos pos, BlockState state) {
-        if (entity.getWorld().isClient) return;
+        if (entity.getEntityWorld().isClient()) return;
 
         if (this.structure.getStructure().isEmpty()) {
             entity.discard();
@@ -61,7 +61,7 @@ public class StructureContainer {
     }
 
     public void updateStructure(BlockStructure delta) {
-        if (!entity.getWorld().isClient) {
+        if (!entity.getEntityWorld().isClient()) {
             if (!this.existsInWorld()) return;  // too early
 
             // if we are in the server world, send an update packet

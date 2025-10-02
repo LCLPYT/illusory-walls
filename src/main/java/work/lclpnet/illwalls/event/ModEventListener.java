@@ -54,7 +54,7 @@ public class ModEventListener {
                 return ActionResult.PASS;
             }
 
-            if (!world.isClient && pos != null) {
+            if (!world.isClient() && pos != null) {
                 ActionResult result = StaffOfIllusionItem.onRightClickBlockEarlyServer((ServerPlayerEntity) player, (ServerWorld) world, pos);
 
                 if (result != null) {
@@ -76,14 +76,14 @@ public class ModEventListener {
 
     private void preventWallModification() {
         BlockModificationHooks.PLACE_BLOCK.register((world, pos, entity, newState) -> {
-            if (world.isClient || !(world instanceof ServerWorld serverWorld)) return false;
+            if (world.isClient() || !(world instanceof ServerWorld serverWorld)) return false;
 
             // prevent block placement in an illusory wall
             return wallLookup.getWallAt(serverWorld, pos).isPresent();
         });
 
         BlockModificationHooks.PLACE_FLUID.register((world, pos, entity, newState) -> {
-            if (world.isClient || !(world instanceof ServerWorld serverWorld)) return false;
+            if (world.isClient() || !(world instanceof ServerWorld serverWorld)) return false;
 
             // prevent fluid placement in an illusory wall
             return wallLookup.getWallAt(serverWorld, pos).isPresent();
@@ -92,7 +92,7 @@ public class ModEventListener {
 
     private void registerDestroyWallEvents() {
         AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
-            if (world.isClient || hand != Hand.MAIN_HAND) return ActionResult.PASS;
+            if (world.isClient() || hand != Hand.MAIN_HAND) return ActionResult.PASS;
 
             ItemStack stack = player.getStackInHand(hand);
             if (stack.isOf(STAFF_OF_ILLUSION_ITEM)) return ActionResult.PASS;
@@ -103,13 +103,13 @@ public class ModEventListener {
         });
 
         ProjectileHooks.HIT_BLOCK.register((projectile, hit) -> {
-            if (projectile.getWorld().isClient) return;
+            if (projectile.getEntityWorld().isClient()) return;
 
             BlockPos pos = hit.getBlockPos();
             IllusoryWallManager manager = IllusoryWallsApi.getInstance().manager();
 
             BlockPos from = pos.offset(hit.getSide());
-            manager.fadeWallAtIfPresent((ServerWorld) projectile.getWorld(), pos, from);
+            manager.fadeWallAtIfPresent((ServerWorld) projectile.getEntityWorld(), pos, from);
         });
     }
 
@@ -143,7 +143,7 @@ public class ModEventListener {
         });
 
         PlayerInventoryHooks.DROP_ITEM.register((player, slot, inInventory) -> {
-            if (player.getWorld().isClient) return false;
+            if (player.getEntityWorld().isClient()) return false;
 
             PlayerInventory inventory = player.getInventory();
 
@@ -159,7 +159,7 @@ public class ModEventListener {
         });
 
         PlayerInventoryHooks.PLAYER_PICKED_UP.register((player, itemEntity) -> {
-            if (player.getWorld().isClient) return;
+            if (player.getEntityWorld().isClient()) return;
 
             PlayerInfo.get((ServerPlayerEntity) player).updatePlayerCanSeeIllusoryWalls();
         });

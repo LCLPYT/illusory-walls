@@ -31,7 +31,7 @@ public class PlayerInfo {
         this.seeIllusoryWalls = canSeeIllusoryWalls;
 
         // update tracking status for all illusory walls in the players world
-        ServerWorld world = player.getWorld();
+        ServerWorld world = player.getEntityWorld();
         ServerChunkLoadingManager chunkManager = world.getChunkManager().chunkLoadingManager;
         if (!(chunkManager instanceof EntityTrackingUpdatable entityTrackingUpdatable)) return;
 

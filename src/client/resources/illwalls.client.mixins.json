@@ -8,6 +8,8 @@
   "client": [
     "BlockRenderManagerAccessor",
     "ClientPlayerInteractionManagerMixin",
+    "EntityRenderManagerMixin",
+    "RenderDispatcherAccessor",
     "WorldRendererAccessor",
     "WorldRendererMixin"
   ],

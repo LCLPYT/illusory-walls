@@ -3,11 +3,12 @@ package work.lclpnet.illwalls.render;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.ColorHelper;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.mixin.client.WorldRendererAccessor;
 
@@ -37,20 +38,14 @@ public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntit
     }
 
     @Override
-    public void render(IllusoryWallRenderState state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+    public void render(IllusoryWallRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState) {
         WorldRenderer worldRenderer = MinecraftClient.getInstance().worldRenderer;
         BufferBuilderStorage bufferBuilders = ((WorldRendererAccessor) worldRenderer).getBufferBuilders();
         OutlineVertexConsumerProvider outlineVertexConsumerProvider = bufferBuilders.getOutlineVertexConsumers();
 
-        vertexConsumers = outlineVertexConsumerProvider;
+        outlineVertexConsumerProvider.setColor(state.outlineColor);
 
-        outlineVertexConsumerProvider.setColor(
-                ColorHelper.getRed(state.outlineColor),
-                ColorHelper.getGreen(state.outlineColor),
-                ColorHelper.getBlue(state.outlineColor),
-                ColorHelper.getAlpha(state.outlineColor));
-
-        structureRenderer.render(state.structure, state.x, state.y, state.z, matrices, vertexConsumers, light, 1F);
+        structureRenderer.render(state.structure, state.x, state.y, state.z, matrices, outlineVertexConsumerProvider, state.light, 1F);
     }
 
     @SuppressWarnings("deprecation")
