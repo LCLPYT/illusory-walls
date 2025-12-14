@@ -1,7 +1,7 @@
 package work.lclpnet.illwalls.wall;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 
 /**
@@ -9,12 +9,12 @@ import work.lclpnet.illwalls.entity.IllusoryWallEntity;
  */
 public class IllusoryWallPlayerSettings {
 
-    public static final PacketCodec<PacketByteBuf, IllusoryWallPlayerSettings> PACKET_CODEC = PacketCodec.of(IllusoryWallPlayerSettings::writeTo, IllusoryWallPlayerSettings::new);
+    public static final StreamCodec<FriendlyByteBuf, IllusoryWallPlayerSettings> PACKET_CODEC = StreamCodec.ofMember(IllusoryWallPlayerSettings::writeTo, IllusoryWallPlayerSettings::new);
     private int respawnDuration = IllusoryWallProperties.NO_RESPAWN;
 
     public IllusoryWallPlayerSettings() {}
 
-    public IllusoryWallPlayerSettings(PacketByteBuf buf) {
+    public IllusoryWallPlayerSettings(FriendlyByteBuf buf) {
         respawnDuration = buf.readVarInt();
     }
 
@@ -35,7 +35,7 @@ public class IllusoryWallPlayerSettings {
         return respawnDuration != IllusoryWallProperties.NO_RESPAWN;
     }
 
-    public void writeTo(PacketByteBuf buf) {
+    public void writeTo(FriendlyByteBuf buf) {
         buf.writeVarInt(respawnDuration);
     }
 

@@ -2,15 +2,15 @@ package work.lclpnet.illwalls.network;
 
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.listener.ClientCommonPacketListener;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.common.ClientCommonPacketListener;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.util.PlayerInfo;
 import work.lclpnet.illwalls.wall.IllusoryWallManager;
@@ -44,18 +44,18 @@ public class ServerNetworkHandler {
     }
 
     private void applyWallSettings(ApplyWallSettingsC2SPacket payload, ServerPlayNetworking.Context context) {
-        ServerPlayerEntity player = context.player();
+        ServerPlayer player = context.player();
 
-        if (!player.isCreativeLevelTwoOp()) return;
+        if (!player.canUseGameMasterBlocks()) return;
 
-        final ServerWorld world = player.getEntityWorld();
+        final ServerLevel world = player.level();
 
         world.getServer().execute(() -> {
             int entityId = payload.entityId();
             IllusoryWallEntity wallEntity = null;
 
             if (entityId != -1) {
-                Entity entity = world.getEntityById(entityId);
+                Entity entity = world.getEntity(entityId);
 
                 if (entity instanceof IllusoryWallEntity) {
                     wallEntity = (IllusoryWallEntity) entity;
@@ -73,8 +73,8 @@ public class ServerNetworkHandler {
     }
 
     private void attackBlockAdventure(AttackBlockAdventureC2SPacket payload, ServerPlayNetworking.Context context) {
-        ServerPlayerEntity player = context.player();
-        final ServerWorld world = player.getEntityWorld();
+        ServerPlayer player = context.player();
+        final ServerLevel world = player.level();
 
         world.getServer().execute(() -> {
             BlockPos pos = payload.pos();
@@ -84,36 +84,36 @@ public class ServerNetworkHandler {
                 return;
             }
 
-            if (!player.canInteractWithBlockAt(pos, 1.0)) {
+            if (!player.canInteractWithBlock(pos, 1.0)) {
                 // too far
                 return;
             }
 
-            if (!player.isBlockBreakingRestricted(world, pos, player.interactionManager.getGameMode())) {
+            if (!player.blockActionRestricted(world, pos, player.gameMode.getGameModeForPlayer())) {
                 // handled by default attack block packet
                 return;
             }
 
-            ItemStack stack = player.getMainHandStack();
+            ItemStack stack = player.getMainHandItem();
 
-            if (stack.isOf(STAFF_OF_ILLUSION_ITEM)) {
+            if (stack.is(STAFF_OF_ILLUSION_ITEM)) {
                 // staff of illusion has different behaviour
                 return;
             }
 
             Direction direction = payload.direction();
-            BlockPos from = pos.offset(direction);
+            BlockPos from = pos.relative(direction);
 
             wallManager.fadeWallAtIfPresent(world, pos, from);
         });
     }
 
-    public static void send(CustomPayload packet, Collection<ServerPlayerEntity> players) {
+    public static void send(CustomPacketPayload packet, Collection<ServerPlayer> players) {
         players.forEach(player -> ServerPlayNetworking.send(player, packet));
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends ClientCommonPacketListener> Packet<T> createS2CPacket(CustomPayload packet) {
+    public static <T extends ClientCommonPacketListener> Packet<T> createS2CPacket(CustomPacketPayload packet) {
         return (Packet<T>) ServerPlayNetworking.createS2CPacket(packet);
     }
 }

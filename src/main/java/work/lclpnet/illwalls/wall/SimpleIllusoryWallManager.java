@@ -1,11 +1,11 @@
 package work.lclpnet.illwalls.wall;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.struct.ExtendedStructureWrapper;
@@ -26,7 +26,7 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
     }
 
     @Override
-    public boolean fadeWallAtIfPresent(ServerWorld world, BlockPos pos, @Nullable BlockPos from) {
+    public boolean fadeWallAtIfPresent(ServerLevel world, BlockPos pos, @Nullable BlockPos from) {
         var optWall = wallLookup.getWallAt(world, pos);
         if (optWall.isEmpty()) return false;
 
@@ -37,15 +37,15 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
     }
 
     @Override
-    public boolean makeBlockIllusory(ServerWorld world, BlockPos pos, @Nullable ServerPlayerEntity player) {
+    public boolean makeBlockIllusory(ServerLevel world, BlockPos pos, @Nullable ServerPlayer player) {
         if (wallLookup.getWallAt(world, pos).isPresent()) return false;  // there is already a wall
 
         // check neighbours for any existing illusory walls
         Set<IllusoryWallEntity> nearbyWalls = new HashSet<>();
-        var adjPos = new BlockPos.Mutable();
+        var adjPos = new BlockPos.MutableBlockPos();
 
         for (Direction direction : Direction.values()) {
-            adjPos.set(pos, direction);
+            adjPos.setWithOffset(pos, direction);
 
             var opt = wallLookup.getWallAt(world, adjPos);
             opt.ifPresent(nearbyWalls::add);
@@ -56,7 +56,7 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
             IllusoryWallEntity wall = IllusoryWallsMod.ILLUSORY_WALL_ENTITY.spawn(world, created -> {
                 ExtendedStructureWrapper structure = created.getStructureContainer().getWrapper();
                 structure.setBlockState(pos, world.getBlockState(pos));
-            }, pos, SpawnReason.SPAWN_ITEM_USE, false, false);
+            }, pos, EntitySpawnReason.SPAWN_ITEM_USE, false, false);
 
             if (player != null && wall != null) {
                 PlayerInfo.get(player).getWallSettings().applyTo(wall);
@@ -104,14 +104,14 @@ public class SimpleIllusoryWallManager implements IllusoryWallManager {
     }
 
     @Override
-    public boolean removeIllusoryBlock(ServerWorld world, BlockPos pos) {
+    public boolean removeIllusoryBlock(ServerLevel world, BlockPos pos) {
         var optWall = wallLookup.getWallAt(world, pos);
         if (optWall.isEmpty()) return false;  // there is no wall
 
         IllusoryWallEntity entity = optWall.get();
 
         ExtendedStructureWrapper structure = entity.getStructureContainer().getWrapper();
-        structure.setBlockState(pos, Blocks.AIR.getDefaultState());
+        structure.setBlockState(pos, Blocks.AIR.defaultBlockState());
         return true;
     }
 }

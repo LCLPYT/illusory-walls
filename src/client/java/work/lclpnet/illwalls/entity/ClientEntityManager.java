@@ -1,7 +1,7 @@
 package work.lclpnet.illwalls.entity;
 
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.SpawnReason;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.EntitySpawnReason;
 import org.slf4j.Logger;
 import work.lclpnet.illwalls.network.EntityExtraSpawnS2CPacket;
 import work.lclpnet.illwalls.network.StructureUpdateS2CPacket;
@@ -16,31 +16,31 @@ public class ClientEntityManager {
         this.logger = logger;
     }
 
-    public void spawnEntity(EntityExtraSpawnS2CPacket extraPacket, ClientWorld world) {
+    public void spawnEntity(EntityExtraSpawnS2CPacket extraPacket, ClientLevel world) {
         final var packet = extraPacket.packet();
 
-        var entityType = packet.getEntityType();
-        var entity = entityType.create(world, SpawnReason.LOAD);
+        var entityType = packet.getType();
+        var entity = entityType.create(world, EntitySpawnReason.LOAD);
 
         if (entity == null) {
             logger.warn("Skipping entity with id {}", entityType);
             return;
         }
 
-        entity.onSpawnPacket(packet);
+        entity.recreateFromPacket(packet);
 
         if (entity instanceof ExtraSpawnData extraSpawnData) {
             var data = extraPacket.data();
             extraSpawnData.readExtraSpawnData(data);
         }
 
-        entity.setId(packet.getEntityId());
+        entity.setId(packet.getId());
         world.addEntity(entity);
     }
 
-    public void updateIllusoryWall(StructureUpdateS2CPacket packet, ClientWorld world) {
+    public void updateIllusoryWall(StructureUpdateS2CPacket packet, ClientLevel world) {
         final int entityId = packet.entityId();
-        final var entity = world.getEntityById(entityId);
+        final var entity = world.getEntity(entityId);
 
         if (!(entity instanceof StructureHolder holder)) {
             logger.warn("Skipping invalid illusory wall update for id {}", entityId);

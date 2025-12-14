@@ -1,6 +1,6 @@
 package work.lclpnet.illwalls.util;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.Locale;
 
@@ -28,8 +28,8 @@ public enum McTimeUnit {
         return ticks % this.ticks == 0;
     }
 
-    public Text asText() {
-        return Text.translatable("illusory_wall.unit." + name().toLowerCase(Locale.ROOT));
+    public Component asText() {
+        return Component.translatable("illusory_wall.unit." + name().toLowerCase(Locale.ROOT));
     }
 
     public static McTimeUnit getBiggestFittingTimeUnit(int ticks) {

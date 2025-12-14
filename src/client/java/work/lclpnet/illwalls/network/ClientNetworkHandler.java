@@ -1,9 +1,9 @@
 package work.lclpnet.illwalls.network;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.Entity;
 import work.lclpnet.illwalls.entity.ClientEntityManager;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.screen.EditWallScreen;
@@ -25,28 +25,28 @@ public class ClientNetworkHandler {
     }
 
     private void spawn(EntityExtraSpawnS2CPacket payload, ClientPlayNetworking.Context context) {
-        if (!(context.player().getEntityWorld() instanceof ClientWorld world)) return;
+        if (!(context.player().level() instanceof ClientLevel world)) return;
 
         // execute in main thread
         context.client().execute(() -> entityManager.spawnEntity(payload, world));
     }
 
     private void illusoryWallUpdate(StructureUpdateS2CPacket payload, ClientPlayNetworking.Context context) {
-        if (!(context.player().getEntityWorld() instanceof ClientWorld world)) return;
+        if (!(context.player().level() instanceof ClientLevel world)) return;
 
         context.client().execute(() -> entityManager.updateIllusoryWall(payload, world));
     }
 
     private void editWallScreen(EditWallScreenS2CPacket payload, ClientPlayNetworking.Context context) {
-        if (!(context.player().getEntityWorld() instanceof ClientWorld world)) return;
-        MinecraftClient client = context.client();
+        if (!(context.player().level() instanceof ClientLevel world)) return;
+        Minecraft client = context.client();
 
         client.execute(() -> {
             int entityId = payload.entityId();
             IllusoryWallEntity wallEntity = null;
 
             if (entityId != -1) {
-                Entity entity = world.getEntityById(entityId);
+                Entity entity = world.getEntity(entityId);
 
                 if (entity instanceof IllusoryWallEntity) {
                     wallEntity = (IllusoryWallEntity) entity;

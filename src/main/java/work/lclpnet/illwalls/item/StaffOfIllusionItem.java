@@ -1,21 +1,21 @@
 package work.lclpnet.illwalls.item;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.particle.DustParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 import work.lclpnet.illwalls.IllusoryWallsApi;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.network.EditWallScreenS2CPacket;
@@ -26,50 +26,50 @@ import javax.annotation.Nullable;
 
 public class StaffOfIllusionItem extends Item {
 
-    public StaffOfIllusionItem(Settings settings) {
+    public StaffOfIllusionItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public boolean hasGlint(ItemStack stack) {
+    public boolean isFoil(ItemStack stack) {
         return true;
     }
 
     @Override
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
-        if (!user.isSneaking()) return super.use(world, user, hand);
+    public InteractionResult use(Level world, Player user, InteractionHand hand) {
+        if (!user.isShiftKeyDown()) return super.use(world, user, hand);
 
-        if (!world.isClient() && user instanceof ServerPlayerEntity player) {
+        if (!world.isClientSide() && user instanceof ServerPlayer player) {
             openEditScreen(player, null);
         }
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public boolean canMine(ItemStack stack, BlockState state, World world, BlockPos pos, LivingEntity user) {
-        if (!world.isClient() && user instanceof ServerPlayerEntity player) {
-            this.destroyIllusoryWall(player, (ServerWorld) world, pos);
+    public boolean canDestroyBlock(ItemStack stack, BlockState state, Level world, BlockPos pos, LivingEntity user) {
+        if (!world.isClientSide() && user instanceof ServerPlayer player) {
+            this.destroyIllusoryWall(player, (ServerLevel) world, pos);
         }
 
         return false;
     }
 
-    private void destroyIllusoryWall(ServerPlayerEntity player, ServerWorld world, BlockPos pos) {
-        if (!player.isCreativeLevelTwoOp()) return;
+    private void destroyIllusoryWall(ServerPlayer player, ServerLevel world, BlockPos pos) {
+        if (!player.canUseGameMasterBlocks()) return;
 
         IllusoryWallManager wallManager = IllusoryWallsApi.getInstance().manager();
         if (!wallManager.removeIllusoryBlock(world, pos)) return;
 
         // spawn visual particles
-        Vec3d center = pos.toCenterPos();
+        Vec3 center = pos.getCenter();
 
-        world.spawnParticles(player, ParticleTypes.FLAME, false, false,
+        world.sendParticles(player, ParticleTypes.FLAME, false, false,
                 center.x, center.y, center.z, 25, 0.5f, 0.5f, 0.5f, 0.05);
     }
 
-    private static void openEditScreen(ServerPlayerEntity player, @Nullable IllusoryWallEntity wall) {
-        CustomPayload packet;
+    private static void openEditScreen(ServerPlayer player, @Nullable IllusoryWallEntity wall) {
+        CustomPacketPayload packet;
 
         if (wall == null) {
             packet = new EditWallScreenS2CPacket(player);
@@ -81,10 +81,10 @@ public class StaffOfIllusionItem extends Item {
     }
 
     @Nullable
-    public static ActionResult onRightClickBlockEarlyServer(ServerPlayerEntity player, ServerWorld world, BlockPos pos) {
+    public static InteractionResult onRightClickBlockEarlyServer(ServerPlayer player, ServerLevel world, BlockPos pos) {
         // fired before vanilla block click handlers
 
-        if (player.isSneaking()) {
+        if (player.isShiftKeyDown()) {
             IllusoryWallLookup lookup = IllusoryWallsApi.getInstance().lookup();
             openEditScreen(player, lookup.getWallAt(world, pos).orElse(null));
 
@@ -92,23 +92,23 @@ public class StaffOfIllusionItem extends Item {
         }
 
         if (!makeIllusoryWall(player, world, pos)) {
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
 
         return null;
     }
 
-    private static boolean makeIllusoryWall(ServerPlayerEntity player, ServerWorld world, BlockPos pos) {
-        if (!player.isCreativeLevelTwoOp()) return false;
+    private static boolean makeIllusoryWall(ServerPlayer player, ServerLevel world, BlockPos pos) {
+        if (!player.canUseGameMasterBlocks()) return false;
 
         IllusoryWallManager wallManager = IllusoryWallsApi.getInstance().manager();
         boolean created = wallManager.makeBlockIllusory(world, pos, player);
 
         if (created) {
-            Vec3d center = pos.toCenterPos();
+            Vec3 center = pos.getCenter();
 
-            DustParticleEffect effect = new DustParticleEffect(0x770077, 0.6f);
-            world.spawnParticles(player, effect, false, false,
+            DustParticleOptions effect = new DustParticleOptions(0x770077, 0.6f);
+            world.sendParticles(player, effect, false, false,
                     center.x, center.y, center.z, 100, 0.5f, 0.5f, 0.5f, 0.1);
         }
 

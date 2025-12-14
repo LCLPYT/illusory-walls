@@ -1,19 +1,19 @@
 package work.lclpnet.illwalls.network;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.kibu.structure.BlockStructure;
 
 import java.util.Objects;
 
-public record StructureUpdateS2CPacket(int entityId, BlockStructure deltaStructure) implements CustomPayload {
+public record StructureUpdateS2CPacket(int entityId, BlockStructure deltaStructure) implements CustomPacketPayload {
 
-    public static final Id<StructureUpdateS2CPacket> ID = new Id<>(IllusoryWallsMod.identifier("structure_update"));
-    public static final PacketCodec<ByteBuf, StructureUpdateS2CPacket> CODEC = PacketCodec.tuple(
-            PacketCodecs.VAR_INT, StructureUpdateS2CPacket::entityId,
+    public static final Type<StructureUpdateS2CPacket> ID = new Type<>(IllusoryWallsMod.identifier("structure_update"));
+    public static final StreamCodec<ByteBuf, StructureUpdateS2CPacket> CODEC = StreamCodec.composite(
+            ByteBufCodecs.VAR_INT, StructureUpdateS2CPacket::entityId,
             IllusoryWallsPacketCodecs.STRUCTURE_PACKET_CODEC, StructureUpdateS2CPacket::deltaStructure,
             StructureUpdateS2CPacket::new);
 
@@ -23,7 +23,7 @@ public record StructureUpdateS2CPacket(int entityId, BlockStructure deltaStructu
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

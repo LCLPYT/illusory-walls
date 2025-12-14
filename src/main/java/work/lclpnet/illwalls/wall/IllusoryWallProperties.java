@@ -1,7 +1,7 @@
 package work.lclpnet.illwalls.wall;
 
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class IllusoryWallProperties {
 
@@ -55,12 +55,12 @@ public class IllusoryWallProperties {
         }
     }
 
-    public void readFrom(ReadView view) {
-        respawnDuration = view.getInt(RESPAWN_DURATION_NBT_KEY, 0);
-        respawnTimer = view.getInt(RESPAWN_TIMER_NBT_KEY, 0);
+    public void readFrom(ValueInput view) {
+        respawnDuration = view.getIntOr(RESPAWN_DURATION_NBT_KEY, 0);
+        respawnTimer = view.getIntOr(RESPAWN_TIMER_NBT_KEY, 0);
     }
 
-    public void writeTo(WriteView view) {
+    public void writeTo(ValueOutput view) {
         view.putInt(RESPAWN_DURATION_NBT_KEY, respawnDuration);
         view.putInt(RESPAWN_TIMER_NBT_KEY, respawnTimer);
     }

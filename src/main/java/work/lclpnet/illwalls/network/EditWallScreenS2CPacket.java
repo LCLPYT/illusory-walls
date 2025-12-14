@@ -1,24 +1,24 @@
 package work.lclpnet.illwalls.network;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.util.PlayerInfo;
 import work.lclpnet.illwalls.wall.IllusoryWallPlayerSettings;
 
-public record EditWallScreenS2CPacket(IllusoryWallPlayerSettings settings, int entityId) implements CustomPayload {
+public record EditWallScreenS2CPacket(IllusoryWallPlayerSettings settings, int entityId) implements CustomPacketPayload {
 
-    public static final Id<EditWallScreenS2CPacket> ID = new Id<>(IllusoryWallsMod.identifier("edit_wall_screen"));
-    public static final PacketCodec<PacketByteBuf, EditWallScreenS2CPacket> CODEC = PacketCodec.tuple(
+    public static final Type<EditWallScreenS2CPacket> ID = new Type<>(IllusoryWallsMod.identifier("edit_wall_screen"));
+    public static final StreamCodec<FriendlyByteBuf, EditWallScreenS2CPacket> CODEC = StreamCodec.composite(
             IllusoryWallPlayerSettings.PACKET_CODEC, EditWallScreenS2CPacket::settings,
-            PacketCodecs.VAR_INT, EditWallScreenS2CPacket::entityId,
+            ByteBufCodecs.VAR_INT, EditWallScreenS2CPacket::entityId,
             EditWallScreenS2CPacket::new);
 
-    public EditWallScreenS2CPacket(ServerPlayerEntity player) {
+    public EditWallScreenS2CPacket(ServerPlayer player) {
         this(PlayerInfo.get(player).getWallSettings(), -1);
     }
 
@@ -27,7 +27,7 @@ public record EditWallScreenS2CPacket(IllusoryWallPlayerSettings settings, int e
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

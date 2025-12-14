@@ -1,7 +1,7 @@
 package work.lclpnet.illwalls;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.client.render.entity.EntityRendererFactories;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import work.lclpnet.illwalls.entity.ClientEntityManager;
 import work.lclpnet.illwalls.network.ClientNetworkHandler;
 import work.lclpnet.illwalls.render.IllusoryWallEntityRenderer;
@@ -11,8 +11,8 @@ public class IllusoryWallsModClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        EntityRendererFactories.register(IllusoryWallsMod.STRUCTURE_ENTITY, StructureEntityRenderer::new);
-        EntityRendererFactories.register(IllusoryWallsMod.ILLUSORY_WALL_ENTITY, IllusoryWallEntityRenderer::new);
+        EntityRenderers.register(IllusoryWallsMod.STRUCTURE_ENTITY, StructureEntityRenderer::new);
+        EntityRenderers.register(IllusoryWallsMod.ILLUSORY_WALL_ENTITY, IllusoryWallEntityRenderer::new);
 
         final var entityManager = new ClientEntityManager(IllusoryWallsMod.LOGGER);
         final var networkHandler = new ClientNetworkHandler(entityManager);

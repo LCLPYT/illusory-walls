@@ -1,21 +1,21 @@
 package work.lclpnet.illwalls.network;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.wall.IllusoryWallPlayerSettings;
 
 import javax.annotation.Nullable;
 
-public record ApplyWallSettingsC2SPacket(IllusoryWallPlayerSettings settings, int entityId) implements CustomPayload {
+public record ApplyWallSettingsC2SPacket(IllusoryWallPlayerSettings settings, int entityId) implements CustomPacketPayload {
 
-    public static final Id<ApplyWallSettingsC2SPacket> ID = new Id<>(IllusoryWallsMod.identifier("apply_wall_settings"));
-    public static final PacketCodec<PacketByteBuf, ApplyWallSettingsC2SPacket> CODEC = PacketCodec.tuple(
+    public static final Type<ApplyWallSettingsC2SPacket> ID = new Type<>(IllusoryWallsMod.identifier("apply_wall_settings"));
+    public static final StreamCodec<FriendlyByteBuf, ApplyWallSettingsC2SPacket> CODEC = StreamCodec.composite(
             IllusoryWallPlayerSettings.PACKET_CODEC, ApplyWallSettingsC2SPacket::settings,
-            PacketCodecs.VAR_INT, ApplyWallSettingsC2SPacket::entityId,
+            ByteBufCodecs.VAR_INT, ApplyWallSettingsC2SPacket::entityId,
             ApplyWallSettingsC2SPacket::new);
 
     public ApplyWallSettingsC2SPacket(IllusoryWallPlayerSettings settings, @Nullable IllusoryWallEntity wall) {
@@ -23,7 +23,7 @@ public record ApplyWallSettingsC2SPacket(IllusoryWallPlayerSettings settings, in
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

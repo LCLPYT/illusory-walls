@@ -1,16 +1,16 @@
 package work.lclpnet.illwalls.util;
 
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import static net.minecraft.util.math.MathHelper.clamp;
+import static net.minecraft.util.Mth.clamp;
 
 public class ColorUtil {
 
     private ColorUtil() {}
 
-    public static int getRandomHsvColor(Random random) {
+    public static int getRandomHsvColor(RandomSource random) {
         // hue between 0 and 360
         final float hue = random.nextFloat() * 360;
         // saturation between 0.6 and 1

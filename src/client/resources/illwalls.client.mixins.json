@@ -6,12 +6,12 @@
     "defaultRequire": 1
   },
   "client": [
-    "BlockRenderManagerAccessor",
-    "ClientPlayerInteractionManagerMixin",
-    "EntityRenderManagerMixin",
-    "RenderDispatcherAccessor",
-    "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "BlockRenderDispatcherAccessor",
+    "MultiPlayerGameModeMixin",
+    "EntityRenderDispatcherMixin",
+    "FeatureRenderDispatcherAccessor",
+    "LevelRendererAccessor",
+    "LevelRendererMixin"
   ],
   "mixins": [
   ]

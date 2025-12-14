@@ -1,10 +1,10 @@
 package work.lclpnet.illwalls.entity;
 
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 
 public interface ExtraSpawnData {
 
-    void writeExtraSpawnData(PacketByteBuf buf);
+    void writeExtraSpawnData(FriendlyByteBuf buf);
 
-    void readExtraSpawnData(PacketByteBuf buf);
+    void readExtraSpawnData(FriendlyByteBuf buf);
 }

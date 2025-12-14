@@ -1,7 +1,7 @@
 package work.lclpnet.illwalls.screen.lib;
 
-import net.minecraft.client.gui.widget.LayoutWidget;
-import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.layouts.Layout;
+import net.minecraft.client.gui.layouts.LayoutElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +30,11 @@ public class UiBuilder {
         this.currentY = initialY;
     }
 
-    public void add(Widget widget) {
+    public void add(LayoutElement widget) {
         add(widget, marginTop);
     }
 
-    public void add(Widget widget, int marginTop) {
+    public void add(LayoutElement widget, int marginTop) {
         Objects.requireNonNull(widget);
 
         Entry entry = new Entry(widget, marginTop);
@@ -53,10 +53,10 @@ public class UiBuilder {
     }
 
     private class Entry {
-        private final Widget widget;
+        private final LayoutElement widget;
         private final int marginTop;
 
-        private Entry(Widget widget, int marginTop) {
+        private Entry(LayoutElement widget, int marginTop) {
             this.widget = widget;
             this.marginTop = marginTop;
         }
@@ -70,8 +70,8 @@ public class UiBuilder {
 
             currentY += marginTop + widgetHeight;
 
-            if (widget instanceof LayoutWidget layout) {
-                layout.refreshPositions();
+            if (widget instanceof Layout layout) {
+                layout.arrangeElements();
             }
         }
     }

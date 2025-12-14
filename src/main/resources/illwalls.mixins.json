@@ -7,7 +7,7 @@
   },
   "mixins": [
     "ServerChunkLoadingManagerEntityTrackerMixin",
-    "ServerChunkLoadingManagerMixin",
-    "ServerPlayerEntityMixin"
+    "ChunkMapMixin",
+    "ServerPlayerMixin"
   ]
 }

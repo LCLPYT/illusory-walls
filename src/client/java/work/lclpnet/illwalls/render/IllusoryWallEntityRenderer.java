@@ -1,25 +1,24 @@
 package work.lclpnet.illwalls.render;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.renderer.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import com.mojang.blaze3d.vertex.PoseStack;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
-import work.lclpnet.illwalls.mixin.client.WorldRendererAccessor;
+import work.lclpnet.illwalls.mixin.client.LevelRendererAccessor;
 
 public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntity, IllusoryWallRenderState> implements RenderLayerGetter {
 
     private final StructureRenderer structureRenderer;
 
-    public IllusoryWallEntityRenderer(EntityRendererFactory.Context context) {
+    public IllusoryWallEntityRenderer(EntityRendererProvider.Context context) {
         super(context);
 
-        var blockRenderManager = context.getBlockRenderManager();
+        var blockRenderManager = context.getBlockRenderDispatcher();
         var blockIllusionRenderManager = new BlockIllusionRenderManager(blockRenderManager, this);
         this.structureRenderer = new CullStructureRenderer(blockIllusionRenderManager);
     }
@@ -30,32 +29,32 @@ public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntit
     }
 
     @Override
-    public void updateRenderState(IllusoryWallEntity entity, IllusoryWallRenderState state, float tickDelta) {
-        super.updateRenderState(entity, state, tickDelta);
+    public void extractRenderState(IllusoryWallEntity entity, IllusoryWallRenderState state, float tickDelta) {
+        super.extractRenderState(entity, state, tickDelta);
 
         state.outlineColor = entity.getOutlineColor();
         state.structure = entity.getStructureContainer().getWrapper();
     }
 
     @Override
-    public void render(IllusoryWallRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState) {
-        WorldRenderer worldRenderer = MinecraftClient.getInstance().worldRenderer;
-        BufferBuilderStorage bufferBuilders = ((WorldRendererAccessor) worldRenderer).getBufferBuilders();
-        OutlineVertexConsumerProvider outlineVertexConsumerProvider = bufferBuilders.getOutlineVertexConsumers();
+    public void submit(IllusoryWallRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        LevelRenderer worldRenderer = Minecraft.getInstance().levelRenderer;
+        RenderBuffers bufferBuilders = ((LevelRendererAccessor) worldRenderer).getRenderBuffers();
+        OutlineBufferSource outlineVertexConsumerProvider = bufferBuilders.outlineBufferSource();
 
         outlineVertexConsumerProvider.setColor(state.outlineColor);
 
-        structureRenderer.render(state.structure, state.x, state.y, state.z, matrices, outlineVertexConsumerProvider, state.light, 1F);
+        structureRenderer.render(state.structure, state.x, state.y, state.z, matrices, outlineVertexConsumerProvider, state.lightCoords, 1F);
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public RenderLayer getRenderLayer(BlockState state, float alpha) {
-        return RenderLayer.getOutline(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE);
+    public RenderType getRenderLayer(BlockState state, float alpha) {
+        return RenderType.outline(TextureAtlas.LOCATION_BLOCKS);
     }
 
     @Override
-    protected boolean canBeCulled(IllusoryWallEntity entity) {
+    protected boolean affectedByCulling(IllusoryWallEntity entity) {
         return false;  // ignore camera frustum culling for now
     }
 }

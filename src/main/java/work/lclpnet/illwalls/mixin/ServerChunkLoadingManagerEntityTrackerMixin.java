@@ -1,10 +1,10 @@
 package work.lclpnet.illwalls.mixin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.server.network.EntityTrackerEntry;
-import net.minecraft.server.network.PlayerAssociatedNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerChunkLoadingManager;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.network.ServerPlayerConnection;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ChunkMap;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,33 +15,33 @@ import work.lclpnet.illwalls.entity.EntityConditionalTracking;
 
 import java.util.Set;
 
-@Mixin(ServerChunkLoadingManager.EntityTracker.class)
+@Mixin(ChunkMap.TrackedEntity.class)
 public class ServerChunkLoadingManagerEntityTrackerMixin {
 
     @Shadow @Final
     Entity entity;
 
-    @Shadow @Final private Set<PlayerAssociatedNetworkHandler> listeners;
+    @Shadow @Final private Set<ServerPlayerConnection> seenBy;
 
     @Shadow @Final
-    EntityTrackerEntry entry;
+    ServerEntity serverEntity;
 
     @Inject(
-            method = "updateTrackedStatus(Lnet/minecraft/server/network/ServerPlayerEntity;)V",
+            method = "updatePlayer(Lnet/minecraft/server/level/ServerPlayer;)V",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/util/Set;add(Ljava/lang/Object;)Z"
             ),
             cancellable = true
     )
-    public void illwalls$loadServerOnlyEntity(ServerPlayerEntity player, CallbackInfo ci) {
+    public void illwalls$loadServerOnlyEntity(ServerPlayer player, CallbackInfo ci) {
         if (!(entity instanceof EntityConditionalTracking conditional)) return;
 
         if (!conditional.shouldBeTrackedBy(player)) {
             ci.cancel();
 
-            if (this.listeners.remove(player.networkHandler)) {
-                this.entry.stopTracking(player);
+            if (this.seenBy.remove(player.connection)) {
+                this.serverEntity.removePairing(player);
             }
         }
     }

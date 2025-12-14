@@ -1,7 +1,7 @@
 package work.lclpnet.illwalls.render;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 
-public record CullInfo(BlockView blockView, BlockPos pos) {
+public record CullInfo(BlockGetter blockView, BlockPos pos) {
 }

@@ -1,8 +1,8 @@
 package work.lclpnet.illwalls.entity;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public interface EntityConditionalTracking {
 
-    boolean shouldBeTrackedBy(ServerPlayerEntity player);
+    boolean shouldBeTrackedBy(ServerPlayer player);
 }

@@ -1,14 +1,14 @@
 package work.lclpnet.illwalls.screen;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.network.ApplyWallSettingsC2SPacket;
@@ -28,14 +28,14 @@ public class EditWallScreen extends Screen {
     private final IllusoryWallPlayerSettings settings;
     @Nullable
     private final IllusoryWallEntity entity;
-    private CheckboxWidget respawnCheckbox = null;
-    private TextWidget cooldownHeader = null;
-    private TextFieldWidget cooldownInput = null;
-    private CyclingButtonWidget<McTimeUnit> unitButton = null;
+    private Checkbox respawnCheckbox = null;
+    private StringWidget cooldownHeader = null;
+    private EditBox cooldownInput = null;
+    private CycleButton<McTimeUnit> unitButton = null;
     private McTimeUnit prevUnit = null;
 
     public EditWallScreen(IllusoryWallPlayerSettings settings, @Nullable IllusoryWallEntity entity) {
-        super(Text.translatable(entity != null ? "illusory_wall.edit" : "illusory_wall.edit_defaults"));
+        super(Component.translatable(entity != null ? "illusory_wall.edit" : "illusory_wall.edit_defaults"));
 
         this.settings = settings;
         this.entity = entity;
@@ -45,10 +45,10 @@ public class EditWallScreen extends Screen {
     protected void init() {
         boolean shouldRespawn = settings.shouldRespawn();
 
-        respawnCheckbox = CheckboxWidget.builder(Text.translatable("illusory_wall.edit.respawn"), textRenderer)
+        respawnCheckbox = Checkbox.builder(Component.translatable("illusory_wall.edit.respawn"), font)
                 .pos(0, 0)
-                .checked(shouldRespawn)
-                .callback((checkbox, checked) -> {
+                .selected(shouldRespawn)
+                .onValueChange((checkbox, checked) -> {
                     if (checked) {
                         addCooldownUi();
                     } else {
@@ -57,7 +57,7 @@ public class EditWallScreen extends Screen {
                 })
                 .build();
 
-        addDrawableChild(respawnCheckbox);
+        addRenderableWidget(respawnCheckbox);
 
         uiBuilder.add(respawnCheckbox);
         uiBuilder.resize(width);
@@ -70,18 +70,18 @@ public class EditWallScreen extends Screen {
     private void addCooldownUi() {
         removeCooldownUi();
 
-        cooldownInput = new TextFieldWidget(textRenderer, 0, 25, 60, 20,
-                Text.translatable("illusory_wall.edit.respawn_duration"));
+        cooldownInput = new EditBox(font, 0, 25, 60, 20,
+                Component.translatable("illusory_wall.edit.respawn_duration"));
 
-        cooldownHeader = new TextWidget(Text.translatable("illusory_wall.edit.cooldown"), textRenderer);
+        cooldownHeader = new StringWidget(Component.translatable("illusory_wall.edit.cooldown"), font);
 
         McTimeUnit cooldownUnit = restoreState(cooldownInput);
         prevUnit = cooldownUnit;
 
-        unitButton = new CyclingButtonWidget.Builder<>(McTimeUnit::asText)
-                .values(McTimeUnit.values())
-                .initially(cooldownUnit)
-                .build(0, 0, 100, 20, Text.translatable("illusory_wall.edit.unit"),
+        unitButton = new CycleButton.Builder<>(McTimeUnit::asText)
+                .withValues(McTimeUnit.values())
+                .withInitialValue(cooldownUnit)
+                .create(0, 0, 100, 20, Component.translatable("illusory_wall.edit.unit"),
                         (btn, unit) -> changeUnit(unit));
 
         RowWidget cooldownRow = new RowWidget(4, cooldownInput, unitButton);
@@ -96,20 +96,20 @@ public class EditWallScreen extends Screen {
         uiBuilder.resize(width);
 
         // actually add the widgets to the screen
-        addDrawable(cooldownHeader);
-        addDrawableChild(cooldownInput);
-        addDrawableChild(unitButton);
+        addRenderableOnly(cooldownHeader);
+        addRenderableWidget(cooldownInput);
+        addRenderableWidget(unitButton);
     }
 
     private void removeCooldownUi() {
-        if (cooldownHeader != null) remove(cooldownHeader);
-        if (cooldownInput != null) remove(cooldownInput);
-        if (unitButton != null) remove(unitButton);
+        if (cooldownHeader != null) removeWidget(cooldownHeader);
+        if (cooldownInput != null) removeWidget(cooldownInput);
+        if (unitButton != null) removeWidget(unitButton);
 
         uiBuilder.reset();
     }
 
-    private @NotNull McTimeUnit restoreState(TextFieldWidget cooldownInput) {
+    private @NotNull McTimeUnit restoreState(EditBox cooldownInput) {
         int cooldownValue;
         McTimeUnit cooldownUnit;
 
@@ -123,7 +123,7 @@ public class EditWallScreen extends Screen {
             cooldownValue = cooldownUnit.fromTicks(ticks);
         }
 
-        cooldownInput.setText(String.valueOf(cooldownValue));
+        cooldownInput.setValue(String.valueOf(cooldownValue));
 
         return cooldownUnit;
     }
@@ -143,12 +143,12 @@ public class EditWallScreen extends Screen {
                 value = Math.max(value, 1);
             }
 
-            cooldownInput.setText(String.valueOf(value));
+            cooldownInput.setValue(String.valueOf(value));
         });
     }
 
-    private OptionalInt getCooldown(TextFieldWidget textField) {
-        String text = textField.getText().trim();
+    private OptionalInt getCooldown(EditBox textField) {
+        String text = textField.getValue().trim();
 
         try {
             int value = Integer.parseInt(text);
@@ -160,7 +160,7 @@ public class EditWallScreen extends Screen {
     }
 
     @Override
-    public void resize(MinecraftClient client, int width, int height) {
+    public void resize(Minecraft client, int width, int height) {
         super.resize(client, width, height);
 
         uiBuilder.resize(width);
@@ -170,20 +170,20 @@ public class EditWallScreen extends Screen {
     @Override
     public void tick() {
         if (entity != null && entity.isRemoved()) {
-            this.close();
+            this.onClose();
         }
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderInGameBackground(context);
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, OFFSET_Y, 0xFFFFFF);
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        this.renderTransparentBackground(context);
+        context.drawCenteredString(this.font, this.title, this.width / 2, OFFSET_Y, 0xFFFFFF);
         super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
-    public void close() {
-        super.close();
+    public void onClose() {
+        super.onClose();
 
         applySettings();
     }
@@ -201,8 +201,8 @@ public class EditWallScreen extends Screen {
         ClientPlayNetworking.send(packet);
     }
 
-    private OptionalInt getRespawnDurationTicks(CheckboxWidget respawnCheckbox) {
-        if (!respawnCheckbox.isChecked()) {
+    private OptionalInt getRespawnDurationTicks(Checkbox respawnCheckbox) {
+        if (!respawnCheckbox.selected()) {
             return OptionalInt.of(IllusoryWallProperties.NO_RESPAWN);
         }
 

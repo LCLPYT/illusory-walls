@@ -1,24 +1,24 @@
 package work.lclpnet.illwalls.wall;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
 
 import javax.annotation.Nullable;
 
 public interface IllusoryWallManager {
 
-    default boolean fadeWallAtIfPresent(ServerWorld world, BlockPos pos) {
+    default boolean fadeWallAtIfPresent(ServerLevel world, BlockPos pos) {
         return fadeWallAtIfPresent(world, pos, null);
     }
 
-    boolean fadeWallAtIfPresent(ServerWorld world, BlockPos pos, @Nullable BlockPos from);
+    boolean fadeWallAtIfPresent(ServerLevel world, BlockPos pos, @Nullable BlockPos from);
 
-    boolean makeBlockIllusory(ServerWorld world, BlockPos pos, @Nullable ServerPlayerEntity player);
+    boolean makeBlockIllusory(ServerLevel world, BlockPos pos, @Nullable ServerPlayer player);
 
-    boolean removeIllusoryBlock(ServerWorld world, BlockPos pos);
+    boolean removeIllusoryBlock(ServerLevel world, BlockPos pos);
 
-    default boolean makeBlockIllusory(ServerWorld world, BlockPos pos) {
+    default boolean makeBlockIllusory(ServerLevel world, BlockPos pos) {
         return makeBlockIllusory(world, pos, null);
     }
 }

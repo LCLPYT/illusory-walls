@@ -1,50 +1,50 @@
 package work.lclpnet.illwalls.render;
 
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.model.BlockStateModel;
-import net.minecraft.client.util.math.MatrixStack;
-import work.lclpnet.illwalls.mixin.client.BlockRenderManagerAccessor;
+import net.minecraft.client.renderer.RenderType;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import com.mojang.blaze3d.vertex.PoseStack;
+import work.lclpnet.illwalls.mixin.client.BlockRenderDispatcherAccessor;
 
 import javax.annotation.Nullable;
 
 public class BlockIllusionRenderManager {
 
-    private final BlockRenderManager blockRenderManager;
+    private final BlockRenderDispatcher blockRenderManager;
     private final RenderLayerGetter renderLayerGetter;
     private final AlphaBlockModelRenderer blockModelRenderer = new AlphaBlockModelRenderer();
 
-    public BlockIllusionRenderManager(BlockRenderManager blockRenderManager, RenderLayerGetter renderLayerGetter) {
+    public BlockIllusionRenderManager(BlockRenderDispatcher blockRenderManager, RenderLayerGetter renderLayerGetter) {
         this.blockRenderManager = blockRenderManager;
         this.renderLayerGetter = renderLayerGetter;
     }
 
     // net.minecraft.client.render.block.BlockRenderManager.renderBlockAsEntity with alpha support
-    public void renderBlockAsEntity(BlockState state, @Nullable CullInfo cullInfo, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float alpha) {
-        BlockRenderType renderType = state.getRenderType();
+    public void renderBlockAsEntity(BlockState state, @Nullable CullInfo cullInfo, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay, float alpha) {
+        RenderShape renderType = state.getRenderShape();
 
-        if (renderType != BlockRenderType.MODEL) return;
+        if (renderType != RenderShape.MODEL) return;
 
-        BlockStateModel bakedModel = blockRenderManager.getModel(state);
-        BlockColors blockColors = ((BlockRenderManagerAccessor) blockRenderManager).getBlockColors();
+        BlockStateModel bakedModel = blockRenderManager.getBlockModel(state);
+        BlockColors blockColors = ((BlockRenderDispatcherAccessor) blockRenderManager).getBlockColors();
 
         int i = blockColors.getColor(state, null, null, 0);
         float r = (float) (i >> 16 & 0xFF) / 255.0f;
         float g = (float) (i >> 8 & 0xFF) / 255.0f;
         float b = (float) (i & 0xFF) / 255.0f;
 
-        RenderLayer renderLayer = renderLayerGetter.getRenderLayer(state, alpha);
+        RenderType renderLayer = renderLayerGetter.getRenderLayer(state, alpha);
         VertexConsumer buffer = vertexConsumers.getBuffer(renderLayer);
 
         if (cullInfo != null) {
-            blockModelRenderer.renderWithCulling(matrices.peek(), buffer, state, cullInfo, bakedModel, r, g, b, alpha, light, overlay);
+            blockModelRenderer.renderWithCulling(matrices.last(), buffer, state, cullInfo, bakedModel, r, g, b, alpha, light, overlay);
         } else {
-            blockModelRenderer.render(matrices.peek(), buffer, bakedModel, r, g, b, alpha, light, overlay);
+            blockModelRenderer.render(matrices.last(), buffer, bakedModel, r, g, b, alpha, light, overlay);
         }
     }
 }

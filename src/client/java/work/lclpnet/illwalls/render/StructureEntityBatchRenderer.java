@@ -1,11 +1,11 @@
 package work.lclpnet.illwalls.render;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import work.lclpnet.illwalls.entity.IllusoryWallEntity;
 import work.lclpnet.illwalls.entity.StructureEntity;
 
@@ -15,11 +15,11 @@ import java.util.List;
 public class StructureEntityBatchRenderer implements RenderLayerGetter {
 
     private final List<Command> commands = new ArrayList<>();
-    private final MatrixStack matrices = new MatrixStack();
-    private final VertexConsumerProvider.Immediate vertexConsumers;
+    private final PoseStack matrices = new PoseStack();
+    private final MultiBufferSource.BufferSource vertexConsumers;
     private final StructureRenderer structureRenderer;
 
-    public StructureEntityBatchRenderer(VertexConsumerProvider.Immediate vertexConsumers, BlockRenderManager blockRenderManager) {
+    public StructureEntityBatchRenderer(MultiBufferSource.BufferSource vertexConsumers, BlockRenderDispatcher blockRenderManager) {
         this.vertexConsumers = vertexConsumers;
 
         var blockIllusionRenderManager = new BlockIllusionRenderManager(blockRenderManager, this);
@@ -27,18 +27,18 @@ public class StructureEntityBatchRenderer implements RenderLayerGetter {
     }
 
     // this is like RenderCommandQueue::submitBlock, but with alpha parameter
-    public void submit(MatrixStack matrices, StructureEntityRenderState state) {
-        commands.add(new Command(matrices.peek().copy(), state));
+    public void submit(PoseStack matrices, StructureEntityRenderState state) {
+        commands.add(new Command(matrices.last().copy(), state));
     }
 
     public void render() {
         for (Command command : commands) {
-            this.matrices.push();
-            this.matrices.peek().copy(command.matricesEntry());
+            this.matrices.pushPose();
+            this.matrices.last().set(command.matricesEntry());
 
             render(command);
 
-            this.matrices.pop();
+            this.matrices.popPose();
         }
 
         commands.clear();
@@ -65,27 +65,27 @@ public class StructureEntityBatchRenderer implements RenderLayerGetter {
                 alpha = 1F - alpha;
             }
 
-            alpha = MathHelper.clamp(alpha, 0F, 1F);
+            alpha = Mth.clamp(alpha, 0F, 1F);
         }
 
         BlockPos fadingFrom = state.fadingFrom;
-        int light = state.light;
+        int light = state.lightCoords;
 
         if (fadingFrom != null) {
-            light = LightmapTextureManager.pack(state.blockLight, state.skyLight);
+            light = LightTexture.pack(state.blockLight, state.skyLight);
         }
 
         structureRenderer.render(state.structure, state.x, state.y, state.z, matrices, vertexConsumers, light, alpha);
     }
 
     @Override
-    public RenderLayer getRenderLayer(BlockState state, float alpha) {
+    public RenderType getRenderLayer(BlockState state, float alpha) {
         if (alpha >= 1.0f) {
-            return RenderLayers.getEntityBlockLayer(state);
+            return ItemBlockRenderTypes.getRenderType(state);
         }
 
-        return TexturedRenderLayers.getItemEntityTranslucentCull();
+        return Sheets.translucentItemSheet();
     }
 
-    public record Command(MatrixStack.Entry matricesEntry, StructureEntityRenderState renderState) {}
+    public record Command(PoseStack.Pose matricesEntry, StructureEntityRenderState renderState) {}
 }

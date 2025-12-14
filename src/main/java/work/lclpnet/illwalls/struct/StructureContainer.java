@@ -1,9 +1,9 @@
 package work.lclpnet.illwalls.struct;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
 import work.lclpnet.illwalls.network.ServerNetworkHandler;
 import work.lclpnet.illwalls.network.StructureUpdateS2CPacket;
 import work.lclpnet.kibu.mc.KibuBlockPos;
@@ -23,11 +23,11 @@ public class StructureContainer {
     }
 
     private boolean existsInWorld() {
-        return entity.getEntityWorld().getEntityById(entity.getId()) != null;
+        return entity.level().getEntity(entity.getId()) != null;
     }
 
     private void onUpdate(BlockPos pos, BlockState state) {
-        if (entity.getEntityWorld().isClient()) return;
+        if (entity.level().isClientSide()) return;
 
         if (this.structure.getStructure().isEmpty()) {
             entity.discard();
@@ -61,7 +61,7 @@ public class StructureContainer {
     }
 
     public void updateStructure(BlockStructure delta) {
-        if (!entity.getEntityWorld().isClient()) {
+        if (!entity.level().isClientSide()) {
             if (!this.existsInWorld()) return;  // too early
 
             // if we are in the server world, send an update packet
@@ -100,10 +100,10 @@ public class StructureContainer {
         int centerZ = center.getZ();
 
         // check whether the wall is in the center already
-        var currentPos = entity.getBlockPos();
+        var currentPos = entity.blockPosition();
         if (currentPos.getX() == centerX && currentPos.getY() == centerY && currentPos.getZ() == centerZ) return;
 
-        entity.setPosition(centerX, centerY, centerZ);
+        entity.setPos(centerX, centerY, centerZ);
     }
 
     @SuppressWarnings("unused")

@@ -1,12 +1,12 @@
 package work.lclpnet.illwalls.mixin.client;
 
 import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(BlockRenderManager.class)
-public interface BlockRenderManagerAccessor {
+@Mixin(BlockRenderDispatcher.class)
+public interface BlockRenderDispatcherAccessor {
 
     @Accessor
     BlockColors getBlockColors();

@@ -3,15 +3,15 @@ package work.lclpnet.illwalls.event;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
 import work.lclpnet.illwalls.IllusoryWallsApi;
 import work.lclpnet.illwalls.item.StaffOfIllusionItem;
 import work.lclpnet.illwalls.util.PlayerInfo;
@@ -50,40 +50,40 @@ public class ModEventListener {
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
             BlockPos pos = hitResult.getBlockPos();
 
-            if (player == null || !player.getStackInHand(hand).isOf(STAFF_OF_ILLUSION_ITEM)) {
-                return ActionResult.PASS;
+            if (player == null || !player.getItemInHand(hand).is(STAFF_OF_ILLUSION_ITEM)) {
+                return InteractionResult.PASS;
             }
 
-            if (!world.isClient() && pos != null) {
-                ActionResult result = StaffOfIllusionItem.onRightClickBlockEarlyServer((ServerPlayerEntity) player, (ServerWorld) world, pos);
+            if (!world.isClientSide() && pos != null) {
+                InteractionResult result = StaffOfIllusionItem.onRightClickBlockEarlyServer((ServerPlayer) player, (ServerLevel) world, pos);
 
                 if (result != null) {
                     return result;
                 }
             }
 
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         });
     }
 
     private void registryEvents() {
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.OPERATOR).register(entries -> {
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.OP_BLOCKS).register(entries -> {
             if (!entries.getContext().hasPermissions()) return;
 
-            entries.add(STAFF_OF_ILLUSION_ITEM);
+            entries.accept(STAFF_OF_ILLUSION_ITEM);
         });
     }
 
     private void preventWallModification() {
         BlockModificationHooks.PLACE_BLOCK.register((world, pos, entity, newState) -> {
-            if (world.isClient() || !(world instanceof ServerWorld serverWorld)) return false;
+            if (world.isClientSide() || !(world instanceof ServerLevel serverWorld)) return false;
 
             // prevent block placement in an illusory wall
             return wallLookup.getWallAt(serverWorld, pos).isPresent();
         });
 
         BlockModificationHooks.PLACE_FLUID.register((world, pos, entity, newState) -> {
-            if (world.isClient() || !(world instanceof ServerWorld serverWorld)) return false;
+            if (world.isClientSide() || !(world instanceof ServerLevel serverWorld)) return false;
 
             // prevent fluid placement in an illusory wall
             return wallLookup.getWallAt(serverWorld, pos).isPresent();
@@ -92,24 +92,24 @@ public class ModEventListener {
 
     private void registerDestroyWallEvents() {
         AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
-            if (world.isClient() || hand != Hand.MAIN_HAND) return ActionResult.PASS;
+            if (world.isClientSide() || hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
 
-            ItemStack stack = player.getStackInHand(hand);
-            if (stack.isOf(STAFF_OF_ILLUSION_ITEM)) return ActionResult.PASS;
+            ItemStack stack = player.getItemInHand(hand);
+            if (stack.is(STAFF_OF_ILLUSION_ITEM)) return InteractionResult.PASS;
 
-            BlockPos from = pos.offset(direction);
-            boolean success = wallManager.fadeWallAtIfPresent((ServerWorld) world, pos, from);
-            return success ? ActionResult.CONSUME : ActionResult.PASS;
+            BlockPos from = pos.relative(direction);
+            boolean success = wallManager.fadeWallAtIfPresent((ServerLevel) world, pos, from);
+            return success ? InteractionResult.CONSUME : InteractionResult.PASS;
         });
 
         ProjectileHooks.HIT_BLOCK.register((projectile, hit) -> {
-            if (projectile.getEntityWorld().isClient()) return;
+            if (projectile.level().isClientSide()) return;
 
             BlockPos pos = hit.getBlockPos();
             IllusoryWallManager manager = IllusoryWallsApi.getInstance().manager();
 
-            BlockPos from = pos.offset(hit.getSide());
-            manager.fadeWallAtIfPresent((ServerWorld) projectile.getEntityWorld(), pos, from);
+            BlockPos from = pos.relative(hit.getDirection());
+            manager.fadeWallAtIfPresent((ServerLevel) projectile.level(), pos, from);
         });
     }
 
@@ -118,50 +118,50 @@ public class ModEventListener {
         PlayerGameModeChangeCallback.HOOK.register((player, gameMode) -> PlayerInfo.get(player).updatePlayerCanSeeIllusoryWalls());
 
         PlayerInventoryHooks.MODIFY_CREATIVE_INVENTORY.register(event -> {
-            ServerPlayerEntity player = event.player();
+            ServerPlayer player = event.player();
 
             int handlerSlotIdx = event.slot();
             if (handlerSlotIdx < 1 || handlerSlotIdx > 45) return;
 
-            Slot handlerSlot = player.currentScreenHandler.getSlot(handlerSlotIdx);
+            Slot handlerSlot = player.containerMenu.getSlot(handlerSlotIdx);
             if (handlerSlot == null) return;
 
-            int slot = handlerSlot.getIndex();
+            int slot = handlerSlot.getContainerSlot();
             if (player.getInventory().getSelectedSlot() != slot) return;
 
             ItemStack handStack = event.stack();
-            if (handStack.isOf(STAFF_OF_ILLUSION_ITEM)) {
+            if (handStack.is(STAFF_OF_ILLUSION_ITEM)) {
                 PlayerInfo.get(player).setCanSeeIllusoryWalls(true);
                 return;
             }
 
-            ItemStack stack = player.getInventory().getStack(slot);
+            ItemStack stack = player.getInventory().getItem(slot);
 
-            if (stack.isOf(STAFF_OF_ILLUSION_ITEM) && handStack.isEmpty()) {
+            if (stack.is(STAFF_OF_ILLUSION_ITEM) && handStack.isEmpty()) {
                 PlayerInfo.get(player).setCanSeeIllusoryWalls(false);
             }
         });
 
         PlayerInventoryHooks.DROP_ITEM.register((player, slot, inInventory) -> {
-            if (player.getEntityWorld().isClient()) return false;
+            if (player.level().isClientSide()) return false;
 
-            PlayerInventory inventory = player.getInventory();
+            Inventory inventory = player.getInventory();
 
-            if (slot < 0 || slot >= inventory.size()) return false;
+            if (slot < 0 || slot >= inventory.getContainerSize()) return false;
 
-            ItemStack stack = inventory.getStack(slot);
+            ItemStack stack = inventory.getItem(slot);
 
-            if (stack.isOf(STAFF_OF_ILLUSION_ITEM)) {
-                PlayerInfo.get((ServerPlayerEntity) player).setCanSeeIllusoryWalls(false);
+            if (stack.is(STAFF_OF_ILLUSION_ITEM)) {
+                PlayerInfo.get((ServerPlayer) player).setCanSeeIllusoryWalls(false);
             }
 
             return false;
         });
 
         PlayerInventoryHooks.PLAYER_PICKED_UP.register((player, itemEntity) -> {
-            if (player.getEntityWorld().isClient()) return;
+            if (player.level().isClientSide()) return;
 
-            PlayerInfo.get((ServerPlayerEntity) player).updatePlayerCanSeeIllusoryWalls();
+            PlayerInfo.get((ServerPlayer) player).updatePlayerCanSeeIllusoryWalls();
         });
     }
 }

@@ -1,9 +1,9 @@
 package work.lclpnet.illwalls.network;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.ByteBufCodecs;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.struct.ExtendedBlockStateAdapter;
 import work.lclpnet.illwalls.struct.StructureContainer;
@@ -16,18 +16,18 @@ public class IllusoryWallsPacketCodecs {
 
     private IllusoryWallsPacketCodecs() {}
 
-    public static final PacketCodec<PacketByteBuf, PacketByteBuf> BYTE_BUF_CODEC = PacketCodec.of((data, buf) -> {
+    public static final StreamCodec<FriendlyByteBuf, FriendlyByteBuf> BYTE_BUF_CODEC = StreamCodec.ofMember((data, buf) -> {
         int dataSize = data.readableBytes();
         buf.writeVarInt(dataSize);
         buf.writeBytes(data);
     }, buf -> {
         int size = buf.readVarInt();
         ByteBuf raw = buf.readBytes(size);
-        return new PacketByteBuf(raw);
+        return new FriendlyByteBuf(raw);
     });
 
-    public static final PacketCodec<ByteBuf, BlockStructure> STRUCTURE_PACKET_CODEC = PacketCodec.tuple(
-            PacketCodecs.BYTE_ARRAY, structure -> {
+    public static final StreamCodec<ByteBuf, BlockStructure> STRUCTURE_PACKET_CODEC = StreamCodec.composite(
+            ByteBufCodecs.BYTE_ARRAY, structure -> {
                 try {
                     return IllusoryWallsMod.SCHEMATIC_FORMAT.writer().toArray(structure);
                 } catch (IOException e) {

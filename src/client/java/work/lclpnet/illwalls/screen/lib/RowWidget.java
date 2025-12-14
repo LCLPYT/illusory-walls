@@ -1,18 +1,18 @@
 package work.lclpnet.illwalls.screen.lib;
 
-import net.minecraft.client.gui.widget.LayoutWidget;
-import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.layouts.Layout;
+import net.minecraft.client.gui.layouts.LayoutElement;
 
 import java.util.function.Consumer;
 
-public class RowWidget implements LayoutWidget {
+public class RowWidget implements Layout {
 
     private final int margin;
-    private final Widget[] children;
+    private final LayoutElement[] children;
     private int width, height;
     private int x, y;
 
-    public RowWidget(int margin, Widget... children) {
+    public RowWidget(int margin, LayoutElement... children) {
         this.margin = margin;
         this.children = children;
 
@@ -23,7 +23,7 @@ public class RowWidget implements LayoutWidget {
         width = 0;
         height = 0;
 
-        for (Widget child : children) {
+        for (LayoutElement child : children) {
             width += child.getWidth();
             height = Math.max(height, child.getHeight());
         }
@@ -64,19 +64,19 @@ public class RowWidget implements LayoutWidget {
     }
 
     @Override
-    public void forEachElement(Consumer<Widget> consumer) {
-        for (Widget child : children) {
+    public void visitChildren(Consumer<LayoutElement> consumer) {
+        for (LayoutElement child : children) {
             consumer.accept(child);
         }
     }
 
     @Override
-    public void refreshPositions() {
-        LayoutWidget.super.refreshPositions();
+    public void arrangeElements() {
+        Layout.super.arrangeElements();
 
         int x = this.x;
 
-        for (Widget child : children) {
+        for (LayoutElement child : children) {
             int childWidth = child.getWidth();
             int childHeight = child.getHeight();
 

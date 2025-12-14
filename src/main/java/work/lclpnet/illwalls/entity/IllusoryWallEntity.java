@@ -2,30 +2,30 @@ package work.lclpnet.illwalls.entity;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.server.network.EntityTrackerEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.Display;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
+import net.minecraft.world.level.Level;
 import work.lclpnet.illwalls.IllusoryWallsMod;
 import work.lclpnet.illwalls.network.EntityExtraSpawnS2CPacket;
 import work.lclpnet.illwalls.network.IllusoryWallsPacketCodecs;
@@ -37,7 +37,6 @@ import work.lclpnet.illwalls.struct.StructureHolder;
 import work.lclpnet.illwalls.util.ColorUtil;
 import work.lclpnet.illwalls.util.PlayerInfo;
 import work.lclpnet.illwalls.wall.IllusoryWallProperties;
-import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.nbt.FabricNbtConversion;
 import work.lclpnet.kibu.structure.BlockStructure;
 
@@ -70,15 +69,15 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     @Environment(EnvType.CLIENT)
     private int outlineColor;
 
-    public IllusoryWallEntity(EntityType<?> type, World world) {
+    public IllusoryWallEntity(EntityType<?> type, Level world) {
         super(type, world);
     }
 
     @Override
-    public void onSpawnPacket(EntitySpawnS2CPacket packet) {
-        super.onSpawnPacket(packet);
+    public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+        super.recreateFromPacket(packet);
 
-        if (getEntityWorld().isClient()) {
+        if (level().isClientSide()) {
             initClient();
         }
     }
@@ -87,13 +86,13 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     private void initClient() {
         // the outline color of an illusory wall should always be the same.
         // Therefore, use a persistent seed for a random.
-        Random colorRandom = new Xoroshiro128PlusPlusRandom(this.getId());
+        RandomSource colorRandom = new XoroshiroRandomSource(this.getId());
         int hsvColor = ColorUtil.getRandomHsvColor(colorRandom);
         this.outlineColor = ColorUtil.setArgbPackedAlpha(hsvColor, 255);
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {}
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {}
 
     public boolean isFading() {
         return fading;
@@ -103,39 +102,39 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
         this.fading = fading;
 
         if (fading) {
-            fadeEnd = age + FADE_DURATION_TICKS;
+            fadeEnd = tickCount + FADE_DURATION_TICKS;
         }
     }
 
     @Override
-    protected void readCustomData(ReadView view) {
-        setFading(view.getBoolean(FADING_NBT_KEY, false));
+    protected void readAdditionalSaveData(ValueInput view) {
+        setFading(view.getBooleanOr(FADING_NBT_KEY, false));
 
-        var structureNbt = view.read(STRUCTURE_NBT_KEY, NbtCompound.CODEC).orElseGet(NbtCompound::new);
-        CompoundTag structureTag = FabricNbtConversion.convert(structureNbt, CompoundTag.class);
+        var structureNbt = view.read(STRUCTURE_NBT_KEY, CompoundTag.CODEC).orElseGet(CompoundTag::new);
+        var structureTag = FabricNbtConversion.convert(structureNbt, work.lclpnet.kibu.jnbt.CompoundTag.class);
 
         var adapter = ExtendedBlockStateAdapter.getInstance();
         BlockStructure structure = IllusoryWallsMod.SCHEMATIC_FORMAT.deserializer().deserialize(structureTag, adapter, StructureContainer::createMutableStructure);
 
         this.structureContainer.setStructure(structure);
 
-        properties.readFrom(view.getReadView(PROPERTIES_NBT_KEY));
+        properties.readFrom(view.childOrEmpty(PROPERTIES_NBT_KEY));
 
-        setFadeMode(view.getInt(FADE_MODE_NBT_KEY, 0));
+        setFadeMode(view.getIntOr(FADE_MODE_NBT_KEY, 0));
 
-        fadeFrom = BlockPos.fromLong(view.getLong(FADE_FROM_NBT_KEY, 0));
+        fadeFrom = BlockPos.of(view.getLongOr(FADE_FROM_NBT_KEY, 0));
     }
 
     @Override
-    protected void writeCustomData(WriteView nbt) {
+    protected void addAdditionalSaveData(ValueOutput nbt) {
         nbt.putBoolean(FADING_NBT_KEY, isFading());
 
         BlockStructure structure = this.structureContainer.getWrapper().getStructure();
-        CompoundTag structureTag = IllusoryWallsMod.SCHEMATIC_FORMAT.serializer().serialize(structure);
-        NbtCompound structureNbt = FabricNbtConversion.convert(structureTag, NbtCompound.class);
-        nbt.put(STRUCTURE_NBT_KEY, NbtCompound.CODEC, structureNbt);
+        var structureTag = IllusoryWallsMod.SCHEMATIC_FORMAT.serializer().serialize(structure);
+        CompoundTag structureNbt = FabricNbtConversion.convert(structureTag, CompoundTag.class);
+        nbt.store(STRUCTURE_NBT_KEY, CompoundTag.CODEC, structureNbt);
 
-        getIllusoryWallProperties().writeTo(nbt.get(PROPERTIES_NBT_KEY));
+        getIllusoryWallProperties().writeTo(nbt.child(PROPERTIES_NBT_KEY));
 
         nbt.putInt(FADE_MODE_NBT_KEY, getFadeMode());
 
@@ -150,49 +149,49 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     }
 
     @Override
-    public boolean shouldBeTrackedBy(ServerPlayerEntity player) {
+    public boolean shouldBeTrackedBy(ServerPlayer player) {
         return PlayerInfo.get(player).canSeeIllusoryWalls();
     }
 
     @Override
-    public Packet<ClientPlayPacketListener> createSpawnPacket(EntityTrackerEntry entityTrackerEntry) {
+    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity entityTrackerEntry) {
         var packet = new EntityExtraSpawnS2CPacket(this, entityTrackerEntry);
         return ServerNetworkHandler.createS2CPacket(packet);
     }
 
     @Override
-    public void writeExtraSpawnData(PacketByteBuf buf) {
+    public void writeExtraSpawnData(FriendlyByteBuf buf) {
         IllusoryWallsPacketCodecs.STRUCTURE_PACKET_CODEC.encode(buf, structureContainer.getWrapper().getStructure());
     }
 
     @Override
-    public void readExtraSpawnData(PacketByteBuf buf) {
+    public void readExtraSpawnData(FriendlyByteBuf buf) {
         BlockStructure structure = IllusoryWallsPacketCodecs.STRUCTURE_PACKET_CODEC.decode(buf);
 
         this.structureContainer.setStructure(structure);
     }
 
     public synchronized void fade(@Nullable BlockPos from) {
-        World world = getEntityWorld();
-        if (world.isClient() || isFading()) return;
+        Level world = level();
+        if (world.isClientSide() || isFading()) return;
 
         fadeFrom = from;
 
         // remove blocks
         for (BlockPos pos : structureContainer.getWrapper().getBlockPositions()) {
-            world.setBlockState(pos, Blocks.AIR.getDefaultState());
+            world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
         }
 
-        BlockPos pos = getBlockPos();
-        Vec3d soundPos = pos.toCenterPos();
+        BlockPos pos = blockPosition();
+        Vec3 soundPos = pos.getCenter();
 
-        world.playSound(null, soundPos.getX(), soundPos.getY(), soundPos.getZ(),
-                IllusoryWallsMod.ILLUSORY_WALL_FADE_SOUND, SoundCategory.BLOCKS, 0.85f, 1f);
+        world.playSound(null, soundPos.x(), soundPos.y(), soundPos.z(),
+                IllusoryWallsMod.ILLUSORY_WALL_FADE_SOUND, SoundSource.BLOCKS, 0.85f, 1f);
 
         setFading(true);
         setFadeMode(FADE_OUT);
 
-        var serverWorld = (ServerWorld) world;
+        var serverWorld = (ServerLevel) world;
 
         // spawn a StructureEntity for display
         spawnStructureEntity(pos, serverWorld, FADE_OUT);
@@ -201,52 +200,52 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     public synchronized void resetWall() {
         if (isRemoved()) return;
 
-        World world = getEntityWorld();
-        if (world.isClient() || (isFading() && getFadeMode() == FADE_IN)) return;
+        Level world = level();
+        if (world.isClientSide() || (isFading() && getFadeMode() == FADE_IN)) return;
 
         properties.stopRespawnTimer();
 
-        BlockPos pos = getBlockPos();
-        Vec3d soundPos = pos.toCenterPos();
+        BlockPos pos = blockPosition();
+        Vec3 soundPos = pos.getCenter();
 
-        world.playSound(null, soundPos.getX(), soundPos.getY(), soundPos.getZ(),
-                IllusoryWallsMod.ILLUSORY_WALL_FADE_SOUND, SoundCategory.BLOCKS, 0.85f, 1f);
+        world.playSound(null, soundPos.x(), soundPos.y(), soundPos.z(),
+                IllusoryWallsMod.ILLUSORY_WALL_FADE_SOUND, SoundSource.BLOCKS, 0.85f, 1f);
 
         setFading(true);
         setFadeMode(FADE_IN);
 
-        ServerWorld serverWorld = (ServerWorld) world;
+        ServerLevel serverWorld = (ServerLevel) world;
 
         // spawn a StructureEntity for display
         spawnStructureEntity(pos, serverWorld, FADE_IN);
     }
 
     private void replaceBlocks() {
-        World world = getEntityWorld();
-        if (world.isClient()) return;
+        Level world = level();
+        if (world.isClientSide()) return;
 
         // reset blocks
         ExtendedStructureWrapper wrapper = structureContainer.getWrapper();
 
         for (BlockPos pos : wrapper.getBlockPositions()) {
-            world.setBlockState(pos, wrapper.getBlockState(pos));
+            world.setBlockAndUpdate(pos, wrapper.getBlockState(pos));
         }
     }
 
-    private void spawnStructureEntity(BlockPos pos, ServerWorld serverWorld, int fadeIn) {
+    private void spawnStructureEntity(BlockPos pos, ServerLevel serverWorld, int fadeIn) {
         IllusoryWallsMod.STRUCTURE_ENTITY.spawn(serverWorld, entity -> {
             structureContainer.getWrapper().copyTo(entity.getStructureContainer().getWrapper());
             entity.setFading(true);
             entity.setFadeMode(fadeIn);
             entity.setFadingFrom(fadeFrom != null ? fadeFrom : pos);
-        }, pos, SpawnReason.CONVERSION, false, false);
+        }, pos, EntitySpawnReason.CONVERSION, false, false);
     }
 
     @Override
     public void tick() {
         super.tick();
 
-        if (this.getEntityWorld().isClient() || !this.isFading() || age < fadeEnd) return;
+        if (this.level().isClientSide() || !this.isFading() || tickCount < fadeEnd) return;
 
         if (getFadeMode() != FADE_OUT) {
             this.setFading(false);
@@ -274,8 +273,8 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     }
 
     @Override
-    public boolean shouldRender(double distance) {
-        return distance < MathHelper.square(64.0 * DisplayEntity.getRenderDistanceMultiplier());
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        return distance < Mth.square(64.0 * Display.getViewScale());
     }
 
     @Environment(EnvType.CLIENT)
@@ -296,7 +295,7 @@ public class IllusoryWallEntity extends Entity implements EntityConditionalTrack
     }
 
     @Override
-    public final boolean damage(ServerWorld world, DamageSource source, float amount) {
+    public final boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
         return false;
     }
 }
