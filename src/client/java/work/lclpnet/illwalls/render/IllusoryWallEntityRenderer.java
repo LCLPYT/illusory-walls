@@ -1,6 +1,8 @@
 package work.lclpnet.illwalls.render;
 
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -50,7 +52,7 @@ public class IllusoryWallEntityRenderer extends EntityRenderer<IllusoryWallEntit
     @SuppressWarnings("deprecation")
     @Override
     public RenderType getRenderLayer(BlockState state, float alpha) {
-        return RenderType.outline(TextureAtlas.LOCATION_BLOCKS);
+        return RenderTypes.outline(TextureAtlas.LOCATION_BLOCKS);
     }
 
     @Override

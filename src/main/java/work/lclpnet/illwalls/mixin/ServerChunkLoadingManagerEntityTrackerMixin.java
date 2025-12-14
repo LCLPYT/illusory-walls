@@ -21,7 +21,8 @@ public class ServerChunkLoadingManagerEntityTrackerMixin {
     @Shadow @Final
     Entity entity;
 
-    @Shadow @Final private Set<ServerPlayerConnection> seenBy;
+    @Shadow @Final
+    Set<ServerPlayerConnection> seenBy;
 
     @Shadow @Final
     ServerEntity serverEntity;

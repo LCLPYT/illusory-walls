@@ -1,7 +1,7 @@
 package work.lclpnet.illwalls.render;
 
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.client.renderer.RenderType;
 
 public interface RenderLayerGetter {
 

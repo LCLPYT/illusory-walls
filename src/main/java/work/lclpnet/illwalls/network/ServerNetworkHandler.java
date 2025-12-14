@@ -84,7 +84,7 @@ public class ServerNetworkHandler {
                 return;
             }
 
-            if (!player.canInteractWithBlock(pos, 1.0)) {
+            if (!player.isWithinBlockInteractionRange(pos, 1.0)) {
                 // too far
                 return;
             }

@@ -1,16 +1,14 @@
 package work.lclpnet.illwalls.mixin.client;
 
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import net.minecraft.client.Minecraft;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
-import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.state.LevelRenderState;
 import com.mojang.blaze3d.resource.ResourceHandle;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
+import net.minecraft.client.renderer.state.LevelRenderState;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -62,11 +60,18 @@ public class LevelRendererMixin {
                     target = "Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;renderAllFeatures()V"
             )
     )
-    public void illwalls$renderIllusory(GpuBufferSlice gpuBufferSlice, LevelRenderState worldRenderState,
-                                        ProfilerFiller profiler, Matrix4f matrix4f, ResourceHandle<RenderTarget> handle,
-                                        ResourceHandle<RenderTarget> handle2, boolean bl, Frustum frustum,
-                                        ResourceHandle<RenderTarget> handle3, ResourceHandle<RenderTarget> handle4, CallbackInfo ci) {
-
+    public void illwalls$renderIllusory(
+            GpuBufferSlice gpuBufferSlice,
+            LevelRenderState levelRenderState,
+            ProfilerFiller profilerFiller,
+            Matrix4f matrix4f,
+            ResourceHandle<?> resourceHandle,
+            ResourceHandle<?> resourceHandle2,
+            boolean bl,
+            ResourceHandle<?> resourceHandle3,
+            ResourceHandle<?> resourceHandle4,
+            CallbackInfo ci
+    ) {
         var provider = (IllusoryBatchRendererProvider) entityRenderDispatcher;
 
         provider.illwalls$getStructureEntityRenderer().render();

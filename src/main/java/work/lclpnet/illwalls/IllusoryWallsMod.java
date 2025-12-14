@@ -9,7 +9,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Rarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +80,8 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
         this.wallManager = new SimpleIllusoryWallManager(wallLookup);
     }
 
-    public static ResourceLocation identifier(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier identifier(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
     @Nonnull
@@ -114,7 +114,7 @@ public class IllusoryWallsMod implements ModInitializer, IllusoryWallsApi {
         return wallManager;
     }
 
-    private static SoundEvent registerSound(ResourceLocation id) {
+    private static SoundEvent registerSound(Identifier id) {
         return Registry.register(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id));
     }
 }

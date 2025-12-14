@@ -1,9 +1,9 @@
 package work.lclpnet.illwalls.render;
 
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.renderer.RenderType;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;

@@ -78,9 +78,8 @@ public class EditWallScreen extends Screen {
         McTimeUnit cooldownUnit = restoreState(cooldownInput);
         prevUnit = cooldownUnit;
 
-        unitButton = new CycleButton.Builder<>(McTimeUnit::asText)
+        unitButton = new CycleButton.Builder<>(McTimeUnit::asText, () -> cooldownUnit)
                 .withValues(McTimeUnit.values())
-                .withInitialValue(cooldownUnit)
                 .create(0, 0, 100, 20, Component.translatable("illusory_wall.edit.unit"),
                         (btn, unit) -> changeUnit(unit));
 
@@ -160,12 +159,11 @@ public class EditWallScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft client, int width, int height) {
-        super.resize(client, width, height);
+    public void resize(int i, int j) {
+        super.resize(i, j);
 
         uiBuilder.resize(width);
     }
-
 
     @Override
     public void tick() {
