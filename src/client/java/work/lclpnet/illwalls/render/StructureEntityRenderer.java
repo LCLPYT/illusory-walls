@@ -59,7 +59,7 @@ public class StructureEntityRenderer extends EntityRenderer<StructureEntity, Str
             return ItemBlockRenderTypes.getRenderType(state);
         }
 
-        return Sheets.translucentItemSheet();
+        return Sheets.translucentBlockItemSheet();
     }
 
     @Override

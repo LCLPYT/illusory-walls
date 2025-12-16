@@ -85,7 +85,7 @@ public class StructureEntityBatchRenderer implements RenderLayerGetter {
             return ItemBlockRenderTypes.getRenderType(state);
         }
 
-        return Sheets.translucentItemSheet();
+        return Sheets.translucentBlockItemSheet();
     }
 
     public record Command(PoseStack.Pose matricesEntry, StructureEntityRenderState renderState) {}
