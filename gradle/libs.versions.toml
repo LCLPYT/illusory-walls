@@ -1,0 +1,48 @@
+[versions]
+minecraft = "26.1.2"
+fabric-api = "0.147.0+26.1.2"
+fabric-loader = "0.19.2"
+fabric-loom = "1.16-SNAPSHOT"
+gradle-build-tools = "1.7.0"
+java = "25"
+modrinth-minotaur = "2.4.3"
+kibu-hook-api = "1.4.0"
+kibu-hooks = "0.64.1+26.1"
+kibu-schematic-fabric = "0.14.0+26.1"
+kibu-access-lib = "0.17.0+26.1"
+kibu-schematic-api = "0.10.1"
+kibu-nbt-api = "0.6.0"
+sodium = "mc26.1.2-0.8.10-fabric"
+iris = "1.10.9+26.1-fabric"
+jcpp = "1.4.14"
+glsl-transformer = "3.0.0-pre3"
+antlr4 = "4.13.1"
+jsr305 = "3.0.2"
+junit-jupiter = "5.9.2"
+
+[plugins]
+fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
+maven-publish = { id = "maven-publish" }
+gradle-build-utils = { id = "gradle-build-utils", version.ref = "gradle-build-tools" }
+modrinth-minotaur = { id = "com.modrinth.minotaur", version.ref = "modrinth-minotaur" }
+
+[libraries]
+minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+fabric-loader-junit = { module = "net.fabricmc:fabric-loader-junit", version.ref = "fabric-loader" }
+kibu-hook-api = { module = "work.lclpnet.mods.kibu:kibu-hook-api", version.ref = "kibu-hook-api" }
+kibu-hooks = { module = "work.lclpnet.mods.kibu:kibu-hooks", version.ref = "kibu-hooks" }
+kibu-schematic-fabric = { module = "work.lclpnet.mods.kibu:kibu-schematic-fabric", version.ref = "kibu-schematic-fabric" }
+kibu-access-lib = { module = "work.lclpnet.mods.kibu:kibu-access-lib", version.ref = "kibu-access-lib" }
+kibu-schematic-api = { module = "work.lclpnet.mods.kibu:kibu-schematic-api", version.ref = "kibu-schematic-api" }
+kibu-nbt-api = { module = "work.lclpnet.mods.kibu:kibu-nbt-api", version.ref = "kibu-nbt-api" }
+sodium = { module = "maven.modrinth:sodium", version.ref = "sodium" }
+iris = { module = "maven.modrinth:iris", version.ref = "iris" }
+jcpp = { module = "org.anarres:jcpp", version.ref = "jcpp" }
+glsl-transformer = { module = "io.github.douira:glsl-transformer", version.ref = "glsl-transformer" }
+antlr4-runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr4" }
+jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }

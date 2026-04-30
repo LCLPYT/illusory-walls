@@ -1,19 +1,22 @@
 import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
-	id 'maven-publish'
-	id 'gradle-build-utils' version '1.7.0'
-    id 'com.modrinth.minotaur' version '2.+'
+    alias(libs.plugins.fabric.loom)
+    alias(libs.plugins.maven.publish)
+    alias(libs.plugins.gradle.build.utils)
+    alias(libs.plugins.modrinth.minotaur)
 }
 
 Properties props = buildUtils.loadProperties('publish.properties')
 
-version = "${project.mod_version}+${project.minecraft_version}"
+version = "${project.mod_version}+${libs.versions.minecraft.get()}"
 group = project.maven_group
 
+def modId = project.mod_id
+def javaVersion = libs.versions.java.get().toInteger()
+
 base {
-    archivesName = project.archives_base_name
+    archivesName = modId
 }
 
 repositories {
@@ -50,38 +53,40 @@ loom {
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    minecraft(libs.minecraft)
+    implementation(libs.fabric.loader)
+    implementation(libs.fabric.api)
 
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-    include(modImplementation("work.lclpnet.mods.kibu:kibu-hook-api:${project.kibu_hook_api_version}"))
-    include(modImplementation("work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"))
-    include(modImplementation("work.lclpnet.mods.kibu:kibu-schematic-fabric:${project.kibu_schematic_fabric_version}"))
-    include(modImplementation("work.lclpnet.mods.kibu:kibu-access-lib:${project.kibu_access_lib_version}"))
-
-    if (project.hasProperty('sodium_version')) {
-        modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    def includeImpl = { dep ->
+        include(dep)
+        implementation(dep)
     }
 
-    if (project.hasProperty('iris_version')) {
-        modImplementation "maven.modrinth:iris:${project.iris_version}"
-        implementation "org.anarres:jcpp:1.4.14"
-        implementation "io.github.douira:glsl-transformer:3.0.0-pre3"
-        implementation "org.antlr:antlr4-runtime:4.13.1"
+    includeImpl(libs.kibu.hook.api)
+    includeImpl(libs.kibu.hooks)
+    includeImpl(libs.kibu.schematic.fabric)
+    includeImpl(libs.kibu.access.lib)
+
+    if (project.hasProperty('enable_sodium')) {
+        implementation(libs.sodium)
     }
 
-    /* other Java dependencies */
-    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    if (project.hasProperty('enable_iris')) {
+        implementation(libs.iris)
+        implementation(libs.jcpp)
+        implementation(libs.glsl.transformer)
+        implementation(libs.antlr4.runtime)
+    }
 
-    include(implementation("work.lclpnet.mods.kibu:kibu-schematic-api:${project.kibu_schematic_api_version}"))
-    include(implementation("work.lclpnet.mods.kibu:kibu-nbt-api:${project.kibu_nbt_api_version}"))
+    implementation(libs.jsr305)
 
-    testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    includeImpl(libs.kibu.schematic.api)
+    includeImpl(libs.kibu.nbt.api)
+
+    testImplementation(libs.fabric.loader.junit)
+    testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter.params)
+    testRuntimeOnly(libs.junit.jupiter.engine)
 }
 
 test {
@@ -94,27 +99,34 @@ configurations {
 }
 
 processResources {
-	inputs.property "version", project.version
-    inputs.property "loader_version", project.loader_version
-    inputs.property "minecraft_compat", project.minecraft_compat
+    def tokens = [
+            "version": project.version.toString(),
+            "loader_version": libs.versions.fabric.loader.get(),
+            "minecraft_compat": project.minecraft_compat,
+            "java_version": javaVersion.toString()
+    ]
 
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version,
-                "loader_version": project.loader_version,
-                "minecraft_compat": project.minecraft_compat
-	}
+    inputs.properties(tokens)
+
+    filesMatching("fabric.mod.json") {
+        expand(tokens)
+    }
+
+    filesMatching("*.mixins.json") {
+        filter(ReplaceTokens, beginToken: '${', endToken: '}', tokens: tokens)
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release.convention(21)
+	it.options.release.convention(javaVersion)
 }
 
 java {
 	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
 	withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+    targetCompatibility = JavaVersion.toVersion(javaVersion)
 }
 
 jar {
@@ -126,7 +138,7 @@ jar {
 def env = System.getenv()
 
 tasks.register("github", GithubDeploymentTask) {
-    dependsOn tasks.remapJar
+    dependsOn tasks.jar
 
     config {
         token = env.get("GITHUB_TOKEN")
@@ -134,20 +146,20 @@ tasks.register("github", GithubDeploymentTask) {
     }
 
     release {
-        title = "[$project.minecraft_version] Illusory Walls $project.version"
+        title = "[${libs.versions.minecraft.get()}] Illusory Walls $project.version"
         tag = project.version
     }
 
-    assets.add(tasks.remapJar.archiveFile.get())
+    assets.add(tasks.jar.archiveFile.get())
 }
 
 modrinth {
     token = env.get("MODRINTH_TOKEN")
 
     projectId = "illusory-walls"
-    versionName = "[$project.minecraft_version] Illusory Walls $project.version"
+    versionName = "[${libs.versions.minecraft.get()}] Illusory Walls $project.version"
     versionType = "release"
-    uploadFile = remapJar
+    uploadFile = jar
 
     dependencies {
         required.project "fabric-api"
